@@ -3,944 +3,1245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baki Store — ازياء باكي</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>Baki Store | باكي ستور</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --black: #0a0a0a;
-    --white: #faf8f5;
-    --gold: #c9a84c;
-    --gold-light: #e8c96a;
-    --cream: #f2ede4;
-    --dark: #1a1a1a;
-    --gray: #6b6b6b;
-    --light-gray: #e8e4dd;
+    --deep: #111111;
+    --card: #181818;
+    --red: #c0392b;
+    --red-hot: #e74c3c;
+    --white: #f0ece4;
+    --muted: #888;
+    --gold: #d4a017;
+    --border: #2a2a2a;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
+  html { scroll-behavior: smooth; }
   body {
     background: var(--black);
     color: var(--white);
-    font-family: 'Tajawal', sans-serif;
+    font-family: 'Cairo', sans-serif;
     overflow-x: hidden;
   }
 
-  /* ========= NOISE TEXTURE ========= */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
 
-  /* ========= HEADER ========= */
-  header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    padding: 1.2rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(10,10,10,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(201,168,76,0.15);
-  }
-
-  .logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 900;
-    letter-spacing: 4px;
-    color: var(--gold);
-    text-transform: uppercase;
-  }
-
-  .logo span { color: var(--white); }
-
-  nav { display: flex; gap: 2.5rem; align-items: center; }
-
-  nav a {
-    color: rgba(250,248,245,0.7);
-    text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: color 0.3s;
-    cursor: pointer;
-  }
-
-  nav a:hover { color: var(--gold); }
-
-  /* ========= HERO ========= */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    padding-top: 80px;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(201,168,76,0.05) 0%, transparent 60%),
-      linear-gradient(180deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
-  }
-
-  .hero-lines {
-    position: absolute;
-    inset: 0;
-    background-image: 
-      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(201,168,76,0.04) 79px, rgba(201,168,76,0.04) 80px),
-      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(201,168,76,0.04) 79px, rgba(201,168,76,0.04) 80px);
-  }
-
-  .hero-content { position: relative; z-index: 2; }
-
-  .hero-tag {
-    display: inline-block;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    font-size: 0.7rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    padding: 0.4rem 1.5rem;
-    margin-bottom: 2rem;
-    animation: fadeUp 0.8s ease forwards;
-  }
-
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3.5rem, 9vw, 8rem);
-    font-weight: 900;
-    line-height: 1;
-    margin-bottom: 1.5rem;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-
-  .hero h1 em {
-    font-style: italic;
-    color: var(--gold);
-    display: block;
-  }
-
-  .hero p {
-    font-size: 1.05rem;
-    color: rgba(250,248,245,0.6);
-    max-width: 500px;
-    margin: 0 auto 3rem;
-    line-height: 1.8;
-    animation: fadeUp 0.8s 0.4s ease both;
-  }
-
-  .hero-btns {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeUp 0.8s 0.6s ease both;
-  }
-
-  .btn-primary {
-    background: var(--gold);
-    color: var(--black);
-    border: none;
-    padding: 1rem 2.5rem;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .btn-primary:hover {
-    background: var(--gold-light);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(201,168,76,0.3);
-  }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--white);
-    border: 1px solid rgba(250,248,245,0.3);
-    padding: 1rem 2.5rem;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.9rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .btn-outline:hover {
-    border-color: var(--gold);
-    color: var(--gold);
-  }
-
-  /* ========= SECTIONS ========= */
-  section { padding: 6rem 3rem; }
-
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    color: var(--gold);
-    font-size: 0.7rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-  }
-
-  .section-label::before {
-    content: '';
-    width: 40px;
-    height: 1px;
-    background: var(--gold);
-  }
-
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-weight: 700;
-    margin-bottom: 1rem;
-  }
-
-  .section-title em { color: var(--gold); font-style: italic; }
-
-  /* ========= CATEGORIES ========= */
-  #categories { background: var(--dark); }
-
-  .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-top: 3rem;
-  }
-
-  .category-card {
-    position: relative;
-    height: 320px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 1px solid rgba(201,168,76,0.1);
-    transition: all 0.4s;
-  }
-
-  .category-card:hover { border-color: var(--gold); transform: translateY(-5px); }
-
-  .category-card .cat-bg {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 5rem;
-    transition: transform 0.4s;
-  }
-
-  .category-card:hover .cat-bg { transform: scale(1.05); }
-
-  .cat-bg-women { background: linear-gradient(135deg, #1a0f1e, #2d1b3d); }
-  .cat-bg-men { background: linear-gradient(135deg, #0f1a1a, #1b2d2d); }
-  .cat-bg-acc { background: linear-gradient(135deg, #1a1a0f, #2d2d1b); }
-  .cat-bg-kids { background: linear-gradient(135deg, #1a0f0f, #2d1b1b); }
-
-  .category-card .cat-info {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 1.5rem;
-    background: linear-gradient(transparent, rgba(10,10,10,0.95));
-  }
-
-  .cat-info h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    margin-bottom: 0.3rem;
-  }
-
-  .cat-info span {
-    font-size: 0.75rem;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  /* ========= PRODUCTS ========= */
-  #products { background: var(--black); }
-
-  .filter-bar {
-    display: flex;
-    gap: 0.8rem;
-    margin: 2rem 0;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    background: transparent;
-    border: 1px solid rgba(250,248,245,0.2);
-    color: rgba(250,248,245,0.6);
-    padding: 0.5rem 1.2rem;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .filter-btn.active, .filter-btn:hover {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: var(--black);
-  }
-
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-
-  .product-card {
-    background: var(--dark);
-    border: 1px solid rgba(201,168,76,0.08);
-    transition: all 0.4s;
-    cursor: pointer;
-  }
-
-  .product-card:hover {
-    border-color: rgba(201,168,76,0.4);
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  }
-
-  .product-img {
-    height: 280px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .product-badge {
-    position: absolute;
-    top: 1rem; right: 1rem;
-    background: var(--gold);
-    color: var(--black);
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 0.3rem 0.7rem;
-    text-transform: uppercase;
-  }
-
-  .product-info { padding: 1.2rem 1.5rem 1.5rem; }
-
-  .product-category {
-    font-size: 0.65rem;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-
-  .product-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-  }
-
-  .product-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .product-price {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gold);
-  }
-
-  .order-btn {
-    background: var(--gold);
-    color: var(--black);
-    border: none;
-    padding: 0.5rem 1rem;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-transform: uppercase;
-  }
-
-  .order-btn:hover { background: var(--gold-light); }
-
-  /* ========= MODAL ========= */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(10px);
-    z-index: 500;
+  /* ========= ADMIN PANEL ========= */
+  #admin-overlay {
     display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .modal-overlay.active { display: flex; }
-
-  .modal {
-    background: var(--dark);
-    border: 1px solid rgba(201,168,76,0.3);
-    width: 100%;
-    max-width: 520px;
-    max-height: 90vh;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
     overflow-y: auto;
-    animation: modalIn 0.4s ease;
+    padding: 40px 20px;
   }
-
-  @keyframes modalIn {
-    from { opacity: 0; transform: translateY(30px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+  #admin-overlay.active { display: flex; align-items: flex-start; justify-content: center; }
+  .admin-box {
+    background: var(--deep);
+    border: 1px solid var(--red);
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 700px;
   }
-
-  .modal-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid rgba(201,168,76,0.15);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .admin-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--red);
+    margin-bottom: 30px;
+    text-align: center;
+    letter-spacing: 3px;
   }
-
-  .modal-header h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    color: var(--gold);
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.5rem;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-    line-height: 1;
-  }
-
-  .modal-close:hover { opacity: 1; }
-
-  .modal-body { padding: 2rem; }
-
-  .modal-product-info {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(201,168,76,0.1);
-  }
-
-  .modal-product-emoji { font-size: 2.5rem; }
-
-  .modal-product-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    margin-bottom: 0.2rem;
-  }
-
-  .modal-product-price { color: var(--gold); font-weight: 700; }
-
-  .form-group { margin-bottom: 1.2rem; }
-
+  .form-group { margin-bottom: 20px; }
   .form-group label {
     display: block;
-    font-size: 0.78rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(250,248,245,0.6);
-    margin-bottom: 0.5rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    background: rgba(250,248,245,0.05);
-    border: 1px solid rgba(250,248,245,0.15);
-    color: var(--white);
-    padding: 0.8rem 1rem;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.3s;
-    outline: none;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    border-color: var(--gold);
-  }
-
-  .form-group select option { background: var(--dark); }
-
-  .size-selector {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .size-btn {
-    background: transparent;
-    border: 1px solid rgba(250,248,245,0.2);
-    color: var(--white);
-    width: 44px;
-    height: 44px;
-    font-family: 'Tajawal', sans-serif;
+    color: var(--muted);
     font-size: 0.85rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    direction: rtl;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--red);
+  }
+  .form-group textarea { height: 100px; resize: vertical; }
+  .size-checkboxes {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .size-checkboxes label {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
     cursor: pointer;
     transition: all 0.2s;
+    color: var(--white);
+    font-size: 0.9rem;
+    margin-bottom: 0;
   }
-
-  .size-btn.selected, .size-btn:hover {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: var(--black);
-    font-weight: 700;
+  .size-checkboxes label:hover { border-color: var(--red); }
+  .size-checkboxes input[type=checkbox] { accent-color: var(--red); width: auto; }
+  .image-preview-grid {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;
   }
-
-  .submit-order-btn {
-    width: 100%;
-    background: var(--gold);
-    color: var(--black);
+  .preview-img {
+    width: 80px; height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .preview-img:hover { border-color: var(--red); }
+  .btn-primary {
+    background: var(--red);
+    color: white;
     border: none;
-    padding: 1rem;
-    font-family: 'Tajawal', sans-serif;
+    border-radius: 8px;
+    padding: 14px 30px;
+    font-family: 'Cairo', sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     cursor: pointer;
-    margin-top: 0.5rem;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 10px;
   }
+  .btn-primary:hover { background: var(--red-hot); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 30px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--red); color: var(--white); }
+  .admin-product-list { margin-top: 30px; }
+  .admin-product-item {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .admin-product-item img {
+    width: 60px; height: 60px; object-fit: cover; border-radius: 6px;
+  }
+  .admin-product-info { flex: 1; }
+  .admin-product-info strong { display: block; font-size: 0.95rem; }
+  .admin-product-info span { color: var(--muted); font-size: 0.8rem; }
+  .btn-delete {
+    background: transparent;
+    border: 1px solid #555;
+    color: #888;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    font-family: 'Cairo', sans-serif;
+  }
+  .btn-delete:hover { border-color: var(--red); color: var(--red); }
 
-  .submit-order-btn:hover { background: var(--gold-light); }
-  .submit-order-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* ========= NAVBAR ========= */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(10,10,10,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 70px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none;
+  }
+  .nav-logo img {
+    height: 48px; width: 48px;
+    object-fit: contain;
+    filter: brightness(1.1);
+  }
+  .nav-logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--white);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+  .nav-logo-text span { color: var(--red); }
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--white); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .cart-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--white);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .cart-btn:hover { border-color: var(--red); }
+  .cart-count {
+    position: absolute; top: -6px; right: -6px;
+    background: var(--red);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cairo', sans-serif;
+  }
+  .admin-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.2s;
+  }
+  .admin-btn:hover { border-color: var(--gold); color: var(--gold); }
 
-  /* ========= SUCCESS MESSAGE ========= */
-  .success-msg {
+  /* ========= HERO ========= */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--black);
+    padding-top: 70px;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(192,57,43,0.08) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px);
+  }
+  .hero-logo-bg {
+    position: absolute;
+    width: 700px; height: 700px;
+    opacity: 0.04;
+    background-image: url('/mnt/user-data/uploads/Logo.PNG');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: blur(2px);
+  }
+  .hero-content {
+    position: relative;
     text-align: center;
-    padding: 2rem;
-    display: none;
+    z-index: 2;
+    animation: heroIn 1s ease forwards;
   }
-
-  .success-msg.active { display: block; }
-  .success-icon { font-size: 3rem; margin-bottom: 1rem; }
-  .success-msg h4 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.8rem; }
-  .success-msg p { color: rgba(250,248,245,0.7); font-size: 0.9rem; line-height: 1.7; }
-
-  /* ========= DIVIDER ========= */
-  .gold-divider {
-    width: 80px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 1.5rem auto;
-  }
-
-  /* ========= FOOTER ========= */
-  footer {
-    background: var(--dark);
-    border-top: 1px solid rgba(201,168,76,0.1);
-    padding: 3rem;
-    text-align: center;
-  }
-
-  .footer-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    color: var(--gold);
-    letter-spacing: 4px;
-    margin-bottom: 1rem;
-  }
-
-  footer p { color: rgba(250,248,245,0.4); font-size: 0.85rem; }
-
-  /* ========= ANIMATIONS ========= */
-  @keyframes fadeUp {
+  @keyframes heroIn {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  .hero-logo {
+    width: 140px; height: 140px;
+    object-fit: contain;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 0 40px rgba(192,57,43,0.4));
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(192,57,43,0.3)); }
+    50% { filter: drop-shadow(0 0 60px rgba(192,57,43,0.6)); }
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: 8px;
+    color: var(--white);
+    text-shadow: 0 0 80px rgba(192,57,43,0.3);
+  }
+  .hero-title span { color: var(--red); }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    color: var(--muted);
+    margin: 20px 0 40px;
+    letter-spacing: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .hero-cta {
+    display: inline-flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  }
+  .btn-cta {
+    padding: 16px 40px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-cta-primary {
+    background: var(--red);
+    color: white;
+    border: 2px solid var(--red);
+  }
+  .btn-cta-primary:hover {
+    background: transparent;
+    color: var(--red);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(192,57,43,0.4);
+  }
+  .btn-cta-outline {
+    background: transparent;
+    color: var(--white);
+    border: 2px solid var(--white);
+  }
+  .btn-cta-outline:hover {
+    background: var(--white);
+    color: var(--black);
+    transform: translateY(-3px);
+  }
+  .hero-scroll {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    text-align: center;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--red));
+    margin: 0 auto 8px;
+    animation: scrollAnim 2s ease-in-out infinite;
+  }
+  @keyframes scrollAnim {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+  }
+  .scroll-text { font-size: 0.7rem; color: var(--muted); letter-spacing: 3px; }
 
-  /* ========= SCROLLBAR ========= */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--black); }
-  ::-webkit-scrollbar-thumb { background: var(--gold); }
+  /* ========= SECTIONS ========= */
+  section { padding: 100px 40px; }
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .section-tag {
+    display: inline-block;
+    background: rgba(192,57,43,0.15);
+    color: var(--red);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 30px;
+    padding: 6px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    letter-spacing: 5px;
+    line-height: 1;
+  }
+  .section-title span { color: var(--red); }
 
-  /* ========= MOBILE ========= */
-  @media (max-width: 768px) {
-    header { padding: 1rem 1.5rem; }
-    nav { gap: 1.2rem; }
-    nav a { font-size: 0.75rem; letter-spacing: 1px; }
-    section { padding: 4rem 1.5rem; }
-    .categories-grid { grid-template-columns: repeat(2, 1fr); }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    .product-img { height: 200px; font-size: 3rem; }
-    .modal { max-height: 95vh; }
+  /* ========= CATEGORIES ========= */
+  #categories { background: var(--deep); }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .cat-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 50px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.35s;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(192,57,43,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .cat-card:hover::before { opacity: 1; }
+  .cat-card:hover {
+    border-color: var(--red);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(192,57,43,0.2);
+  }
+  .cat-icon { font-size: 3.5rem; margin-bottom: 20px; }
+  .cat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+  .cat-sub { color: var(--muted); font-size: 0.85rem; }
+  .cat-active {
+    border-color: var(--red) !important;
+    background: rgba(192,57,43,0.08) !important;
+  }
+  .cat-active::before { opacity: 1 !important; }
+
+  /* ========= PRODUCTS ========= */
+  #shop { background: var(--black); }
+  .filter-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap; gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+  }
+  .filter-tabs {
+    display: flex; gap: 8px;
+  }
+  .filter-tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .filter-tab:hover, .filter-tab.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+  .products-count { color: var(--muted); font-size: 0.85rem; }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .product-card:hover {
+    border-color: var(--red);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .product-img-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 280px;
+    background: #111;
+  }
+  .product-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+  }
+  .product-card:hover .product-img-wrap img { transform: scale(1.08); }
+  .product-img-nav {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px;
+  }
+  .img-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .img-dot.active { background: var(--red); }
+  .product-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--red);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .product-body { padding: 20px; }
+  .product-category {
+    font-size: 0.7rem;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .product-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .product-sizes {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .size-tag {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 9px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .product-footer {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .product-price {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--red);
+  }
+  .product-price span { color: var(--muted); font-size: 0.8rem; font-family: 'Cairo', sans-serif; }
+  .btn-order {
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-order:hover {
+    background: var(--red-hot);
+    transform: scale(1.05);
   }
 
-  @media (max-width: 480px) {
+  /* ========= ORDER MODAL ========= */
+  #order-modal {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 9000;
+    overflow-y: auto;
+    padding: 40px 20px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  #order-modal.active { display: flex; }
+  .order-box {
+    background: var(--deep);
+    border: 1px solid var(--red);
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .order-product-preview {
+    display: flex; gap: 16px; align-items: center;
+    background: var(--card);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .order-product-preview img {
+    width: 80px; height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  .order-product-name { font-weight: 700; margin-bottom: 4px; }
+  .order-product-price { color: var(--red); font-family: 'Oswald', sans-serif; font-size: 1.2rem; }
+  .size-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .size-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .size-btn:hover, .size-btn.selected { background: var(--red); border-color: var(--red); }
+  .telegram-btn {
+    background: #229ED9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    width: 100%;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 16px;
+  }
+  .telegram-btn:hover { background: #1a85b5; transform: translateY(-2px); }
+  .telegram-icon { font-size: 1.2rem; }
+  .modal-close {
+    position: absolute; top: 20px; left: 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { border-color: var(--red); color: var(--red); }
+  .order-box { position: relative; }
+
+  /* ========= EMPTY STATE ========= */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    grid-column: 1/-1;
+  }
+  .empty-state .empty-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.4; }
+  .empty-state h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 10px; color: var(--white); opacity: 0.5; }
+
+  /* ========= FEATURES STRIP ========= */
+  #features {
+    background: var(--deep);
+    padding: 60px 40px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .feature-item { }
+  .feature-icon { font-size: 2.5rem; margin-bottom: 14px; }
+  .feature-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .feature-sub { color: var(--muted); font-size: 0.8rem; }
+
+  /* ========= FOOTER ========= */
+  footer {
+    background: var(--deep);
+    border-top: 1px solid var(--border);
+    padding: 60px 40px 30px;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+  }
+  .footer-logo span { color: var(--red); }
+  .footer-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 30px; letter-spacing: 2px; }
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 30px;
+  }
+
+  /* ========= RESPONSIVE ========= */
+  @media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    section { padding: 70px 20px; }
+    .cat-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .admin-box { padding: 24px; }
+  }
+  @media (max-width: 600px) {
+    .hero-title { font-size: 3.5rem; }
+    .cat-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
     .products-grid { grid-template-columns: 1fr; }
-    .categories-grid { grid-template-columns: 1fr 1fr; }
+    footer, #features { padding: 50px 20px 24px; }
   }
+
+  /* ========= TOAST ========= */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--red);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">Baki<span> STORE</span></div>
-  <nav>
-    <a onclick="scrollTo('categories')">أقسام</a>
-    <a onclick="scrollTo('products')">منتجات</a>
-    <a onclick="scrollTo('contact')">تواصل</a>
-  </nav>
-</header>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-lines"></div>
-  <div class="hero-content">
-    <div class="hero-tag">✦ مجموعة ٢٠٢٦</div>
-    <h1>
-      أناقة بلا
-      <em>حدود</em>
-    </h1>
-    <p>اكتشف أرقى تشكيلات الأزياء والإكسسوارات — للمرأة والرجل، بأحجام تناسب الجميع</p>
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="scrollTo('products')">تسوق الآن</button>
-      <button class="btn-outline" onclick="scrollTo('categories')">استعرض الأقسام</button>
-    </div>
-  </div>
-</section>
+<!-- ======= ADMIN PANEL ======= -->
+<div id="admin-overlay">
+  <div class="admin-box">
+    <div class="admin-title">⚙️ لوحة التحكم</div>
 
-<!-- CATEGORIES -->
-<section id="categories">
-  <div class="section-label">أقسامنا</div>
-  <div class="section-title">كل ما <em>تحتاجه</em></div>
-  <div class="categories-grid">
-    <div class="category-card" onclick="filterProducts('women')">
-      <div class="cat-bg cat-bg-women">👗</div>
-      <div class="cat-info">
-        <h3>ملابس نسائي</h3>
-        <span>العباءات · الفساتين · الكاجوال</span>
-      </div>
-    </div>
-    <div class="category-card" onclick="filterProducts('men')">
-      <div class="cat-bg cat-bg-men">👔</div>
-      <div class="cat-info">
-        <h3>ملابس رجالي</h3>
-        <span>الرسمي · الكاجوال · الرياضي</span>
-      </div>
-    </div>
-    <div class="category-card" onclick="filterProducts('accessories')">
-      <div class="cat-bg cat-bg-acc">💍</div>
-      <div class="cat-info">
-        <h3>إكسسوارات</h3>
-        <span>الحقائب · الإكسسوارات · الأحذية</span>
-      </div>
-    </div>
-    <div class="category-card" onclick="filterProducts('gym')">
-      <div class="cat-bg cat-bg-kids">🏋️</div>
-      <div class="cat-info">
-        <h3>ملابس جيم</h3>
-        <span>رياضي نسائي · رياضي رجالي</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PRODUCTS -->
-<section id="products">
-  <div class="section-label">منتجاتنا</div>
-  <div class="section-title">التشكيلة <em>المميزة</em></div>
-  
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterProducts('all', this)">الكل</button>
-    <button class="filter-btn" onclick="filterProducts('women', this)">نسائي</button>
-    <button class="filter-btn" onclick="filterProducts('men', this)">رجالي</button>
-    <button class="filter-btn" onclick="filterProducts('accessories', this)">إكسسوارات</button>
-    <button class="filter-btn" onclick="filterProducts('gym', this)">جيم</button>
-  </div>
-
-  <div class="products-grid" id="productsGrid"></div>
-</section>
-
-<!-- FOOTER -->
-<section id="contact" style="background: var(--dark); padding: 4rem 3rem; text-align: center;">
-  <div class="section-label" style="justify-content: center;">تواصل معنا</div>
-  <div class="section-title" style="text-align: center;">نحن هنا <em>لخدمتك</em></div>
-  <div class="gold-divider"></div>
-  <p style="color: rgba(250,248,245,0.6); font-size: 0.95rem; line-height: 2;">
-    📦 توصيل سريع · 🔄 إرجاع مجاني · 💬 دعم على مدار الساعة
-  </p>
-</section>
-
-<footer>
-  <div class="footer-logo">Baki STORE</div>
-  <p>© 2026 جميع الحقوق محفوظة</p>
-</footer>
-
-<!-- ORDER MODAL -->
-<div class="modal-overlay" id="orderModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>إتمام الطلب</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody">
-      <div class="modal-product-info">
-        <div class="modal-product-emoji" id="modalEmoji">👗</div>
-        <div>
-          <div class="modal-product-name" id="modalProductName">—</div>
-          <div class="modal-product-price" id="modalProductPrice">—</div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>الاسم الكامل</label>
-        <input type="text" id="customerName" placeholder="أدخل اسمك الكامل">
-      </div>
-
-      <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="customerPhone" placeholder="07xxxxxxxxx">
-      </div>
-
-      <div class="form-group">
-        <label>العنوان / المحافظة</label>
-        <input type="text" id="customerAddress" placeholder="المدينة، المنطقة، الشارع">
-      </div>
-
-      <div class="form-group" id="sizeGroup">
-        <label>المقاس</label>
-        <div class="size-selector" id="sizeBtns">
-          <button class="size-btn" onclick="selectSize(this)">XS</button>
-          <button class="size-btn" onclick="selectSize(this)">S</button>
-          <button class="size-btn" onclick="selectSize(this)">M</button>
-          <button class="size-btn" onclick="selectSize(this)">L</button>
-          <button class="size-btn" onclick="selectSize(this)">XL</button>
-          <button class="size-btn" onclick="selectSize(this)">XXL</button>
-          <button class="size-btn" onclick="selectSize(this)">3XL</button>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>الكمية</label>
-        <select id="customerQty">
-          <option value="1">١</option>
-          <option value="2">٢</option>
-          <option value="3">٣</option>
-          <option value="4">٤</option>
-          <option value="5">٥</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>ملاحظات (اختياري)</label>
-        <textarea id="customerNotes" rows="2" placeholder="أي تفاصيل إضافية..."></textarea>
-      </div>
-
-      <button class="submit-order-btn" id="submitBtn" onclick="submitOrder()">
-        ✦ إرسال الطلب
-      </button>
+    <div class="form-group">
+      <label>اسم المنتج</label>
+      <input type="text" id="p-name" placeholder="مثال: تيشيرت باكي الكلاسيكي">
     </div>
 
-    <!-- SUCCESS -->
-    <div class="success-msg" id="successMsg">
-      <div class="success-icon">✅</div>
-      <h4>تم استلام طلبك!</h4>
-      <div class="gold-divider"></div>
-      <p>شكراً لثقتك بـ Baki STORE<br> سيتواصل معك فريقنا في أقرب وقت لتأكيد الطلب وتحديد موعد التوصيل. مده التوصيل من 48 الى 72 ساعه</p>
+    <div class="form-group">
+      <label>القسم</label>
+      <select id="p-cat">
+        <option value="men">رجالي 👨</option>
+        <option value="women">نسائي 👩</option>
+        <option value="accessories">اكسسوارات 💎</option>
+      </select>
     </div>
+
+    <div class="form-group">
+      <label>السعر (دينار عراقي)</label>
+      <input type="number" id="p-price" placeholder="مثال: 35000">
+    </div>
+
+    <div class="form-group">
+      <label>الأحجام المتاحة</label>
+      <div class="size-checkboxes">
+        <label><input type="checkbox" value="XS"> XS</label>
+        <label><input type="checkbox" value="S"> S</label>
+        <label><input type="checkbox" value="M" checked> M</label>
+        <label><input type="checkbox" value="L" checked> L</label>
+        <label><input type="checkbox" value="XL"> XL</label>
+        <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="Free Size"> Free</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>وصف المنتج (اختياري)</label>
+      <textarea id="p-desc" placeholder="وصف مختصر للمنتج..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>🔖 هل هو جديد / عرض؟</label>
+      <select id="p-badge">
+        <option value="">بدون</option>
+        <option value="NEW">جديد</option>
+        <option value="SALE">تخفيض</option>
+        <option value="HOT">🔥 HOT</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>📸 صور المنتج (اختر أكثر من صورة)</label>
+      <input type="file" id="p-images" multiple accept="image/*" onchange="previewImages(this)">
+      <div class="image-preview-grid" id="img-preview"></div>
+    </div>
+
+    <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
+    <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
+
+    <div class="admin-product-list" id="admin-list"></div>
   </div>
 </div>
 
-<script>
-// ===== TELEGRAM CONFIG =====
-const TELEGRAM_BOT_TOKEN = '8582381777:AAHwzm_ibO_HCcL22VNv5kTUL5w43Uu0Vyo';
-const TELEGRAM_CHAT_ID   = '6263195701';  // مثال: '6263195701'
+<!-- ======= ORDER MODAL ======= -->
+<div id="order-modal">
+  <div class="order-box">
+    <button class="modal-close" onclick="closeOrder()">✖</button>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;margin-bottom:20px;color:var(--red)">تفاصيل الطلب</h2>
 
-// ===== PRODUCTS DATA =====
-const products = [
-  { id:1, name:'عباءة كلاسيك فاخرة', category:'women', price:'85,000', emoji:'🧕', badge:'جديد', sizes:true, bg:'#1a0f1e' },
-  { id:2, name:'فستان سهرة راقي', category:'women', price:'120,000', emoji:'👗', badge:'', sizes:true, bg:'#200f2a' },
-  { id:3, name:'بدلة رسمية إيطالية', category:'men', price:'180,000', emoji:'🤵', badge:'مميز', sizes:true, bg:'#0f1a1a' },
-  { id:4, name:'شيرت كاجوال بريميوم', category:'men', price:'35,000', emoji:'👕', badge:'', sizes:true, bg:'#101a10' },
-  { id:5, name:'حقيبة يد فاخرة', category:'accessories', price:'95,000', emoji:'👜', badge:'جديد', sizes:false, bg:'#1a1a0a' },
-  { id:6, name:'ساعة أنيقة', category:'accessories', price:'250,000', emoji:'⌚', badge:'حصري', sizes:false, bg:'#1a0a0a' },
-  { id:7, name:'طقم جيم نسائي', category:'gym', price:'55,000', emoji:'🩱', badge:'', sizes:true, bg:'#0f0f1a' },
-  { id:8, name:'ترنج رياضي رجالي', category:'gym', price:'65,000', emoji:'🩳', badge:'', sizes:true, bg:'#1a0f10' },
-  { id:9, name:'فستان كاجوال صيفي', category:'women', price:'45,000', emoji:'👘', badge:'', sizes:true, bg:'#1a0f1e' },
-  { id:10, name:'بنطلون جينز كلاسيك', category:'men', price:'50,000', emoji:'👖', badge:'', sizes:true, bg:'#0f1a1a' },
-  { id:11, name:'حذاء رياضي نسائي', category:'accessories', price:'75,000', emoji:'👟', badge:'', sizes:false, bg:'#1a1a0a' },
-  { id:12, name:'سترة جيم للرجال', category:'gym', price:'40,000', emoji:'🦺', badge:'', sizes:true, bg:'#1a0f10' },
-];
-
-let selectedSize = '';
-let currentProduct = null;
-
-function renderProducts(filter = 'all') {
-  const grid = document.getElementById('productsGrid');
-  const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-  grid.innerHTML = filtered.map(p => `
-    <div class="product-card">
-      <div class="product-img" style="background: linear-gradient(135deg, ${p.bg}, #0a0a0a);">
-        ${p.emoji}
-        ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+    <div class="order-product-preview">
+      <img id="order-img" src="" alt="">
+      <div>
+        <div class="order-product-name" id="order-name"></div>
+        <div class="order-product-price" id="order-price"></div>
+        <div style="color:var(--muted);font-size:0.8rem;margin-top:4px" id="order-cat"></div>
       </div>
-      <div class="product-info">
-        <div class="product-category">${getCatName(p.category)}</div>
+    </div>
+
+    <div class="form-group">
+      <label>📏 اختر الحجم</label>
+      <div class="size-selector" id="order-sizes"></div>
+    </div>
+
+    <div class="form-group">
+      <label>🔢 الكمية</label>
+      <input type="number" id="order-qty" value="1" min="1" max="10">
+    </div>
+
+    <div class="form-group">
+      <label>📝 ملاحظات إضافية (اختياري)</label>
+      <textarea id="order-note" placeholder="أي ملاحظات للطلب..."></textarea>
+    </div>
+
+    <button class="telegram-btn" onclick="sendToTelegram()">
+      <span class="telegram-icon">✈️</span>
+      إرسال الطلب عبر تيليجرام
+    </button>
+    <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">سيتم توجيهك إلى تيليجرام لإتمام الطلب</p>
+  </div>
+</div>
+
+<!-- ======= NAV ======= -->
+<nav>
+  <a class="nav-logo" href="#hero">
+    <img src="/mnt/user-data/uploads/Logo.PNG" alt="Baki Store Logo">
+    <div>
+      <div class="nav-logo-text">BAKI <span>STORE</span></div>
+      <div style="font-size:0.65rem;color:var(--muted);letter-spacing:2px">باكي ستور</div>
+    </div>
+  </a>
+
+  <ul class="nav-links">
+    <li><a onclick="scrollTo('hero')">الرئيسية</a></li>
+    <li><a onclick="scrollTo('categories')">الأقسام</a></li>
+    <li><a onclick="scrollTo('shop')">المنتجات</a></li>
+    <li><a onclick="scrollTo('features')">مميزاتنا</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="admin-btn" onclick="openAdmin()">⚙ إدارة</button>
+    <button class="cart-btn" onclick="scrollTo('shop')">
+      🛍
+      <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ======= HERO ======= -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-logo-bg"></div>
+  <div class="hero-content">
+    <img src="/mnt/user-data/uploads/Logo.PNG" alt="Baki" class="hero-logo">
+    <div class="hero-title">BAKI <span>STORE</span></div>
+    <div class="hero-sub">باكي ستور · ملابس الجيم الاحترافية</div>
+    <div class="hero-cta">
+      <a class="btn-cta btn-cta-primary" onclick="scrollTo('shop')">تسوق الآن</a>
+      <a class="btn-cta btn-cta-outline" onclick="scrollTo('categories')">الأقسام</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <div class="scroll-text">SCROLL</div>
+  </div>
+</section>
+
+<!-- ======= CATEGORIES ======= -->
+<section id="categories">
+  <div class="section-header">
+    <div class="section-tag">COLLECTIONS</div>
+    <div class="section-title">اختر <span>قسمك</span></div>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card" onclick="filterCat('men')" id="cat-men">
+      <div class="cat-icon">👨‍💪</div>
+      <div class="cat-title">رجالي</div>
+      <div class="cat-sub">Men's Collection</div>
+    </div>
+    <div class="cat-card" onclick="filterCat('women')" id="cat-women">
+      <div class="cat-icon">👩‍💪</div>
+      <div class="cat-title">نسائي</div>
+      <div class="cat-sub">Women's Collection</div>
+    </div>
+    <div class="cat-card" onclick="filterCat('accessories')" id="cat-accessories">
+      <div class="cat-icon">💎</div>
+      <div class="cat-title">اكسسوارات</div>
+      <div class="cat-sub">Accessories</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= SHOP ======= -->
+<section id="shop">
+  <div class="section-header">
+    <div class="section-tag">SHOP</div>
+    <div class="section-title">كل <span>المنتجات</span></div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterProducts('all', this)">الكل</button>
+      <button class="filter-tab" onclick="filterProducts('men', this)">رجالي</button>
+      <button class="filter-tab" onclick="filterProducts('women', this)">نسائي</button>
+      <button class="filter-tab" onclick="filterProducts('accessories', this)">اكسسوارات</button>
+    </div>
+    <div class="products-count" id="products-count">0 منتج</div>
+  </div>
+
+  <div class="products-grid" id="products-grid">
+    <div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3>لا توجد منتجات بعد</h3>
+      <p>افتح لوحة التحكم وأضف أول منتج</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FEATURES ======= -->
+<section id="features">
+  <div class="features-grid">
+    <div class="feature-item">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">توصيل سريع</div>
+      <div class="feature-sub">لجميع المحافظات</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">💯</div>
+      <div class="feature-title">جودة مضمونة</div>
+      <div class="feature-sub">ملابس جيم احترافية</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">✈️</div>
+      <div class="feature-title">طلب عبر تيليجرام</div>
+      <div class="feature-sub">سهل وسريع</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">استبدال وإرجاع</div>
+      <div class="feature-sub">خلال 3 أيام</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= FOOTER ======= -->
+<footer>
+  <div class="footer-logo">BAKI <span>STORE</span></div>
+  <div class="footer-sub">باكي ستور · ملابس جيم نسائي ورجالي واكسسوارات</div>
+  <div class="footer-bottom">
+    © 2025 Baki Store. جميع الحقوق محفوظة.
+  </div>
+</footer>
+
+<script>
+// ============ STATE ============
+let products = JSON.parse(localStorage.getItem('baki_products') || '[]');
+let currentFilter = 'all';
+let selectedProduct = null;
+let selectedSize = null;
+let productImagesData = {};
+
+// ============ TELEGRAM CONFIG ============
+// 🔧 غيّر هذا إلى يوزر نيم تيليجرام الخاص بك
+const TELEGRAM_USERNAME = 'BakiStore_bot';
+
+// ============ UTILS ============
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============ ADMIN ============
+function openAdmin() {
+  document.getElementById('admin-overlay').classList.add('active');
+  renderAdminList();
+}
+function closeAdmin() {
+  document.getElementById('admin-overlay').classList.remove('active');
+}
+
+let tempImages = [];
+function previewImages(input) {
+  tempImages = [];
+  const preview = document.getElementById('img-preview');
+  preview.innerHTML = '';
+  const files = Array.from(input.files);
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      tempImages[i] = e.target.result;
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'preview-img';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function addProduct() {
+  const name = document.getElementById('p-name').value.trim();
+  const cat = document.getElementById('p-cat').value;
+  const price = document.getElementById('p-price').value;
+  const desc = document.getElementById('p-desc').value.trim();
+  const badge = document.getElementById('p-badge').value;
+  const checkboxes = document.querySelectorAll('.size-checkboxes input[type=checkbox]');
+  const sizes = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+
+  if (!name || !price) { showToast('❌ يرجى إدخال الاسم والسعر'); return; }
+  if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً على الأقل'); return; }
+
+  const id = Date.now();
+  const images = [...tempImages];
+  if (images.length === 0) images.push('');
+
+  const product = { id, name, cat, price: parseInt(price), desc, badge, sizes, images };
+  products.push(product);
+  saveProducts();
+  renderProducts();
+  renderAdminList();
+  showToast('✅ تمت إضافة المنتج بنجاح');
+
+  // reset
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-price').value = '';
+  document.getElementById('p-desc').value = '';
+  document.getElementById('p-badge').value = '';
+  document.getElementById('p-images').value = '';
+  document.getElementById('img-preview').innerHTML = '';
+  tempImages = [];
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  saveProducts();
+  renderProducts();
+  renderAdminList();
+  showToast('🗑 تم حذف المنتج');
+}
+
+function saveProducts() {
+  localStorage.setItem('baki_products', JSON.stringify(products));
+}
+
+function renderAdminList() {
+  const list = document.getElementById('admin-list');
+  if (products.length === 0) { list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">لا توجد منتجات</p>'; return; }
+  list.innerHTML = '<h3 style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;letter-spacing:2px;margin-bottom:14px;color:var(--muted)">المنتجات الحالية</h3>' +
+    products.map(p => `
+      <div class="admin-product-item">
+        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=IMG'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=IMG'">
+        <div class="admin-product-info">
+          <strong>${p.name}</strong>
+          <span>${catLabel(p.cat)} · ${p.price.toLocaleString()} د.ع</span>
+        </div>
+        <button class="btn-delete" onclick="deleteProduct(${p.id})">حذف</button>
+      </div>
+    `).join('');
+}
+
+function catLabel(cat) {
+  return { men: 'رجالي', women: 'نسائي', accessories: 'اكسسوارات' }[cat] || cat;
+}
+
+// ============ PRODUCTS ============
+function filterCat(cat) {
+  // remove active
+  ['men','women','accessories'].forEach(c => {
+    document.getElementById('cat-'+c).classList.remove('cat-active');
+  });
+  document.getElementById('cat-'+cat).classList.add('cat-active');
+  filterProducts(cat);
+  scrollTo('shop');
+  // sync filter tab
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.includes({ men:'رجالي', women:'نسائي', accessories:'اكسسوارات' }[cat]));
+  });
+}
+
+function filterProducts(cat, btn) {
+  currentFilter = cat;
+  if (btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderProducts();
+}
+
+function renderProducts() {
+  const grid = document.getElementById('products-grid');
+  const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+  document.getElementById('products-count').textContent = filtered.length + ' منتج';
+  document.getElementById('cart-count').textContent = products.length;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3>${currentFilter === 'all' ? 'لا توجد منتجات بعد' : 'لا توجد منتجات في هذا القسم'}</h3>
+      <p>افتح لوحة التحكم وأضف منتجات</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card" onclick="openOrder(${p.id})">
+      <div class="product-img-wrap">
+        <img src="${p.images[0] || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
+             id="pimg-${p.id}-0"
+             onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
+        ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+        ${p.images.length > 1 ? `<div class="product-img-nav">${p.images.map((_, i) => `<div class="img-dot ${i===0?'active':''}" onclick="event.stopPropagation();switchImg(${p.id},${i})"></div>`).join('')}</div>` : ''}
+      </div>
+      <div class="product-body">
+        <div class="product-category">${catLabel(p.cat)}</div>
         <div class="product-name">${p.name}</div>
-        <div class="product-bottom">
-          <div class="product-price">${p.price} د.ع</div>
-          <button class="order-btn" onclick="openModal(${p.id})">اطلب الآن</button>
+        ${p.desc ? `<div style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">${p.desc}</div>` : ''}
+        <div class="product-sizes">
+          ${p.sizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
+        </div>
+        <div class="product-footer">
+          <div class="product-price">${p.price.toLocaleString()} <span>د.ع</span></div>
+          <button class="btn-order" onclick="event.stopPropagation();openOrder(${p.id})">
+            اطلب الآن ✈️
+          </button>
         </div>
       </div>
     </div>
   `).join('');
 }
 
-function getCatName(cat) {
-  const names = { women:'نسائي', men:'رجالي', accessories:'إكسسوارات', gym:'جيم' };
-  return names[cat] || cat;
-}
-
-function filterProducts(cat, btn) {
-  if (btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+function switchImg(productId, imgIndex) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+  const img = document.getElementById(`pimg-${productId}-0`);
+  if (img) img.src = p.images[imgIndex];
+  const card = img?.closest('.product-card');
+  if (card) {
+    card.querySelectorAll('.img-dot').forEach((d, i) => d.classList.toggle('active', i === imgIndex));
   }
-  renderProducts(cat);
-  if (btn) scrollTo('products');
 }
 
-function openModal(productId) {
-  currentProduct = products.find(p => p.id === productId);
-  selectedSize = '';
-  document.getElementById('modalEmoji').textContent = currentProduct.emoji;
-  document.getElementById('modalProductName').textContent = currentProduct.name;
-  document.getElementById('modalProductPrice').textContent = currentProduct.price + ' د.ع';
-  document.getElementById('sizeGroup').style.display = currentProduct.sizes ? 'block' : 'none';
-  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('customerName').value = '';
-  document.getElementById('customerPhone').value = '';
-  document.getElementById('customerAddress').value = '';
-  document.getElementById('customerNotes').value = '';
-  document.getElementById('customerQty').value = '1';
-  document.getElementById('successMsg').classList.remove('active');
-  document.getElementById('modalBody').style.display = 'block';
-  document.getElementById('orderModal').classList.add('active');
-}
+// ============ ORDER MODAL ============
+function openOrder(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  selectedProduct = p;
+  selectedSize = null;
 
-function closeModal() {
-  document.getElementById('orderModal').classList.remove('active');
-}
+  document.getElementById('order-img').src = p.images[0] || 'https://via.placeholder.com/80x80/181818/555?text=IMG';
+  document.getElementById('order-name').textContent = p.name;
+  document.getElementById('order-price').textContent = p.price.toLocaleString() + ' د.ع';
+  document.getElementById('order-cat').textContent = catLabel(p.cat);
+  document.getElementById('order-qty').value = 1;
+  document.getElementById('order-note').value = '';
 
-function selectSize(btn) {
+  const sizeSel = document.getElementById('order-sizes');
+  sizeSel.innerHTML = p.sizes.map(s => `<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
+
+  document.getElementById('order-modal').classList.add('active');
+}
+function closeOrder() {
+  document.getElementById('order-modal').classList.remove('active');
+  selectedProduct = null;
+  selectedSize = null;
+}
+function selectSize(s, btn) {
+  selectedSize = s;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-  selectedSize = btn.textContent;
 }
 
-async function submitOrder() {
-  const name = document.getElementById('customerName').value.trim();
-  const phone = document.getElementById('customerPhone').value.trim();
-  const address = document.getElementById('customerAddress').value.trim();
-  const qty = document.getElementById('customerQty').value;
-  const notes = document.getElementById('customerNotes').value.trim();
+function sendToTelegram() {
+  if (!selectedProduct) return;
+  if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); return; }
+  const qty = document.getElementById('order-qty').value || 1;
+  const note = document.getElementById('order-note').value.trim();
 
-  if (!name || !phone || !address) {
-    alert('يرجى تعبئة الاسم والهاتف والعنوان');
-    return;
-  }
+  const msg = encodeURIComponent(
+    `🛒 *طلب جديد - باكي ستور*\n\n` +
+    `📦 المنتج: ${selectedProduct.name}\n` +
+    `📂 القسم: ${catLabel(selectedProduct.cat)}\n` +
+    `📏 الحجم: ${selectedSize}\n` +
+    `🔢 الكمية: ${qty}\n` +
+    `💰 السعر: ${selectedProduct.price.toLocaleString()} د.ع\n` +
+    `💰 الإجمالي: ${(selectedProduct.price * qty).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '')
+  );
 
-  if (currentProduct.sizes && !selectedSize) {
-    alert('يرجى اختيار المقاس');
-    return;
-  }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ جاري الإرسال...';
-
-  const message = 
-`🛍️ *طلب جديد — NOVA STORE*
-━━━━━━━━━━━━━━━━━
-📦 *المنتج:* ${currentProduct.emoji} ${currentProduct.name}
-💰 *السعر:* ${currentProduct.price} د.ع
-${currentProduct.sizes ? `📏 *المقاس:* ${selectedSize}` : ''}
-🔢 *الكمية:* ${qty}
-━━━━━━━━━━━━━━━━━
-👤 *الاسم:* ${name}
-📞 *الهاتف:* ${phone}
-📍 *العنوان:* ${address}
-${notes ? `📝 *ملاحظات:* ${notes}` : ''}
-━━━━━━━━━━━━━━━━━
-🕐 ${new Date().toLocaleString('ar-IQ')}`;
-
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown'
-      })
-    });
-
-    if (res.ok) {
-      document.getElementById('modalBody').style.display = 'none';
-      document.getElementById('successMsg').classList.add('active');
-    } else {
-      throw new Error('فشل الإرسال');
-    }
-  } catch (e) {
-    alert('حدث خطأ أثناء إرسال الطلب. تأكد من إعدادات التيليغرام.');
-    btn.disabled = false;
-    btn.textContent = '✦ إرسال الطلب';
-  }
+  window.open(`https://t.me/${TELEGRAM_USERNAME}?text=${msg}`, '_blank');
+  showToast('✅ جاري التوجيه لتيليجرام...');
+  closeOrder();
 }
 
-function scrollTo(id) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-}
-
-// Close modal on overlay click
-document.getElementById('orderModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Init
+// ============ INIT ============
 renderProducts();
 </script>
 </body>
