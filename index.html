@@ -852,6 +852,25 @@
       <input type="number" id="order-qty" value="1" min="1" max="10">
     </div>
 
+    <div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
+      <div style="color:var(--red);font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
+    </div>
+
+    <div class="form-group">
+      <label>الاسم الكامل *</label>
+      <input type="text" id="customer-name" placeholder="اكتب اسمك هنا">
+    </div>
+
+    <div class="form-group">
+      <label>رقم الهاتف *</label>
+      <input type="tel" id="customer-phone" placeholder="07XXXXXXXXX">
+    </div>
+
+    <div class="form-group">
+      <label>العنوان / المحافظة (اختياري)</label>
+      <input type="text" id="customer-address" placeholder="مثال: بغداد - الكرخ">
+    </div>
+
     <div class="form-group">
       <label>📝 ملاحظات إضافية (اختياري)</label>
       <textarea id="order-note" placeholder="أي ملاحظات للطلب..."></textarea>
@@ -859,9 +878,9 @@
 
     <button class="telegram-btn" onclick="sendToTelegram()">
       <span class="telegram-icon">✈️</span>
-      إرسال الطلب عبر تيليجرام
+      إرسال الطلب مباشرة
     </button>
-    <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">سيتم توجيهك إلى تيليجرام لإتمام الطلب</p>
+    <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">سيصلك تأكيد الطلب على تيليجرام</p>
   </div>
 </div>
 
@@ -1005,8 +1024,8 @@ let selectedSize = null;
 let productImagesData = {};
 
 // ============ TELEGRAM CONFIG ============
-// 🔧 غيّر هذا إلى يوزر نيم تيليجرام الخاص بك
-const TELEGRAM_USERNAME = 'BakiStore_bot';
+const BOT_TOKEN = '8582381777:AAHwzm_ibO_HCcL22VNv5kTUL5w43Uu0Vyo';
+const CHAT_ID = '6263195701';
 
 // ============ UTILS ============
 function scrollTo(id) {
@@ -1219,26 +1238,61 @@ function selectSize(s, btn) {
   btn.classList.add('selected');
 }
 
-function sendToTelegram() {
+async function sendToTelegram() {
   if (!selectedProduct) return;
   if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); return; }
+
   const qty = document.getElementById('order-qty').value || 1;
   const note = document.getElementById('order-note').value.trim();
+  const name = document.getElementById('customer-name').value.trim();
+  const phone = document.getElementById('customer-phone').value.trim();
+  const address = document.getElementById('customer-address').value.trim();
 
-  const msg = encodeURIComponent(
+  if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
+
+  const text =
     `🛒 *طلب جديد - باكي ستور*\n\n` +
-    `📦 المنتج: ${selectedProduct.name}\n` +
+    `👤 الاسم: ${name}\n` +
+    `📞 الهاتف: ${phone}\n` +
+    (address ? `📍 العنوان: ${address}\n` : '') +
+    `\n📦 المنتج: ${selectedProduct.name}\n` +
     `📂 القسم: ${catLabel(selectedProduct.cat)}\n` +
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
-    `💰 السعر: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `💰 الإجمالي: ${(selectedProduct.price * qty).toLocaleString()} د.ع` +
-    (note ? `\n📝 ملاحظات: ${note}` : '')
-  );
+    `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
+    `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '');
 
-  window.open(`https://t.me/${TELEGRAM_USERNAME}?text=${msg}`, '_blank');
-  showToast('✅ جاري التوجيه لتيليجرام...');
-  closeOrder();
+  // Show loading
+  const btn = document.querySelector('.telegram-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الإرسال...';
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: 'Markdown'
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('✅ تم إرسال طلبك بنجاح!');
+      closeOrder();
+    } else {
+      showToast('❌ خطأ في الإرسال، حاول مرة ثانية');
+      console.error(data);
+    }
+  } catch (e) {
+    showToast('❌ تعذر الاتصال، تحقق من الإنترنت');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="telegram-icon">✈️</span> إرسال الطلب مباشرة';
+  }
 }
 
 // ============ INIT ============
