@@ -7,19 +7,22 @@
 <title>Baki Store | باكي ستور</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <!-- Firebase Compat SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDNyLcBRcVOQ5jxWlML1Jk0GNaOfybPqLM",
-  authDomain: "baki-store-9bc21.firebaseapp.com",
-  projectId: "baki-store-9bc21",
-  storageBucket: "baki-store-9bc21.firebasestorage.app",
-  messagingSenderId: "717150259982",
-  appId: "1:717150259982:web:1563517f703a7a6284255f"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+window.addEventListener('load', function() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNyLcBRcVOQ5jxWlML1Jk0GNaOfybPqLM",
+    authDomain: "baki-store-9bc21.firebaseapp.com",
+    projectId: "baki-store-9bc21",
+    storageBucket: "baki-store-9bc21.firebasestorage.app",
+    messagingSenderId: "717150259982",
+    appId: "1:717150259982:web:1563517f703a7a6284255f"
+  };
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+  loadProducts();
+});
 </script>
 <style>
   :root {
@@ -1198,7 +1201,7 @@ let productImagesData = {};
 // ============ FIREBASE FUNCTIONS ============
 async function loadProducts() {
   try {
-    db.collection('products').onSnapshot((snapshot) => {
+    window.db.collection('products').onSnapshot((snapshot) => {
       products = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
       renderProducts();
       renderAdminList();
@@ -1211,11 +1214,11 @@ async function loadProducts() {
 }
 
 async function saveProductToFirebase(product) {
-  await db.collection('products').add(product);
+  await window.db.collection('products').add(product);
 }
 
 async function deleteProductFromFirebase(docId) {
-  await db.collection('products').doc(docId).delete();
+  await window.db.collection('products').doc(docId).delete();
 }
 
 async function uploadImageToFirebase(file) {
@@ -1779,9 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
 // ============ INIT ============
-loadProducts();
 updateCartCount();
 </script>
 
