@@ -884,6 +884,55 @@
   </div>
 </div>
 
+<!-- ======= PASSWORD MODAL ======= -->
+<div id="password-modal" style="
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.97);
+  z-index:99999;
+  align-items:center; justify-content:center;
+">
+  <div style="
+    background:#111;
+    border:1px solid #c0392b;
+    border-radius:14px;
+    padding:40px;
+    width:100%; max-width:380px;
+    text-align:center;
+  ">
+    <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:#c0392b;margin-bottom:6px">لوحة التحكم</div>
+    <div style="color:#888;font-size:0.85rem;margin-bottom:24px">أدخل كلمة السر للدخول</div>
+    <input type="password" id="admin-password-input"
+      placeholder="••••••••"
+      style="
+        width:100%; background:#181818;
+        border:1px solid #333; border-radius:8px;
+        padding:14px; color:white;
+        font-size:1.1rem; text-align:center;
+        font-family:'Cairo',sans-serif;
+        letter-spacing:4px; margin-bottom:14px;
+        direction:ltr;
+      "
+      onkeydown="if(event.key==='Enter') checkPassword()"
+    >
+    <div id="pass-error" style="color:#e74c3c;font-size:0.85rem;margin-bottom:12px;display:none">❌ كلمة السر خاطئة</div>
+    <button onclick="checkPassword()" style="
+      background:#c0392b; color:white; border:none;
+      border-radius:8px; padding:14px; width:100%;
+      font-family:'Cairo',sans-serif; font-size:1rem;
+      font-weight:700; cursor:pointer;
+      transition:background 0.2s;
+    " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+      دخول ⚡
+    </button>
+    <button onclick="closePasswordModal()" style="
+      background:transparent; color:#666; border:none;
+      margin-top:12px; cursor:pointer;
+      font-family:'Cairo',sans-serif; font-size:0.85rem;
+    ">إلغاء</button>
+  </div>
+</div>
+
 <!-- ======= NAV ======= -->
 <nav>
   <a class="nav-logo" href="#hero">
@@ -1038,10 +1087,36 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ============ ADMIN ============
+// ============ ADMIN PASSWORD (SHA-256 encrypted) ============
+const ADMIN_HASH = 'db3d284fe9b95344d96e13259168aee1aa9e10e37f79cbfb444ad15c1cba08b8';
+
+async function hashPassword(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 function openAdmin() {
-  document.getElementById('admin-overlay').classList.add('active');
-  renderAdminList();
+  const pm = document.getElementById('password-modal');
+  pm.style.display = 'flex';
+  document.getElementById('admin-password-input').value = '';
+  document.getElementById('pass-error').style.display = 'none';
+  setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
+}
+function closePasswordModal() {
+  document.getElementById('password-modal').style.display = 'none';
+}
+async function checkPassword() {
+  const val = document.getElementById('admin-password-input').value;
+  const hashed = await hashPassword(val);
+  if (hashed === ADMIN_HASH) {
+    closePasswordModal();
+    document.getElementById('admin-overlay').classList.add('active');
+    renderAdminList();
+  } else {
+    document.getElementById('pass-error').style.display = 'block';
+    document.getElementById('admin-password-input').value = '';
+    document.getElementById('admin-password-input').focus();
+  }
 }
 function closeAdmin() {
   document.getElementById('admin-overlay').classList.remove('active');
