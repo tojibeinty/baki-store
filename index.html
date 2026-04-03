@@ -897,6 +897,21 @@ window.addEventListener('load', loadProducts);
     <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
     <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
 
+    <!-- VIDEO MANAGEMENT -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#c0392b;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
+      <div class="form-group">
+        <label>رابط YouTube (مثال: https://youtu.be/xxxxx)</label>
+        <input type="text" id="v-url" placeholder="https://youtu.be/xxxxx">
+      </div>
+      <div class="form-group">
+        <label>عنوان الفيديو (اختياري)</label>
+        <input type="text" id="v-title" placeholder="مثال: تيشيرت باكي الكلاسيكي">
+      </div>
+      <button class="btn-primary" onclick="addVideo()" style="margin-top:0">➕ إضافة الفيديو</button>
+      <div id="admin-video-list" style="margin-top:16px;"></div>
+    </div>
+
     <div class="admin-product-list" id="admin-list"></div>
   </div>
 </div>
@@ -959,6 +974,64 @@ window.addEventListener('load', loadProducts);
       </button>
     </div>
     <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">اطلب الآن = إرسال مباشر لتيليجرام بدون سلة</p>
+  </div>
+</div>
+
+<!-- ======= EDIT PRODUCT MODAL ======= -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+  <div style="background:#111;border:1px solid #c0392b;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
+    <button onclick="closeEdit()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
+    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#c0392b;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
+
+    <input type="hidden" id="edit-docid">
+
+    <div class="form-group">
+      <label>اسم المنتج</label>
+      <input type="text" id="edit-name">
+    </div>
+    <div class="form-group">
+      <label>القسم</label>
+      <select id="edit-cat">
+        <option value="men">رجالي 👨</option>
+        <option value="women">نسائي 👩</option>
+        <option value="accessories">اكسسوارات 💎</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>السعر الجديد (د.ع)</label>
+      <input type="number" id="edit-price">
+    </div>
+    <div class="form-group">
+      <label>السعر القديم — سيظهر مشطوباً (اختياري)</label>
+      <input type="number" id="edit-old-price" placeholder="اتركه فارغ لو ما تريد سعر مشطوب">
+    </div>
+    <div class="form-group">
+      <label>الوصف</label>
+      <textarea id="edit-desc"></textarea>
+    </div>
+    <div class="form-group">
+      <label>الشارة</label>
+      <select id="edit-badge">
+        <option value="">بدون</option>
+        <option value="NEW">جديد</option>
+        <option value="SALE">تخفيض</option>
+        <option value="HOT">🔥 HOT</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>الأحجام</label>
+      <div class="size-checkboxes" id="edit-sizes">
+        <label><input type="checkbox" value="XS"> XS</label>
+        <label><input type="checkbox" value="S"> S</label>
+        <label><input type="checkbox" value="M"> M</label>
+        <label><input type="checkbox" value="L"> L</label>
+        <label><input type="checkbox" value="XL"> XL</label>
+        <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="Free Size"> Free</label>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
+    <button class="btn-secondary" onclick="closeEdit()">إلغاء</button>
   </div>
 </div>
 
@@ -1095,7 +1168,11 @@ window.addEventListener('load', loadProducts);
       <button class="filter-tab" onclick="filterProducts('women', this)">نسائي</button>
       <button class="filter-tab" onclick="filterProducts('accessories', this)">اكسسوارات</button>
     </div>
-    <div class="products-count" id="products-count">0 منتج</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <input type="text" id="search-input" placeholder="🔍 ابحث عن منتج..." oninput="renderProducts()"
+        style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;direction:rtl;width:180px;">
+      <div class="products-count" id="products-count">0 منتج</div>
+    </div>
   </div>
 
   <div class="products-grid" id="products-grid">
@@ -1103,6 +1180,35 @@ window.addEventListener('load', loadProducts);
       <div class="empty-icon">📦</div>
       <h3>لا توجد منتجات بعد</h3>
       <p>افتح لوحة التحكم وأضف أول منتج</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======= VIDEOS SECTION ======= -->
+<section id="videos" style="background:var(--deep);padding:80px 40px;">
+  <div class="section-header">
+    <div class="section-tag">LOOK GOOD</div>
+    <div class="section-title">على الجسم <span>أحسن</span></div>
+  </div>
+
+  <div id="video-slider-wrap" style="max-width:800px;margin:0 auto;position:relative;">
+    <div id="video-empty" style="text-align:center;padding:60px;color:var(--muted);border:2px dashed var(--border);border-radius:12px;">
+      <div style="font-size:3rem;margin-bottom:16px">🎬</div>
+      <div style="font-family:var(--font-display);font-size:1.5rem;letter-spacing:2px;">لا توجد فيديوهات بعد</div>
+    </div>
+
+    <div id="video-slider" style="display:none;">
+      <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;">
+        <iframe id="video-frame" width="100%" height="100%" style="position:absolute;inset:0;border:none;" allowfullscreen allow="autoplay"></iframe>
+      </div>
+
+      <!-- Controls -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;">
+        <button onclick="prevVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">◀</button>
+        <div id="video-dots" style="display:flex;gap:8px;"></div>
+        <button onclick="nextVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">▶</button>
+      </div>
+      <div id="video-title" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:10px;"></div>
     </div>
   </div>
 </section>
@@ -1223,6 +1329,17 @@ window.addEventListener('load', loadProducts);
     </div>
   </div>
 </div>
+
+<!-- ======= WHATSAPP BUTTON ======= -->
+<a href="https://wa.me/9647846467878" target="_blank" style="
+  position:fixed;bottom:30px;right:24px;
+  background:#25D366;color:white;
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;z-index:8000;
+  box-shadow:0 4px 20px rgba(37,211,102,0.4);
+  text-decoration:none;transition:transform 0.2s;
+" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a>
 
 <script>
 // ============ STATE ============
@@ -1411,7 +1528,10 @@ function renderAdminList() {
           <strong>${p.name}</strong>
           <span>${catLabel(p.cat)} · ${p.price.toLocaleString()} د.ع</span>
         </div>
-        <button class="btn-delete" onclick="deleteProduct('${p._docId}')">حذف</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn-delete" style="border-color:#d4a017;color:#d4a017" onclick="openEdit('${p._docId}')">✏️</button>
+          <button class="btn-delete" onclick="deleteProduct('${p._docId}')">🗑</button>
+        </div>
       </div>
     `).join('');
 }
@@ -1446,15 +1566,17 @@ function filterProducts(cat, btn) {
 
 function renderProducts() {
   const grid = document.getElementById('products-grid');
-  const filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+  const searchVal = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+  let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+  if (searchVal) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchVal) || (p.desc||'').toLowerCase().includes(searchVal));
   document.getElementById('products-count').textContent = filtered.length + ' منتج';
-  document.getElementById('cart-count').textContent = products.length;
+  updateCartCount();
 
   if (filtered.length === 0) {
     grid.innerHTML = `<div class="empty-state">
       <div class="empty-icon">📦</div>
-      <h3>${currentFilter === 'all' ? 'لا توجد منتجات بعد' : 'لا توجد منتجات في هذا القسم'}</h3>
-      <p>افتح لوحة التحكم وأضف منتجات</p>
+      <h3>${searchVal ? 'لا توجد نتائج' : currentFilter === 'all' ? 'لا توجد منتجات بعد' : 'لا توجد منتجات في هذا القسم'}</h3>
+      <p>${searchVal ? 'جرب كلمة بحث ثانية' : 'افتح لوحة التحكم وأضف منتجات'}</p>
     </div>`;
     return;
   }
@@ -1466,6 +1588,7 @@ function renderProducts() {
              id="pimg-${p.id}-0"
              onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+        ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:14px;background:#d4a017">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
         ${p.images.length > 1 ? `<div class="product-img-nav">${p.images.map((_, i) => `<div class="img-dot ${i===0?'active':''}" onclick="event.stopPropagation();switchImg(${p.id},${i})"></div>`).join('')}</div>` : ''}
       </div>
       <div class="product-body">
@@ -1476,14 +1599,100 @@ function renderProducts() {
           ${p.sizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
         </div>
         <div class="product-footer">
-          <div class="product-price">${p.price.toLocaleString()} <span>د.ع</span></div>
-          <button class="btn-order" onclick="event.stopPropagation();openOrder(${p.id})">
-            اطلب الآن ✈️
-          </button>
+          <div>
+            <div class="product-price">${p.price.toLocaleString()} <span>د.ع</span></div>
+            ${p.oldPrice ? `<div style="color:#666;font-size:0.82rem;text-decoration:line-through;margin-top:2px">${p.oldPrice.toLocaleString()} د.ع</div>` : ''}
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn-order" style="background:transparent;border:1px solid #333;padding:10px 12px;" onclick="event.stopPropagation();shareProduct(${p.id})" title="مشاركة">📤</button>
+            <button class="btn-order" onclick="event.stopPropagation();openOrder(${p.id})">اطلب ✈️</button>
+          </div>
         </div>
       </div>
     </div>
   `).join('');
+}
+
+// ============ SHARE PRODUCT ============
+function shareProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const text = `🛒 *${p.name}*\n💰 السعر: ${p.price.toLocaleString()} د.ع\n\n🔗 ${window.location.href}\n\n_باكي ستور - ملابس جيم احترافية_`;
+  if (navigator.share) {
+    navigator.share({ title: p.name, text, url: window.location.href });
+  } else {
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(wa, '_blank');
+  }
+}
+
+// ============ EDIT PRODUCT ============
+function openEdit(docId) {
+  const p = products.find(x => x._docId === docId);
+  if (!p) return;
+  document.getElementById('edit-docid').value = docId;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-cat').value = p.cat;
+  document.getElementById('edit-price').value = p.price;
+  document.getElementById('edit-old-price').value = p.oldPrice || '';
+  document.getElementById('edit-desc').value = p.desc || '';
+  document.getElementById('edit-badge').value = p.badge || '';
+  document.querySelectorAll('#edit-sizes input[type=checkbox]').forEach(cb => {
+    cb.checked = p.sizes.includes(cb.value);
+  });
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+async function saveEdit() {
+  const docId = document.getElementById('edit-docid').value;
+  const name = document.getElementById('edit-name').value.trim();
+  const cat = document.getElementById('edit-cat').value;
+  const price = parseInt(document.getElementById('edit-price').value);
+  const oldPriceVal = document.getElementById('edit-old-price').value;
+  const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
+  const desc = document.getElementById('edit-desc').value.trim();
+  const badge = document.getElementById('edit-badge').value;
+  const sizes = Array.from(document.querySelectorAll('#edit-sizes input[type=checkbox]')).filter(c => c.checked).map(c => c.value);
+
+  if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
+  if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً'); return; }
+
+  const p = products.find(x => x._docId === docId);
+  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, sizes };
+  delete updatedProduct._docId;
+
+  showToast('⏳ جاري الحفظ...');
+  try {
+    await updateProductInFirebase(docId, updatedProduct);
+    showToast('✅ تم التعديل بنجاح');
+    closeEdit();
+  } catch(e) {
+    showToast('❌ خطأ في الحفظ');
+  }
+}
+
+async function updateProductInFirebase(docId, product) {
+  const fields = {
+    id: { integerValue: product.id },
+    name: { stringValue: product.name },
+    cat: { stringValue: product.cat },
+    price: { integerValue: product.price },
+    oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
+    desc: { stringValue: product.desc || '' },
+    badge: { stringValue: product.badge || '' },
+    sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
+    images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
+  };
+  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=cat&updateMask.fieldPaths=price&updateMask.fieldPaths=oldPrice&updateMask.fieldPaths=desc&updateMask.fieldPaths=badge&updateMask.fieldPaths=sizes&updateMask.fieldPaths=images`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields })
+  });
+  await loadProducts();
 }
 
 function switchImg(productId, imgIndex) {
@@ -1620,16 +1829,13 @@ async function orderNowDirect() {
     `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '');
 
-  const btn = document.querySelector('#order-modal .telegram-btn[onclick="orderNowDirect()"]');
+  const photoUrl = selectedProduct.images[0] || '';
+  const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
-    });
-    const data = await res.json();
+    const res = await sendOrderWithPhoto(text, photoUrl);
+    const data = await (res.json ? res.json() : res);
     if (data.ok) {
       showToast('✅ تم إرسال طلبك بنجاح!');
       closeOrder();
@@ -1773,7 +1979,134 @@ async function sendCartToTelegram() {
   }
 }
 
-// ============ SECRET ADMIN REVEAL ============
+// ============ VIDEOS ============
+let videos = JSON.parse(localStorage.getItem('baki_videos') || '[]');
+let currentVideo = 0;
+let videoTimer = null;
+
+function getYouTubeId(url) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&\n]+)/);
+  return match ? match[1] : null;
+}
+
+function addVideo() {
+  const url = document.getElementById('v-url').value.trim();
+  const title = document.getElementById('v-title').value.trim();
+  const ytId = getYouTubeId(url);
+  if (!ytId) { showToast('❌ رابط YouTube غير صحيح'); return; }
+  videos.push({ id: ytId, title: title || '' });
+  localStorage.setItem('baki_videos', JSON.stringify(videos));
+  document.getElementById('v-url').value = '';
+  document.getElementById('v-title').value = '';
+  renderVideos();
+  renderAdminVideoList();
+  showToast('✅ تمت إضافة الفيديو');
+}
+
+function deleteVideo(i) {
+  videos.splice(i, 1);
+  localStorage.setItem('baki_videos', JSON.stringify(videos));
+  renderVideos();
+  renderAdminVideoList();
+  showToast('🗑 تم حذف الفيديو');
+}
+
+function renderVideos() {
+  const empty = document.getElementById('video-empty');
+  const slider = document.getElementById('video-slider');
+  if (videos.length === 0) {
+    empty.style.display = 'block';
+    slider.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  slider.style.display = 'block';
+  currentVideo = Math.min(currentVideo, videos.length - 1);
+  showVideo(currentVideo);
+  const dots = document.getElementById('video-dots');
+  dots.innerHTML = videos.map((_, i) => `
+    <div onclick="showVideo(${i})" style="width:10px;height:10px;border-radius:50%;background:${i===currentVideo?'#c0392b':'#333'};cursor:pointer;transition:background 0.2s;"></div>
+  `).join('');
+  clearInterval(videoTimer);
+  videoTimer = setInterval(() => nextVideo(), 8000);
+}
+
+function showVideo(i) {
+  currentVideo = i;
+  const v = videos[i];
+  document.getElementById('video-frame').src = `https://www.youtube.com/embed/${v.id}?autoplay=0&rel=0`;
+  document.getElementById('video-title').textContent = v.title || '';
+  const dots = document.getElementById('video-dots');
+  if (dots) dots.querySelectorAll('div').forEach((d, j) => d.style.background = j===i ? '#c0392b' : '#333');
+}
+
+function nextVideo() {
+  if (videos.length === 0) return;
+  showVideo((currentVideo + 1) % videos.length);
+  renderVideoDotsOnly();
+}
+
+function prevVideo() {
+  if (videos.length === 0) return;
+  showVideo((currentVideo - 1 + videos.length) % videos.length);
+  renderVideoDotsOnly();
+}
+
+function renderVideoDotsOnly() {
+  const dots = document.getElementById('video-dots');
+  if (dots) dots.querySelectorAll('div').forEach((d, j) => d.style.background = j===currentVideo ? '#c0392b' : '#333');
+}
+
+function renderAdminVideoList() {
+  const list = document.getElementById('admin-video-list');
+  if (!list) return;
+  if (videos.length === 0) { list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">لا توجد فيديوهات</p>'; return; }
+  list.innerHTML = videos.map((v, i) => `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;">
+      <img src="https://img.youtube.com/vi/${v.id}/default.jpg" style="width:60px;height:45px;object-fit:cover;border-radius:4px;">
+      <div style="flex:1;font-size:0.85rem;">${v.title || v.id}</div>
+      <button class="btn-delete" onclick="deleteVideo(${i})">🗑</button>
+    </div>
+  `).join('');
+}
+
+// ============ SEND ORDER WITH PHOTO ============
+async function sendOrderWithPhoto(text, photoUrl) {
+  // أرسل الصورة مع الطلب
+  if (photoUrl && photoUrl.startsWith('data:')) {
+    // base64 — أرسل نص بدون صورة لأن تيليجرام ما يقبل base64 مباشرة
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+  } else if (photoUrl && photoUrl.startsWith('http')) {
+    // رابط خارجي — أرسل صورة مع caption
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, photo: photoUrl, caption: text, parse_mode: 'Markdown' })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+      return data;
+    } catch {
+      // لو فشلت الصورة، أرسل نص فقط
+      return await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+      });
+    }
+  } else {
+    return await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+  }
+}
 // اضغط على اللوغو 5 مرات متتالية لإظهار زر الإدارة
 let logoTaps = 0;
 let logoTimer = null;
@@ -1796,6 +2129,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============ INIT ============
 updateCartCount();
+renderVideos();
+renderAdminVideoList();
 </script>
 </body>
 </html>
