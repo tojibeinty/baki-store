@@ -1095,10 +1095,11 @@ window.addEventListener('load', loadProducts);
   </a>
 
   <ul class="nav-links">
-    <li><a onclick="scrollTo('hero')">الرئيسية</a></li>
-    <li><a onclick="scrollTo('categories')">الأقسام</a></li>
-    <li><a onclick="scrollTo('shop')">المنتجات</a></li>
-    <li><a onclick="scrollTo('features')">مميزاتنا</a></li>
+    <li><a onclick="document.getElementById('hero').scrollIntoView({behavior:'smooth'})">الرئيسية</a></li>
+    <li><a onclick="document.getElementById('categories').scrollIntoView({behavior:'smooth'})">الأقسام</a></li>
+    <li><a onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">المنتجات</a></li>
+    <li><a onclick="document.getElementById('videos').scrollIntoView({behavior:'smooth'})">فيديوهات</a></li>
+    <li><a onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">مميزاتنا</a></li>
   </ul>
 
   <div class="nav-right">
