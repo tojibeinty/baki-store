@@ -27,6 +27,7 @@ async function loadProducts() {
           name: fields.name?.stringValue || '',
           cat: fields.cat?.stringValue || 'men',
           price: parseInt(fields.price?.integerValue || fields.price?.doubleValue || 0),
+          oldPrice: fields.oldPrice?.integerValue ? parseInt(fields.oldPrice.integerValue) : (fields.oldPrice?.doubleValue ? parseInt(fields.oldPrice.doubleValue) : null),
           desc: fields.desc?.stringValue || '',
           badge: fields.badge?.stringValue || '',
           sizes: fields.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
@@ -53,6 +54,7 @@ async function saveProductToFirebase(product) {
       name: { stringValue: product.name },
       cat: { stringValue: product.cat },
       price: { integerValue: product.price },
+      oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
       desc: { stringValue: product.desc || '' },
       badge: { stringValue: product.badge || '' },
       sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
@@ -894,6 +896,17 @@ window.addEventListener('load', loadProducts);
       <div class="image-preview-grid" id="img-preview"></div>
     </div>
 
+    <div class="form-group">
+      <label>🔗 رابط الصورة (اختياري — لو عندك رابط خارجي)</label>
+      <input type="text" id="p-img-url" placeholder="https://i.ibb.co/xxx/image.jpg">
+      <div style="color:var(--muted);font-size:0.75rem;margin-top:6px">⚠️ لو حطيت رابط، ترسل صورة المنتج مع الطلب تلقائياً</div>
+    </div>
+
+    <div class="form-group">
+      <label>🏷️ السعر القديم — يظهر مشطوباً (اختياري)</label>
+      <input type="number" id="p-old-price" placeholder="مثال: 25000 — اتركه فارغ لو ما تريد">
+    </div>
+
     <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
     <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
 
@@ -1480,10 +1493,16 @@ async function addProduct() {
     showToast('❌ خطأ في رفع الصور');
     return;
   }
-  if (images.length === 0) images.push('');
+  if (images.length === 0) {
+    const imgUrl = document.getElementById('p-img-url').value.trim();
+    if (imgUrl) images.push(imgUrl);
+    else images.push('');
+  }
 
+  const oldPriceVal = document.getElementById('p-old-price').value;
+  const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
   const id = Date.now();
-  const product = { id, name, cat, price: parseInt(price), desc, badge, sizes, images };
+  const product = { id, name, cat, price: parseInt(price), oldPrice, desc, badge, sizes, images };
 
   showToast('⏳ جاري الحفظ...');
   try {
@@ -1496,6 +1515,8 @@ async function addProduct() {
 
   document.getElementById('p-name').value = '';
   document.getElementById('p-price').value = '';
+  document.getElementById('p-old-price').value = '';
+  document.getElementById('p-img-url').value = '';
   document.getElementById('p-desc').value = '';
   document.getElementById('p-badge').value = '';
   document.getElementById('p-images').value = '';
