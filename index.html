@@ -833,6 +833,10 @@ window.addEventListener('load', loadProducts);
     white-space: nowrap;
   }
   .toast.show { opacity: 1; }
+  #order-img-track::-webkit-scrollbar,
+  [id^="pimg-track-"]::-webkit-scrollbar { display: none; }
+  #order-img-track,
+  [id^="pimg-track-"] { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 </head>
 <body>
@@ -944,24 +948,30 @@ window.addEventListener('load', loadProducts);
     <button class="modal-close" onclick="closeOrder()">✖</button>
     <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;margin-bottom:20px;color:var(--red)">تفاصيل الطلب</h2>
 
-    <!-- Product preview: image slider + info -->
-    <div style="display:flex;flex-direction:row-reverse;gap:14px;align-items:flex-start;background:var(--card);border-radius:10px;padding:14px;margin-bottom:20px;">
-      <!-- Image slider -->
-      <div style="position:relative;flex-shrink:0;width:110px;height:110px;border-radius:8px;overflow:hidden;background:#111;">
-        <img id="order-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity 0.25s;">
-        <!-- prev = go back (left arrow on left side) -->
-        <button id="order-img-prev" onclick="orderImgSlide(-1)" style="display:none;position:absolute;top:50%;left:4px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.75rem;line-height:1;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10095;</button>
-        <!-- next = go forward (right arrow on right side) -->
-        <button id="order-img-next" onclick="orderImgSlide(1)" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.75rem;line-height:1;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10094;</button>
+    <!-- Product preview: full slider on top, info below -->
+    <div style="background:var(--card);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+      <!-- Full-width image slider -->
+      <div style="position:relative;width:100%;height:220px;background:#111;direction:ltr;">
+        <div id="order-img-track"
+             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;"
+             onscroll="onOrderImgScroll(event)">
+        </div>
+        <!-- arrows -->
+        <button id="order-img-prev" onclick="orderImgSlide(-1)" style="display:none;position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:none;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10095;</button>
+        <button id="order-img-next" onclick="orderImgSlide(1)" style="display:none;position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:none;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10094;</button>
         <!-- dots -->
-        <div id="order-img-dots" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:3;"></div>
+        <div id="order-img-dots" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;"></div>
       </div>
-      <!-- Info -->
-      <div style="flex:1;text-align:right;">
-        <div class="order-product-name" id="order-name" style="font-size:1rem;margin-bottom:6px;"></div>
-        <div class="order-product-price" id="order-price" style="font-size:1.2rem;"></div>
-        <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;" id="order-cat"></div>
-        <div id="order-variant-label" style="color:var(--red);font-size:0.78rem;font-weight:700;margin-top:6px;"></div>
+      <!-- Info row -->
+      <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+        <div style="text-align:right;">
+          <div class="order-product-name" id="order-name" style="font-size:1rem;margin-bottom:4px;"></div>
+          <div style="color:var(--muted);font-size:0.8rem;" id="order-cat"></div>
+        </div>
+        <div style="text-align:left;">
+          <div class="order-product-price" id="order-price" style="font-size:1.2rem;"></div>
+          <div id="order-variant-label" style="color:var(--red);font-size:0.75rem;font-weight:700;margin-top:2px;text-align:left;"></div>
+        </div>
       </div>
     </div>
 
@@ -1734,13 +1744,16 @@ function renderProducts() {
 
   grid.innerHTML = filtered.map(p => `
     <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
-      <div class="product-img-wrap" style="position:relative;overflow:hidden;">
-        <div id="pimg-track-${p.id}" style="display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);width:${p.images.length * 100}%;will-change:transform;direction:ltr;">
+      <div class="product-img-wrap" style="position:relative;">
+        <!-- scroll container -->
+        <div id="pimg-track-${p.id}"
+             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:280px;direction:ltr;"
+             onscroll="event.stopPropagation();onProductScroll(event,${p.id},${p.images.length})">
           ${p.images.map((img, i) => `
-            <div style="width:${100/p.images.length}%;flex-shrink:0;height:280px;overflow:hidden;">
+            <div style="min-width:100%;scroll-snap-align:start;flex-shrink:0;height:280px;overflow:hidden;">
               <img src="${img || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
                    class="card-main-img"
-                   style="width:100%;height:100%;object-fit:cover;display:block;"
+                   style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"
                    onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
             </div>
           `).join('')}
@@ -1751,7 +1764,7 @@ function renderProducts() {
           <button onclick="event.stopPropagation();slideProductImg(${p.id},1)" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10094;</button>
           <button onclick="event.stopPropagation();slideProductImg(${p.id},-1)" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10095;</button>
           <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;" id="pdots-${p.id}">
-            ${p.images.map((_,i) => `<div onclick="event.stopPropagation();goProductImg(${p.id},${i})" style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--red)':'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.2s;"></div>`).join('')}
+            ${p.images.map((_,i) => `<div style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--red)':'rgba(255,255,255,0.4)'};transition:background 0.2s;pointer-events:none;"></div>`).join('')}
           </div>
         ` : ''}
       </div>
@@ -1875,15 +1888,27 @@ function goProductImg(productId, idx) {
   if (!window.productImgIndex) window.productImgIndex = {};
   window.productImgIndex[productId] = idx;
   const track = document.getElementById(`pimg-track-${productId}`);
-  // Track is (n*100)% wide, each slide is (100/n)% of track
-  // To go to slide i: move -(i * 100/n)% of track = -(i/n*100)%
-  if (track) track.style.transform = `translateX(-${(idx / p.images.length) * 100}%)`;
+  if (track) {
+    track.scrollTo({ left: idx * track.offsetWidth, behavior: 'smooth' });
+  }
+  updateProductDots(productId, idx);
+}
+
+function updateProductDots(productId, idx) {
   const dotsWrap = document.getElementById(`pdots-${productId}`);
   if (dotsWrap) {
     dotsWrap.querySelectorAll('div').forEach((d, j) => {
       d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.4)';
     });
   }
+}
+
+function onProductScroll(e, productId, total) {
+  const track = e.target;
+  const idx = Math.round(track.scrollLeft / track.offsetWidth);
+  if (!window.productImgIndex) window.productImgIndex = {};
+  window.productImgIndex[productId] = idx;
+  updateProductDots(productId, idx);
 }
 
 function switchImg(productId, imgIndex) { goProductImg(productId, imgIndex); }
@@ -1898,22 +1923,34 @@ function openOrder(id) {
   const currentImgIdx = (window.productImgIndex && window.productImgIndex[id]) || 0;
   selectedProduct._selectedImgIdx = currentImgIdx;
 
-  document.getElementById('order-img').src = p.images[currentImgIdx] || p.images[0] || 'https://via.placeholder.com/80x80/181818/555?text=IMG';
+  // Build image slider in order modal
+  const track = document.getElementById('order-img-track');
+  track.innerHTML = p.images.map((img, i) => `
+    <div style="min-width:100%;scroll-snap-align:start;flex-shrink:0;height:220px;">
+      <img src="${img || 'https://via.placeholder.com/400x220/111/555?text=Product'}"
+           style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"
+           onerror="this.src='https://via.placeholder.com/400x220/111/555?text=Product'">
+    </div>
+  `).join('');
+  // Scroll to selected image
+  setTimeout(() => {
+    track.scrollTo({ left: currentImgIdx * track.offsetWidth, behavior: 'instant' });
+  }, 30);
+
   document.getElementById('order-name').textContent = p.name;
   document.getElementById('order-price').textContent = p.price.toLocaleString() + ' د.ع';
   document.getElementById('order-cat').textContent = catLabel(p.cat);
   document.getElementById('order-qty').value = 1;
 
-  // Setup image nav in order modal
   const prevBtn = document.getElementById('order-img-prev');
   const nextBtn = document.getElementById('order-img-next');
   const variantLabel = document.getElementById('order-variant-label');
   const dotsWrap = document.getElementById('order-img-dots');
   if (p.images.length > 1) {
-    prevBtn.style.display = 'flex';
-    nextBtn.style.display = 'flex';
+    prevBtn.style.cssText += ';display:flex!important';
+    nextBtn.style.cssText += ';display:flex!important';
     variantLabel.textContent = `🎨 طبعة ${currentImgIdx + 1} من ${p.images.length}`;
-    dotsWrap.innerHTML = p.images.map((_, i) => `<div onclick="orderGoImg(${i})" style="width:6px;height:6px;border-radius:50%;background:${i===currentImgIdx?'var(--red)':'rgba(255,255,255,0.35)'};cursor:pointer;transition:background 0.2s;"></div>`).join('');
+    dotsWrap.innerHTML = p.images.map((_, i) => `<div style="width:7px;height:7px;border-radius:50%;background:${i===currentImgIdx?'var(--red)':'rgba(255,255,255,0.35)'};cursor:pointer;transition:background 0.2s;" onclick="orderGoImg(${i})"></div>`).join('');
   } else {
     prevBtn.style.display = 'none';
     nextBtn.style.display = 'none';
@@ -1939,16 +1976,13 @@ function closeOrder() {
 function orderGoImg(idx) {
   if (!selectedProduct) return;
   selectedProduct._selectedImgIdx = idx;
-  const imgEl = document.getElementById('order-img');
-  imgEl.style.opacity = '0';
-  setTimeout(() => {
-    imgEl.src = selectedProduct.images[idx];
-    imgEl.style.opacity = '1';
-  }, 150);
+  const track = document.getElementById('order-img-track');
+  if (track) track.scrollTo({ left: idx * track.offsetWidth, behavior: 'smooth' });
   const lbl = document.getElementById('order-variant-label');
   if (lbl) lbl.textContent = `🎨 طبعة ${idx + 1} من ${selectedProduct.images.length}`;
-  const dots = document.querySelectorAll('#order-img-dots div');
-  dots.forEach((d, j) => d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.35)');
+  document.querySelectorAll('#order-img-dots div').forEach((d, j) => {
+    d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.35)';
+  });
 }
 function orderImgSlide(dir) {
   if (!selectedProduct || selectedProduct.images.length <= 1) return;
@@ -1956,6 +1990,18 @@ function orderImgSlide(dir) {
   if (idx < 0) idx = selectedProduct.images.length - 1;
   if (idx >= selectedProduct.images.length) idx = 0;
   orderGoImg(idx);
+}
+function onOrderImgScroll(e) {
+  if (!selectedProduct) return;
+  const track = e.target;
+  const idx = Math.round(track.scrollLeft / track.offsetWidth);
+  if (idx === selectedProduct._selectedImgIdx) return;
+  selectedProduct._selectedImgIdx = idx;
+  const lbl = document.getElementById('order-variant-label');
+  if (lbl) lbl.textContent = `🎨 طبعة ${idx + 1} من ${selectedProduct.images.length}`;
+  document.querySelectorAll('#order-img-dots div').forEach((d, j) => {
+    d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.35)';
+  });
 }
 function selectSize(s, btn) {
   selectedSize = s;
