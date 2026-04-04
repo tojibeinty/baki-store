@@ -579,9 +579,8 @@ window.addEventListener('load', loadProducts);
   .product-img-wrap img {
     width: 100%; height: 100%;
     object-fit: cover;
-    transition: transform 0.5s;
   }
-  .product-card:hover .product-img-wrap img { transform: scale(1.08); }
+  .product-card:hover .product-img-wrap .card-main-img { transform: scale(1.06); transition: transform 0.5s; }
   .product-img-nav {
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 5px;
@@ -945,18 +944,24 @@ window.addEventListener('load', loadProducts);
     <button class="modal-close" onclick="closeOrder()">✖</button>
     <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;margin-bottom:20px;color:var(--red)">تفاصيل الطلب</h2>
 
-    <div class="order-product-preview" style="position:relative;">
-      <div style="position:relative;flex-shrink:0;">
-        <img id="order-img" src="" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:8px;display:block;">
-        <div id="order-img-nav" style="display:none;position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);display:flex;gap:4px;"></div>
-        <button id="order-img-prev" onclick="orderImgSlide(-1)" style="display:none;position:absolute;top:50%;right:-10px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.7rem;">&#9664;</button>
-        <button id="order-img-next" onclick="orderImgSlide(1)" style="display:none;position:absolute;top:50%;left:-10px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.7rem;">&#9654;</button>
+    <!-- Product preview: image slider + info -->
+    <div style="display:flex;flex-direction:row-reverse;gap:14px;align-items:flex-start;background:var(--card);border-radius:10px;padding:14px;margin-bottom:20px;">
+      <!-- Image slider -->
+      <div style="position:relative;flex-shrink:0;width:110px;height:110px;border-radius:8px;overflow:hidden;background:#111;">
+        <img id="order-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;transition:opacity 0.25s;">
+        <!-- prev = go back (left arrow on left side) -->
+        <button id="order-img-prev" onclick="orderImgSlide(-1)" style="display:none;position:absolute;top:50%;left:4px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.75rem;line-height:1;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10095;</button>
+        <!-- next = go forward (right arrow on right side) -->
+        <button id="order-img-next" onclick="orderImgSlide(1)" style="display:none;position:absolute;top:50%;right:4px;transform:translateY(-50%);background:rgba(0,0,0,0.65);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:0.75rem;line-height:1;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='var(--red)'" onmouseout="this.style.background='rgba(0,0,0,0.65)'">&#10094;</button>
+        <!-- dots -->
+        <div id="order-img-dots" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:3;"></div>
       </div>
-      <div style="padding-right:8px;">
-        <div class="order-product-name" id="order-name"></div>
-        <div class="order-product-price" id="order-price"></div>
-        <div style="color:var(--muted);font-size:0.8rem;margin-top:4px" id="order-cat"></div>
-        <div id="order-variant-label" style="color:var(--red);font-size:0.75rem;margin-top:4px;"></div>
+      <!-- Info -->
+      <div style="flex:1;text-align:right;">
+        <div class="order-product-name" id="order-name" style="font-size:1rem;margin-bottom:6px;"></div>
+        <div class="order-product-price" id="order-price" style="font-size:1.2rem;"></div>
+        <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;" id="order-cat"></div>
+        <div id="order-variant-label" style="color:var(--red);font-size:0.78rem;font-weight:700;margin-top:6px;"></div>
       </div>
     </div>
 
@@ -1730,11 +1735,14 @@ function renderProducts() {
   grid.innerHTML = filtered.map(p => `
     <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
       <div class="product-img-wrap" style="position:relative;overflow:hidden;">
-        <div id="pimg-track-${p.id}" style="display:flex;transition:transform 0.4s ease;">
+        <div id="pimg-track-${p.id}" style="display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);width:${p.images.length * 100}%;will-change:transform;">
           ${p.images.map((img, i) => `
-            <img src="${img || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
-                 style="min-width:100%;width:100%;height:280px;object-fit:cover;flex-shrink:0;"
-                 onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
+            <div style="width:${100/p.images.length}%;flex-shrink:0;height:280px;overflow:hidden;">
+              <img src="${img || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
+                   class="card-main-img"
+                   style="width:100%;height:100%;object-fit:cover;display:block;"
+                   onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
+            </div>
           `).join('')}
         </div>
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
@@ -1867,7 +1875,9 @@ function goProductImg(productId, idx) {
   if (!window.productImgIndex) window.productImgIndex = {};
   window.productImgIndex[productId] = idx;
   const track = document.getElementById(`pimg-track-${productId}`);
-  if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+  // Track is (n*100)% wide, each slide is (100/n)% of track
+  // To go to slide i: move -(i * 100/n)% of track = -(i/n*100)%
+  if (track) track.style.transform = `translateX(-${(idx / p.images.length) * 100}%)`;
   const dotsWrap = document.getElementById(`pdots-${productId}`);
   if (dotsWrap) {
     dotsWrap.querySelectorAll('div').forEach((d, j) => {
@@ -1898,14 +1908,17 @@ function openOrder(id) {
   const prevBtn = document.getElementById('order-img-prev');
   const nextBtn = document.getElementById('order-img-next');
   const variantLabel = document.getElementById('order-variant-label');
+  const dotsWrap = document.getElementById('order-img-dots');
   if (p.images.length > 1) {
-    prevBtn.style.display = 'block';
-    nextBtn.style.display = 'block';
-    variantLabel.textContent = `طبعة ${currentImgIdx + 1} من ${p.images.length}`;
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    variantLabel.textContent = `🎨 طبعة ${currentImgIdx + 1} من ${p.images.length}`;
+    dotsWrap.innerHTML = p.images.map((_, i) => `<div onclick="orderGoImg(${i})" style="width:6px;height:6px;border-radius:50%;background:${i===currentImgIdx?'var(--red)':'rgba(255,255,255,0.35)'};cursor:pointer;transition:background 0.2s;"></div>`).join('');
   } else {
     prevBtn.style.display = 'none';
     nextBtn.style.display = 'none';
     variantLabel.textContent = '';
+    dotsWrap.innerHTML = '';
   }
   document.getElementById('order-note').value = '';
   document.getElementById('customer-name').value = '';
@@ -1923,15 +1936,26 @@ function closeOrder() {
   selectedSize = null;
 }
 
+function orderGoImg(idx) {
+  if (!selectedProduct) return;
+  selectedProduct._selectedImgIdx = idx;
+  const imgEl = document.getElementById('order-img');
+  imgEl.style.opacity = '0';
+  setTimeout(() => {
+    imgEl.src = selectedProduct.images[idx];
+    imgEl.style.opacity = '1';
+  }, 150);
+  const lbl = document.getElementById('order-variant-label');
+  if (lbl) lbl.textContent = `🎨 طبعة ${idx + 1} من ${selectedProduct.images.length}`;
+  const dots = document.querySelectorAll('#order-img-dots div');
+  dots.forEach((d, j) => d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.35)');
+}
 function orderImgSlide(dir) {
   if (!selectedProduct || selectedProduct.images.length <= 1) return;
   let idx = (selectedProduct._selectedImgIdx || 0) + dir;
   if (idx < 0) idx = selectedProduct.images.length - 1;
   if (idx >= selectedProduct.images.length) idx = 0;
-  selectedProduct._selectedImgIdx = idx;
-  document.getElementById('order-img').src = selectedProduct.images[idx];
-  const lbl = document.getElementById('order-variant-label');
-  if (lbl) lbl.textContent = `طبعة ${idx + 1} من ${selectedProduct.images.length}`;
+  orderGoImg(idx);
 }
 function selectSize(s, btn) {
   selectedSize = s;
