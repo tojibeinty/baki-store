@@ -7,6 +7,14 @@
 <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
 <meta name="theme-color" content="#0c0a06">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="باكي ستور">
+<meta name="application-name" content="باكي ستور">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
+<link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
 <style>
 @import url('https://fonts.cdnfonts.com/css/bebas-neue');
 </style>
@@ -1148,6 +1156,9 @@ window.addEventListener('load', loadProducts);
   </ul>
 
   <div class="nav-right">
+    <button id="pwa-install-btn" onclick="installPWA()" style="display:none;align-items:center;gap:6px;background:var(--red);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.8rem;font-weight:700;transition:all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+      📲 ثبّت التطبيق
+    </button>
     <button class="admin-btn" id="admin-nav-btn" onclick="openAdmin()" style="display:none">⚙ إدارة</button>
     <button class="cart-btn" onclick="openCart()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -2584,6 +2595,45 @@ async function loadVideos() {
 }
 
 window.addEventListener('load', () => { loadVideos(); loadReviews(); });
+</script>
+<script>
+// ============ PWA SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('✅ Service Worker registered'))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// ============ PWA INSTALL PROMPT ============
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') {
+      showToast('✅ تم تثبيت التطبيق!');
+    }
+    deferredPrompt = null;
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'none';
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  showToast('🎉 تم تثبيت باكي ستور كتطبيق!');
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'none';
+});
 </script>
 </body>
 </html>
