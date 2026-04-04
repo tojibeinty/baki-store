@@ -86,11 +86,11 @@ window.addEventListener('load', loadProducts);
     --black: #0c0a06;
     --deep: #130f07;
     --card: #1a1508;
-    --red: #d4a017;
-    --red-hot: #e8b820;
+    --red: #c0392b;
+    --red-hot: #e74c3c;
     --white: #f5f0e8;
     --muted: #7a6a4a;
-    --gold: #d4a017;
+    --gold: #c0392b;
     --border: #2a2010;
     --font-display: 'Bebas Neue', 'Arial Black', Impact, sans-serif;
     --font-body: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
@@ -108,7 +108,7 @@ window.addEventListener('load', loadProducts);
   /* SCROLLBAR */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--black); }
-  ::-webkit-scrollbar-thumb { background: #d4a017; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: #c0392b; border-radius: 2px; }
 
   /* ========= ADMIN PANEL ========= */
   #admin-overlay {
@@ -337,7 +337,7 @@ window.addEventListener('load', loadProducts);
   .hero-bg {
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(212,160,23,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(192,57,43,0.08) 0%, transparent 70%),
       repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px),
       repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px);
   }
@@ -365,12 +365,12 @@ window.addEventListener('load', loadProducts);
     width: 140px; height: 140px;
     object-fit: contain;
     margin-bottom: 30px;
-    filter: drop-shadow(0 0 40px rgba(212,160,23,0.4));
+    filter: drop-shadow(0 0 40px rgba(192,57,43,0.4));
     animation: pulse-glow 3s ease-in-out infinite;
   }
   @keyframes pulse-glow {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(212,160,23,0.3)); }
-    50% { filter: drop-shadow(0 0 60px rgba(212,160,23,0.6)); }
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(192,57,43,0.3)); }
+    50% { filter: drop-shadow(0 0 60px rgba(192,57,43,0.6)); }
   }
   .hero-title {
     font-family: var(--font-display);
@@ -378,7 +378,7 @@ window.addEventListener('load', loadProducts);
     line-height: 0.9;
     letter-spacing: 8px;
     color: var(--white);
-    text-shadow: 0 0 80px rgba(212,160,23,0.3);
+    text-shadow: 0 0 80px rgba(192,57,43,0.3);
   }
   .hero-title span { color: var(--red); }
   .hero-sub {
@@ -412,7 +412,7 @@ window.addEventListener('load', loadProducts);
     background: transparent;
     color: var(--red);
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(212,160,23,0.4);
+    box-shadow: 0 10px 30px rgba(192,57,43,0.4);
   }
   .btn-cta-outline {
     background: transparent;
@@ -448,9 +448,9 @@ window.addEventListener('load', loadProducts);
   }
   .section-tag {
     display: inline-block;
-    background: rgba(212,160,23,0.15);
+    background: rgba(192,57,43,0.15);
     color: var(--red);
-    border: 1px solid rgba(212,160,23,0.3);
+    border: 1px solid rgba(192,57,43,0.3);
     border-radius: 30px;
     padding: 6px 20px;
     font-size: 0.75rem;
@@ -490,7 +490,7 @@ window.addEventListener('load', loadProducts);
   .cat-card::before {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(212,160,23,0.1), transparent);
+    background: linear-gradient(135deg, rgba(192,57,43,0.1), transparent);
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -498,7 +498,7 @@ window.addEventListener('load', loadProducts);
   .cat-card:hover {
     border-color: var(--red);
     transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(212,160,23,0.2);
+    box-shadow: 0 20px 60px rgba(192,57,43,0.2);
   }
   .cat-icon { font-size: 3.5rem; margin-bottom: 20px; }
   .cat-title {
@@ -510,7 +510,7 @@ window.addEventListener('load', loadProducts);
   .cat-sub { color: var(--muted); font-size: 0.85rem; }
   .cat-active {
     border-color: var(--red) !important;
-    background: rgba(212,160,23,0.08) !important;
+    background: rgba(192,57,43,0.08) !important;
   }
   .cat-active::before { opacity: 1 !important; }
 
@@ -915,7 +915,7 @@ window.addEventListener('load', loadProducts);
 
     <!-- VIDEO MANAGEMENT -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
-      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#d4a017;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#c0392b;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
       <div class="form-group">
         <label>رابط YouTube (مثال: https://youtu.be/xxxxx)</label>
         <input type="text" id="v-url" placeholder="https://youtu.be/xxxxx">
@@ -988,7 +988,7 @@ window.addEventListener('load', loadProducts);
     </div>
 
     <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#d4a017;flex:1">
+      <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#c0392b;flex:1">
         🛍 أضف للسلة
       </button>
       <button class="telegram-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
@@ -1001,9 +1001,9 @@ window.addEventListener('load', loadProducts);
 
 <!-- ======= EDIT PRODUCT MODAL ======= -->
 <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
-  <div style="background:#111;border:1px solid #d4a017;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
+  <div style="background:#111;border:1px solid #c0392b;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
     <button onclick="closeEdit()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
-    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#d4a017;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
+    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#c0392b;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
 
     <input type="hidden" id="edit-docid">
 
@@ -1066,14 +1066,14 @@ window.addEventListener('load', loadProducts);
 ">
   <div style="
     background:#111;
-    border:1px solid #d4a017;
+    border:1px solid #c0392b;
     border-radius:14px;
     padding:40px;
     width:100%; max-width:380px;
     text-align:center;
   ">
     <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
-    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:4px;color:#d4a017;margin-bottom:6px">لوحة التحكم</div>
+    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:4px;color:#c0392b;margin-bottom:6px">لوحة التحكم</div>
     <div style="color:#888;font-size:0.85rem;margin-bottom:24px">أدخل كلمة السر للدخول</div>
     <input type="password" id="admin-password-input"
       placeholder="••••••••"
@@ -1088,14 +1088,14 @@ window.addEventListener('load', loadProducts);
       "
       onkeydown="if(event.key==='Enter') checkPassword()"
     >
-    <div id="pass-error" style="color:#e8b820;font-size:0.85rem;margin-bottom:12px;display:none">❌ كلمة السر خاطئة</div>
+    <div id="pass-error" style="color:#e74c3c;font-size:0.85rem;margin-bottom:12px;display:none">❌ كلمة السر خاطئة</div>
     <button onclick="checkPassword()" style="
-      background:#d4a017; color:white; border:none;
+      background:#c0392b; color:white; border:none;
       border-radius:8px; padding:14px; width:100%;
       font-family:var(--font-body); font-size:1rem;
       font-weight:700; cursor:pointer;
       transition:background 0.2s;
-    " onmouseover="this.style.background='#e8b820'" onmouseout="this.style.background='#c0392b'">
+    " onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
       دخول ⚡
     </button>
     <button onclick="closePasswordModal()" style="
@@ -1162,7 +1162,7 @@ window.addEventListener('load', loadProducts);
   <div class="cat-grid">
     <div class="cat-card" onclick="filterCat('men')" id="cat-men">
       <div class="cat-icon">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="4" r="2"/>
           <path d="M12 6v7"/>
           <path d="M8 8l-2 4h3l1 6h4l1-6h3l-2-4"/>
@@ -1174,7 +1174,7 @@ window.addEventListener('load', loadProducts);
     </div>
     <div class="cat-card" onclick="filterCat('women')" id="cat-women">
       <div class="cat-icon">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="4" r="2"/>
           <path d="M12 6v5"/>
           <path d="M8 8l-1 3h10l-1-3"/>
@@ -1187,7 +1187,7 @@ window.addEventListener('load', loadProducts);
     </div>
     <div class="cat-card" onclick="filterCat('accessories')" id="cat-accessories">
       <div class="cat-icon">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <rect x="5" y="8" width="14" height="12" rx="2"/>
           <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
           <circle cx="12" cy="14" r="2"/>
@@ -1350,7 +1350,7 @@ window.addEventListener('load', loadProducts);
   align-items:flex-start; justify-content:center;
 ">
   <div style="
-    background:#111; border:1px solid #d4a017;
+    background:#111; border:1px solid #c0392b;
     border-radius:12px; padding:36px;
     width:100%; max-width:550px;
     position:relative; animation:modalIn 0.3s ease;
@@ -1364,18 +1364,18 @@ window.addEventListener('load', loadProducts);
     " onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'"
        onmouseout="this.style.borderColor='#333';this.style.color='#888'">✖</button>
 
-    <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#d4a017;margin-bottom:24px;text-align:center">🛍 سلة المشتريات</h2>
+    <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#c0392b;margin-bottom:24px;text-align:center">🛍 سلة المشتريات</h2>
 
     <div id="cart-items-list"></div>
 
     <div id="cart-footer" style="display:none">
       <div style="border-top:1px solid #2a2a2a;margin:20px 0;padding-top:20px;display:flex;justify-content:space-between;align-items:center">
         <span style="color:#888;font-size:0.9rem">الإجمالي:</span>
-        <span id="cart-total" style="font-family:var(--font-num);font-size:1.6rem;color:#d4a017"></span>
+        <span id="cart-total" style="font-family:var(--font-num);font-size:1.6rem;color:#c0392b"></span>
       </div>
 
       <div style="border-top:1px solid #2a2a2a;padding-top:20px;margin-bottom:16px">
-        <div style="color:#d4a017;font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
+        <div style="color:#c0392b;font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
       </div>
       <div style="margin-bottom:14px">
         <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">الاسم الكامل *</label>
@@ -1634,7 +1634,7 @@ function renderAdminList() {
           <span>${catLabel(p.cat)} · ${p.price.toLocaleString()} د.ع</span>
         </div>
         <div style="display:flex;gap:6px">
-          <button class="btn-delete" style="border-color:#d4a017;color:#d4a017" onclick="openEdit('${p._docId}')">✏️</button>
+          <button class="btn-delete" style="border-color:#c0392b;color:#c0392b" onclick="openEdit('${p._docId}')">✏️</button>
           <button class="btn-delete" onclick="deleteProduct('${p._docId}')">🗑</button>
         </div>
       </div>
@@ -1693,7 +1693,7 @@ function renderProducts() {
              id="pimg-${p.id}-0"
              onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-        ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:14px;background:#d4a017">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
+        ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:14px;background:#c0392b">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
         ${p.images.length > 1 ? `<div class="product-img-nav">${p.images.map((_, i) => `<div class="img-dot ${i===0?'active':''}" onclick="event.stopPropagation();switchImg(${p.id},${i})"></div>`).join('')}</div>` : ''}
       </div>
       <div class="product-body">
@@ -2011,7 +2011,7 @@ function renderCart() {
       <div style="flex:1">
         <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">${item.name}</div>
         <div style="color:#888;font-size:0.8rem">الحجم: ${item.size} · الكمية: ${item.qty}</div>
-        <div style="color:#d4a017;font-family:var(--font-num);font-size:1.1rem;margin-top:4px">${(item.price * item.qty).toLocaleString()} د.ع</div>
+        <div style="color:#c0392b;font-family:var(--font-num);font-size:1.1rem;margin-top:4px">${(item.price * item.qty).toLocaleString()} د.ع</div>
       </div>
       <button onclick="removeFromCart(${i})" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:0.85rem;transition:all 0.2s"
         onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'"
@@ -2085,7 +2085,7 @@ async function sendCartToTelegram() {
 }
 
 // ============ VIDEOS ============
-let videos = JSON.parse(localStorage.getItem('baki_videos') || '[]');
+let videos = [];
 let currentVideo = 0;
 let videoTimer = null;
 
@@ -2094,26 +2094,30 @@ function getYouTubeId(url) {
   return match ? match[1] : null;
 }
 
-function addVideo() {
+async function addVideo() {
   const url = document.getElementById('v-url').value.trim();
   const title = document.getElementById('v-title').value.trim();
   const ytId = getYouTubeId(url);
   if (!ytId) { showToast('❌ رابط YouTube غير صحيح'); return; }
-  videos.push({ id: ytId, title: title || '' });
-  localStorage.setItem('baki_videos', JSON.stringify(videos));
+  const body = { fields: {
+    ytId: { stringValue: ytId },
+    title: { stringValue: title || '' }
+  }};
+  await fetch(`${FS_BASE}/videos?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
   document.getElementById('v-url').value = '';
   document.getElementById('v-title').value = '';
-  renderVideos();
-  renderAdminVideoList();
   showToast('✅ تمت إضافة الفيديو');
+  await loadVideos();
 }
 
-function deleteVideo(i) {
-  videos.splice(i, 1);
-  localStorage.setItem('baki_videos', JSON.stringify(videos));
-  renderVideos();
-  renderAdminVideoList();
+async function deleteVideo(docId) {
+  await fetch(`${FS_BASE}/videos/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
   showToast('🗑 تم حذف الفيديو');
+  await loadVideos();
 }
 
 function renderVideos() {
@@ -2345,6 +2349,27 @@ async function deleteReview(docId) {
 updateCartCount();
 renderVideos();
 renderAdminVideoList();
+async function loadVideos() {
+  try {
+    const res = await fetch(`${FS_BASE}/videos?key=${FIREBASE_API_KEY}`);
+    const data = await res.json();
+    if (data.documents) {
+      videos = data.documents.map(d => ({
+        _docId: d.name.split('/').pop(),
+        id: d.fields?.ytId?.stringValue || '',
+        title: d.fields?.title?.stringValue || ''
+      }));
+    } else {
+      videos = [];
+    }
+  } catch(e) {
+    console.error('خطأ في تحميل الفيديوهات:', e);
+    videos = [];
+  }
+  renderVideos();
+  renderAdminVideoList();
+}
+
 window.addEventListener('load', () => { loadVideos(); loadReviews(); });
 </script>
 </body>
