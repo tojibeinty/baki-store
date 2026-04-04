@@ -1108,7 +1108,21 @@ async function loadAnalytics() {
 
     <!-- REVIEWS MANAGEMENT -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
-      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">💬 آراء الزبائن</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);">💬 آراء الزبائن</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--muted);font-size:0.82rem;font-weight:600;">
+            <input type="checkbox" id="select-all-reviews" onchange="toggleSelectAllReviews(this.checked)"
+              style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">
+            تحديد الكل
+          </label>
+          <button onclick="deleteSelectedReviews()" id="btn-delete-selected-reviews"
+            style="display:none;background:#c0392b;color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.82rem;font-weight:700;transition:all 0.2s;"
+            onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+            🗑 حذف المحدد (<span id="selected-reviews-count">0</span>)
+          </button>
+        </div>
+      </div>
       <div id="admin-reviews-list"></div>
     </div>
   </div>
@@ -2788,19 +2802,82 @@ function goReviewPage(i) {
 function renderAdminReviews(reviews) {
   const list = document.getElementById('admin-reviews-list');
   if (!list) return;
+
+  // Reset select all
+  const selectAll = document.getElementById('select-all-reviews');
+  if (selectAll) selectAll.checked = false;
+  updateDeleteSelectedBtn();
+
   if (reviews.length === 0) {
     list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">لا توجد آراء بعد</p>';
     return;
   }
   list.innerHTML = reviews.map(r => `
-    <div style="display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;">
+    <div id="review-row-${r._docId}" style="display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;transition:border-color 0.2s;">
+      <input type="checkbox" data-docid="${r._docId}"
+        onchange="onReviewCheckChange()"
+        style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;margin-top:2px;flex-shrink:0;">
       <div style="flex:1">
         <div style="font-size:0.8rem;font-weight:700;margin-bottom:4px;">${r.name} · ${'⭐'.repeat(r.rating)}</div>
         <div style="font-size:0.8rem;color:var(--muted);">"${r.text}"</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">${r.date}</div>
       </div>
       <button class="btn-delete" onclick="deleteReview('${r._docId}')">🗑</button>
     </div>
   `).join('');
+}
+
+function onReviewCheckChange() {
+  updateDeleteSelectedBtn();
+  // Update "select all" checkbox state
+  const all = document.querySelectorAll('#admin-reviews-list input[type=checkbox]');
+  const checked = document.querySelectorAll('#admin-reviews-list input[type=checkbox]:checked');
+  const selectAll = document.getElementById('select-all-reviews');
+  if (selectAll) {
+    selectAll.checked = all.length > 0 && checked.length === all.length;
+    selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+  }
+}
+
+function toggleSelectAllReviews(checked) {
+  document.querySelectorAll('#admin-reviews-list input[type=checkbox]').forEach(cb => {
+    cb.checked = checked;
+    // Highlight selected rows
+    const row = document.getElementById(`review-row-${cb.dataset.docid}`);
+    if (row) row.style.borderColor = checked ? 'var(--red)' : 'var(--border)';
+  });
+  updateDeleteSelectedBtn();
+}
+
+function updateDeleteSelectedBtn() {
+  const checked = document.querySelectorAll('#admin-reviews-list input[type=checkbox]:checked');
+  const btn = document.getElementById('btn-delete-selected-reviews');
+  const countEl = document.getElementById('selected-reviews-count');
+  if (btn) btn.style.display = checked.length > 0 ? 'block' : 'none';
+  if (countEl) countEl.textContent = checked.length;
+}
+
+async function deleteSelectedReviews() {
+  const checked = document.querySelectorAll('#admin-reviews-list input[type=checkbox]:checked');
+  if (checked.length === 0) return;
+  if (!confirm(`هل تريد حذف ${checked.length} رأي؟`)) return;
+
+  const btn = document.getElementById('btn-delete-selected-reviews');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحذف...'; }
+
+  const docIds = Array.from(checked).map(cb => cb.dataset.docid);
+  try {
+    // Delete all in parallel
+    await Promise.all(docIds.map(docId =>
+      fetch(`${FS_BASE}/reviews/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' })
+    ));
+    showToast(`🗑 تم حذف ${docIds.length} رأي`);
+    await loadReviews();
+  } catch(e) {
+    showToast('❌ خطأ في الحذف');
+  } finally {
+    if (btn) { btn.disabled = false; btn.style.display = 'none'; }
+  }
 }
 
 async function submitReview() {
