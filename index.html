@@ -944,12 +944,18 @@ window.addEventListener('load', loadProducts);
     <button class="modal-close" onclick="closeOrder()">✖</button>
     <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;margin-bottom:20px;color:var(--red)">تفاصيل الطلب</h2>
 
-    <div class="order-product-preview">
-      <img id="order-img" src="" alt="">
-      <div>
+    <div class="order-product-preview" style="position:relative;">
+      <div style="position:relative;flex-shrink:0;">
+        <img id="order-img" src="" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:8px;display:block;">
+        <div id="order-img-nav" style="display:none;position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);display:flex;gap:4px;"></div>
+        <button id="order-img-prev" onclick="orderImgSlide(-1)" style="display:none;position:absolute;top:50%;right:-10px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.7rem;">&#9664;</button>
+        <button id="order-img-next" onclick="orderImgSlide(1)" style="display:none;position:absolute;top:50%;left:-10px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.7rem;">&#9654;</button>
+      </div>
+      <div style="padding-right:8px;">
         <div class="order-product-name" id="order-name"></div>
         <div class="order-product-price" id="order-price"></div>
         <div style="color:var(--muted);font-size:0.8rem;margin-top:4px" id="order-cat"></div>
+        <div id="order-variant-label" style="color:var(--red);font-size:0.75rem;margin-top:4px;"></div>
       </div>
     </div>
 
@@ -1323,12 +1329,15 @@ window.addEventListener('load', loadProducts);
     </button>
   </div>
 
-  <!-- عرض الآراء -->
-  <div id="reviews-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;">
-    <div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;">
+  <!-- عرض الآراء - كاروسيل -->
+  <div id="reviews-carousel-wrap" style="max-width:1100px;margin:0 auto;position:relative;overflow:hidden;">
+    <div id="reviews-track" style="display:flex;transition:transform 0.5s ease;will-change:transform;"></div>
+    <div id="reviews-empty" style="text-align:center;padding:40px;color:var(--muted);">
       <div style="font-size:2.5rem;margin-bottom:12px">💬</div>
       <div>كن أول من يكتب رأيه!</div>
     </div>
+    <!-- Dots -->
+    <div id="reviews-dots" style="display:flex;justify-content:center;gap:8px;margin-top:24px;"></div>
   </div>
 </section>
 
@@ -1686,15 +1695,29 @@ function renderProducts() {
     return;
   }
 
+  // Track current image index per product
+  if (!window.productImgIndex) window.productImgIndex = {};
+  filtered.forEach(p => { if (window.productImgIndex[p.id] === undefined) window.productImgIndex[p.id] = 0; });
+
   grid.innerHTML = filtered.map(p => `
-    <div class="product-card" onclick="openOrder(${p.id})">
-      <div class="product-img-wrap">
-        <img src="${p.images[0] || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
-             id="pimg-${p.id}-0"
-             onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
+    <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
+      <div class="product-img-wrap" style="position:relative;overflow:hidden;">
+        <div id="pimg-track-${p.id}" style="display:flex;transition:transform 0.4s ease;">
+          ${p.images.map((img, i) => `
+            <img src="${img || 'https://via.placeholder.com/400x300/181818/555?text=Product'}"
+                 style="min-width:100%;width:100%;height:280px;object-fit:cover;flex-shrink:0;"
+                 onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
+          `).join('')}
+        </div>
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
-        ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:14px;background:#c0392b">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
-        ${p.images.length > 1 ? `<div class="product-img-nav">${p.images.map((_, i) => `<div class="img-dot ${i===0?'active':''}" onclick="event.stopPropagation();switchImg(${p.id},${i})"></div>`).join('')}</div>` : ''}
+        ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:${p.images.length>1?'40px':'14px'};background:#c0392b">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
+        ${p.images.length > 1 ? `
+          <button onclick="event.stopPropagation();slideProductImg(${p.id},-1)" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#9664;</button>
+          <button onclick="event.stopPropagation();slideProductImg(${p.id},1)" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#9654;</button>
+          <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;" id="pdots-${p.id}">
+            ${p.images.map((_,i) => `<div onclick="event.stopPropagation();goProductImg(${p.id},${i})" style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--red)':'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.2s;"></div>`).join('')}
+          </div>
+        ` : ''}
       </div>
       <div class="product-body">
         <div class="product-category">${catLabel(p.cat)}</div>
@@ -1800,16 +1823,32 @@ async function updateProductInFirebase(docId, product) {
   await loadProducts();
 }
 
-function switchImg(productId, imgIndex) {
+function slideProductImg(productId, dir) {
+  const p = products.find(x => x.id === productId);
+  if (!p || p.images.length <= 1) return;
+  if (!window.productImgIndex) window.productImgIndex = {};
+  let idx = (window.productImgIndex[productId] || 0) + dir;
+  if (idx < 0) idx = p.images.length - 1;
+  if (idx >= p.images.length) idx = 0;
+  goProductImg(productId, idx);
+}
+
+function goProductImg(productId, idx) {
   const p = products.find(x => x.id === productId);
   if (!p) return;
-  const img = document.getElementById(`pimg-${productId}-0`);
-  if (img) img.src = p.images[imgIndex];
-  const card = img?.closest('.product-card');
-  if (card) {
-    card.querySelectorAll('.img-dot').forEach((d, i) => d.classList.toggle('active', i === imgIndex));
+  if (!window.productImgIndex) window.productImgIndex = {};
+  window.productImgIndex[productId] = idx;
+  const track = document.getElementById(`pimg-track-${productId}`);
+  if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+  const dotsWrap = document.getElementById(`pdots-${productId}`);
+  if (dotsWrap) {
+    dotsWrap.querySelectorAll('div').forEach((d, j) => {
+      d.style.background = j === idx ? 'var(--red)' : 'rgba(255,255,255,0.4)';
+    });
   }
 }
+
+function switchImg(productId, imgIndex) { goProductImg(productId, imgIndex); }
 
 // ============ ORDER MODAL ============
 function openOrder(id) {
@@ -1817,12 +1856,29 @@ function openOrder(id) {
   if (!p) return;
   selectedProduct = p;
   selectedSize = null;
+  // Use whichever image the customer is currently viewing
+  const currentImgIdx = (window.productImgIndex && window.productImgIndex[id]) || 0;
+  selectedProduct._selectedImgIdx = currentImgIdx;
 
-  document.getElementById('order-img').src = p.images[0] || 'https://via.placeholder.com/80x80/181818/555?text=IMG';
+  document.getElementById('order-img').src = p.images[currentImgIdx] || p.images[0] || 'https://via.placeholder.com/80x80/181818/555?text=IMG';
   document.getElementById('order-name').textContent = p.name;
   document.getElementById('order-price').textContent = p.price.toLocaleString() + ' د.ع';
   document.getElementById('order-cat').textContent = catLabel(p.cat);
   document.getElementById('order-qty').value = 1;
+
+  // Setup image nav in order modal
+  const prevBtn = document.getElementById('order-img-prev');
+  const nextBtn = document.getElementById('order-img-next');
+  const variantLabel = document.getElementById('order-variant-label');
+  if (p.images.length > 1) {
+    prevBtn.style.display = 'block';
+    nextBtn.style.display = 'block';
+    variantLabel.textContent = `طبعة ${currentImgIdx + 1} من ${p.images.length}`;
+  } else {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    variantLabel.textContent = '';
+  }
   document.getElementById('order-note').value = '';
   document.getElementById('customer-name').value = '';
   document.getElementById('customer-phone').value = '';
@@ -1837,6 +1893,17 @@ function closeOrder() {
   document.getElementById('order-modal').classList.remove('active');
   selectedProduct = null;
   selectedSize = null;
+}
+
+function orderImgSlide(dir) {
+  if (!selectedProduct || selectedProduct.images.length <= 1) return;
+  let idx = (selectedProduct._selectedImgIdx || 0) + dir;
+  if (idx < 0) idx = selectedProduct.images.length - 1;
+  if (idx >= selectedProduct.images.length) idx = 0;
+  selectedProduct._selectedImgIdx = idx;
+  document.getElementById('order-img').src = selectedProduct.images[idx];
+  const lbl = document.getElementById('order-variant-label');
+  if (lbl) lbl.textContent = `طبعة ${idx + 1} من ${selectedProduct.images.length}`;
 }
 function selectSize(s, btn) {
   selectedSize = s;
@@ -1921,12 +1988,14 @@ async function orderNowDirect() {
 
   if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
 
+  const variantIdx = selectedProduct._selectedImgIdx || 0;
   const text =
     `🛒 *طلب جديد - باكي ستور*\n\n` +
     `👤 الاسم: ${name}\n` +
     `📞 الهاتف: ${phone}\n` +
     (address ? `📍 العنوان: ${address}\n` : '') +
     `\n📦 المنتج: ${selectedProduct.name}\n` +
+    (selectedProduct.images.length > 1 ? `🎨 الطبعة: رقم ${variantIdx + 1} من ${selectedProduct.images.length}\n` : '') +
     `📂 القسم: ${catLabel(selectedProduct.cat)}\n` +
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
@@ -1934,7 +2003,7 @@ async function orderNowDirect() {
     `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '');
 
-  const photoUrl = selectedProduct.images[0] || '';
+  const photoUrl = selectedProduct.images[variantIdx] || selectedProduct.images[0] || '';
   const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
 
@@ -2265,20 +2334,66 @@ async function loadReviews() {
   } catch(e) { console.error(e); }
 }
 
+let reviewsCarouselIndex = 0;
+let reviewsTimer = null;
+const REVIEWS_PER_PAGE = 3;
+
 function renderReviews(reviews) {
-  const grid = document.getElementById('reviews-grid');
-  if (!grid) return;
+  const track = document.getElementById('reviews-track');
+  const empty = document.getElementById('reviews-empty');
+  const dots = document.getElementById('reviews-dots');
+  if (!track) return;
+
   if (reviews.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;"><div style="font-size:2.5rem;margin-bottom:12px">💬</div><div>كن أول من يكتب رأيه!</div></div>`;
+    track.innerHTML = '';
+    empty.style.display = 'block';
+    dots.innerHTML = '';
+    clearInterval(reviewsTimer);
     return;
   }
-  grid.innerHTML = reviews.map(r => `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;transition:border-color 0.3s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="margin-bottom:12px;font-size:1.2rem">${'⭐'.repeat(r.rating)}</div>
-      <div style="color:var(--white);font-size:0.92rem;line-height:1.6;margin-bottom:14px;">"${r.text}"</div>
-      <div style="color:var(--muted);font-size:0.78rem;border-top:1px solid var(--border);padding-top:10px;">— ${r.name} · ${r.date}</div>
+  empty.style.display = 'none';
+
+  // Build pages of 3
+  const pages = [];
+  for (let i = 0; i < reviews.length; i += REVIEWS_PER_PAGE) {
+    pages.push(reviews.slice(i, i + REVIEWS_PER_PAGE));
+  }
+
+  track.innerHTML = pages.map(page => `
+    <div style="min-width:100%;display:grid;grid-template-columns:repeat(${Math.min(page.length,3)},1fr);gap:20px;padding:4px 2px;box-sizing:border-box;">
+      ${page.map(r => `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;transition:border-color 0.3s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="margin-bottom:10px;font-size:1.1rem">${'⭐'.repeat(r.rating)}</div>
+          <div style="color:var(--white);font-size:0.9rem;line-height:1.6;margin-bottom:12px;">"${r.text}"</div>
+          <div style="color:var(--muted);font-size:0.76rem;border-top:1px solid var(--border);padding-top:10px;">— ${r.name} · ${r.date}</div>
+        </div>
+      `).join('')}
     </div>
   `).join('');
+
+  // Dots
+  reviewsCarouselIndex = 0;
+  dots.innerHTML = pages.map((_, i) => `
+    <div onclick="goReviewPage(${i})" style="width:9px;height:9px;border-radius:50%;background:${i===0?'var(--red)':'#333'};cursor:pointer;transition:background 0.2s;"></div>
+  `).join('');
+
+  track.style.transform = 'translateX(0)';
+  clearInterval(reviewsTimer);
+  if (pages.length > 1) {
+    reviewsTimer = setInterval(() => {
+      reviewsCarouselIndex = (reviewsCarouselIndex + 1) % pages.length;
+      goReviewPage(reviewsCarouselIndex);
+    }, 5000);
+  }
+}
+
+function goReviewPage(i) {
+  reviewsCarouselIndex = i;
+  const track = document.getElementById('reviews-track');
+  if (track) track.style.transform = `translateX(-${i * 100}%)`;
+  document.querySelectorAll('#reviews-dots div').forEach((d, j) => {
+    d.style.background = j === i ? 'var(--red)' : '#333';
+  });
 }
 
 function renderAdminReviews(reviews) {
