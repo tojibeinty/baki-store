@@ -900,9 +900,10 @@ window.addEventListener('load', loadProducts);
     </div>
 
     <div class="form-group">
-      <label>🔗 رابط الصورة (اختياري — لو عندك رابط خارجي)</label>
-      <input type="text" id="p-img-url" placeholder="https://i.ibb.co/xxx/image.jpg">
-      <div style="color:var(--muted);font-size:0.75rem;margin-top:6px">⚠️ لو حطيت رابط، ترسل صورة المنتج مع الطلب تلقائياً</div>
+      <label>🔗 روابط الصور (طبعة لكل رابط)</label>
+      <div id="url-inputs-wrap" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button type="button" onclick="addUrlInput()" style="margin-top:8px;background:transparent;border:1px dashed var(--red);color:var(--red);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;font-weight:600;width:100%;transition:all 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.08)'" onmouseout="this.style.background='transparent'">➕ إضافة رابط طبعة</button>
+      <div style="color:var(--muted);font-size:0.73rem;margin-top:6px">كل رابط = طبعة منفصلة — الزبون يتصفحهن بالسهام</div>
     </div>
 
     <div class="form-group">
@@ -1559,6 +1560,29 @@ function previewImages(input) {
   });
 }
 
+let urlInputCount = 0;
+function addUrlInput() {
+  urlInputCount++;
+  const wrap = document.getElementById('url-inputs-wrap');
+  const row = document.createElement('div');
+  row.id = `url-row-${urlInputCount}`;
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="https://i.ibb.co/xxx/image.jpg — طبعة ${urlInputCount}"
+      style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;direction:ltr;"
+      onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+    <button type="button" onclick="removeUrlInput(${urlInputCount})"
+      style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:0.85rem;flex-shrink:0;transition:all 0.2s;"
+      onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'"
+      onmouseout="this.style.borderColor='#444';this.style.color='#888'">✖</button>
+  `;
+  wrap.appendChild(row);
+}
+function removeUrlInput(id) {
+  const el = document.getElementById(`url-row-${id}`);
+  if (el) el.remove();
+}
+
 async function addProduct() {
   const name = document.getElementById('p-name').value.trim();
   const cat = document.getElementById('p-cat').value;
@@ -1586,9 +1610,13 @@ async function addProduct() {
     return;
   }
   if (images.length === 0) {
-    const imgUrl = document.getElementById('p-img-url').value.trim();
-    if (imgUrl) images.push(imgUrl);
-    else images.push('');
+    // Collect all URL inputs
+    const urlInputs = document.querySelectorAll('#url-inputs-wrap input[type=text]');
+    urlInputs.forEach(inp => {
+      const v = inp.value.trim();
+      if (v) images.push(v);
+    });
+    if (images.length === 0) images.push('');
   }
 
   const oldPriceVal = document.getElementById('p-old-price').value;
@@ -1608,7 +1636,7 @@ async function addProduct() {
   document.getElementById('p-name').value = '';
   document.getElementById('p-price').value = '';
   document.getElementById('p-old-price').value = '';
-  document.getElementById('p-img-url').value = '';
+  document.getElementById('url-inputs-wrap').innerHTML = '';
   document.getElementById('p-desc').value = '';
   document.getElementById('p-badge').value = '';
   document.getElementById('p-images').value = '';
@@ -1712,8 +1740,8 @@ function renderProducts() {
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
         ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:${p.images.length>1?'40px':'14px'};background:#c0392b">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
         ${p.images.length > 1 ? `
-          <button onclick="event.stopPropagation();slideProductImg(${p.id},-1)" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#9664;</button>
-          <button onclick="event.stopPropagation();slideProductImg(${p.id},1)" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:background 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">&#9654;</button>
+          <button onclick="event.stopPropagation();slideProductImg(${p.id},1)" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10094;</button>
+          <button onclick="event.stopPropagation();slideProductImg(${p.id},-1)" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10095;</button>
           <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3;" id="pdots-${p.id}">
             ${p.images.map((_,i) => `<div onclick="event.stopPropagation();goProductImg(${p.id},${i})" style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--red)':'rgba(255,255,255,0.4)'};cursor:pointer;transition:background 0.2s;"></div>`).join('')}
           </div>
