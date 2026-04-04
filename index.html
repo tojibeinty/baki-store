@@ -4,39 +4,38 @@
 <meta charset="UTF-8">
 <style>
 body { background: #111; color: white; font-family: Arial; padding: 20px; }
-.product-img-wrap { position:relative; overflow:hidden; width:300px; height:280px; background:#333; border-radius:8px; }
-.track { display:flex; transition:transform 0.4s; height:100%; direction:ltr; }
-.slide { flex-shrink:0; height:280px; overflow:hidden; }
+.wrap { position:relative; overflow:hidden; width:300px; height:280px; background:#333; border-radius:8px; }
+.track { display:flex; transition:transform 0.4s; height:100%; width:300%; }
+.slide { flex-shrink:0; width:33.333%; height:100%; overflow:hidden; }
 .slide img { width:100%; height:100%; object-fit:cover; display:block; }
-button { margin:10px; padding:8px 16px; cursor:pointer; }
+button { margin:10px; padding:8px 16px; cursor:pointer; background:#d4a017; border:none; border-radius:4px; }
 </style>
 </head>
 <body>
-<h3>Test - 3 images</h3>
-<div class="product-img-wrap">
-  <div class="track" id="track" style="width:300%">
-    <div class="slide" style="width:33.333%">
-      <img src="https://i.ibb.co/PZ59DR87/20.jpg">
-    </div>
-    <div class="slide" style="width:33.333%">
-      <img src="https://via.placeholder.com/300x280/ff0000/fff?text=IMG+2">
-    </div>
-    <div class="slide" style="width:33.333%">
-      <img src="https://via.placeholder.com/300x280/0000ff/fff?text=IMG+3">
-    </div>
+<h3>Test Slider</h3>
+<div class="wrap">
+  <div class="track" id="track">
+    <div class="slide"><img src="https://i.ibb.co/PZ59DR87/20.jpg" onerror="this.style.background='red'"></div>
+    <div class="slide"><img src="https://via.placeholder.com/300x280/ff0000/fff?text=IMG+2"></div>
+    <div class="slide"><img src="https://via.placeholder.com/300x280/0000ff/fff?text=IMG+3"></div>
   </div>
 </div>
 <div>
-  <button onclick="go(0)">1</button>
-  <button onclick="go(1)">2</button>
-  <button onclick="go(2)">3</button>
+  <button onclick="go(0)">صورة 1</button>
+  <button onclick="go(1)">صورة 2</button>
+  <button onclick="go(2)">صورة 3</button>
 </div>
+<div id="log" style="margin-top:10px;color:#aaa;font-size:0.8rem;"></div>
 <script>
+let cur = 0;
+const n = 3;
 function go(i) {
+  cur = i;
   const track = document.getElementById('track');
-  const n = 3;
-  track.style.transform = `translateX(-${(i/n)*100}%)`;
-  console.log('Going to', i, 'transform:', track.style.transform);
+  // RTL: move right = positive translateX
+  const pct = (i / n) * 100;
+  track.style.transform = `translateX(${pct}%)`;
+  document.getElementById('log').textContent = `Slide ${i} → translateX(${pct}%)`;
 }
 </script>
 </body>
