@@ -15,6 +15,25 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-2G1RXP6MJS');
+
+  // Track custom events
+  function trackEvent(action, category, label, value) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', action, {
+        event_category: category,
+        event_label: label,
+        value: value
+      });
+    }
+  }
+</script>
 <style>
 @import url('https://fonts.cdnfonts.com/css/bebas-neue');
 </style>
@@ -88,6 +107,95 @@ async function deleteProductFromFirebase(docId) {
 }
 
 window.addEventListener('load', loadProducts);
+
+// ============ ANALYTICS - FIREBASE ============
+async function logEvent(type, data = {}) {
+  try {
+    if (type === 'visit') {
+      // Daily counter — one document per day, increment visits field
+      const day = new Date().toLocaleDateString('ar-IQ').replace(/\//g, '-');
+      const hour = new Date().getHours();
+      const docId = `visits-${day}`;
+
+      // Read existing doc
+      const res = await fetch(`${FS_BASE}/analytics/${docId}?key=${FIREBASE_API_KEY}`);
+      let visits = 0;
+      let hourMap = {};
+      if (res.ok) {
+        const existing = await res.json();
+        visits = parseInt(existing.fields?.visits?.integerValue || 0);
+        try { hourMap = JSON.parse(existing.fields?.hourMap?.stringValue || '{}'); } catch(e) {}
+      }
+      visits++;
+      hourMap[hour] = (hourMap[hour] || 0) + 1;
+
+      // Write back (PATCH = upsert)
+      await fetch(`${FS_BASE}/analytics/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=visits&updateMask.fieldPaths=day&updateMask.fieldPaths=hourMap`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: {
+          visits: { integerValue: visits },
+          day: { stringValue: day },
+          hourMap: { stringValue: JSON.stringify(hourMap) }
+        }})
+      });
+    } else {
+      // Other events (orders, product views) — still log as individual docs (less frequent)
+      const body = {
+        fields: {
+          type: { stringValue: type },
+          date: { stringValue: new Date().toISOString() },
+          day: { stringValue: new Date().toLocaleDateString('ar-IQ') },
+          hour: { integerValue: new Date().getHours() },
+          ...Object.fromEntries(Object.entries(data).map(([k,v]) => [k, { stringValue: String(v) }]))
+        }
+      };
+      await fetch(`${FS_BASE}/analytics?key=${FIREBASE_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+  } catch(e) {}
+}
+
+async function loadAnalytics() {
+  try {
+    const res = await fetch(`${FS_BASE}/analytics?key=${FIREBASE_API_KEY}&pageSize=300`);
+    const data = await res.json();
+    if (!data.documents) return { events: [], dailyVisits: [] };
+
+    const events = [];
+    const dailyVisits = [];
+
+    data.documents.forEach(d => {
+      const docId = d.name.split('/').pop();
+      if (docId.startsWith('visits-')) {
+        // Daily visit counter doc
+        let hourMap = {};
+        try { hourMap = JSON.parse(d.fields?.hourMap?.stringValue || '{}'); } catch(e) {}
+        dailyVisits.push({
+          day: d.fields?.day?.stringValue || '',
+          visits: parseInt(d.fields?.visits?.integerValue || 0),
+          hourMap
+        });
+      } else {
+        // Individual event doc
+        events.push({
+          type: d.fields?.type?.stringValue || '',
+          date: d.fields?.date?.stringValue || '',
+          day: d.fields?.day?.stringValue || '',
+          hour: parseInt(d.fields?.hour?.integerValue || 0),
+          productName: d.fields?.productName?.stringValue || '',
+          productId: d.fields?.productId?.stringValue || '',
+          cat: d.fields?.cat?.stringValue || '',
+          total: d.fields?.total?.stringValue || ''
+        });
+      }
+    });
+    return { events, dailyVisits };
+  } catch(e) { return { events: [], dailyVisits: [] }; }
+}
 </script>
 <style>
   :root {
@@ -855,7 +963,15 @@ window.addEventListener('load', loadProducts);
 <!-- ======= ADMIN PANEL ======= -->
 <div id="admin-overlay">
   <div class="admin-box">
-    <div class="admin-title">⚙️ لوحة التحكم</div>
+    <!-- Admin Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;">
+      <button onclick="switchAdminTab('products')" id="tab-products" style="flex:1;padding:10px;background:var(--red);color:white;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📦 المنتجات</button>
+      <button onclick="switchAdminTab('analytics')" id="tab-analytics" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📊 الإحصائيات</button>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="admin-tab-products">
+    <div class="admin-title" style="font-size:1.8rem;margin-bottom:20px;">⚙️ إدارة المنتجات</div>
 
     <div class="form-group">
       <label>اسم المنتج</label>
@@ -924,6 +1040,54 @@ window.addEventListener('load', loadProducts);
 
     <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
     <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
+    </div><!-- end admin-tab-products -->
+
+    <!-- Analytics Tab -->
+    <div id="admin-tab-analytics" style="display:none;">
+      <div class="admin-title" style="font-size:1.8rem;margin-bottom:24px;">📊 إحصائيات المتجر</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;" id="stats-cards">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:700;color:var(--red);font-family:var(--font-num);" id="stat-visits">--</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">زيارة اليوم</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:700;color:var(--red);font-family:var(--font-num);" id="stat-orders">--</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">طلب اليوم</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:700;color:var(--red);font-family:var(--font-num);" id="stat-views">--</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">مشاهدة منتج اليوم</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;font-weight:700;color:var(--red);font-family:var(--font-num);" id="stat-total-visits">--</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">إجمالي الزيارات</div>
+        </div>
+      </div>
+
+      <!-- Top Products -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--white);">🔥 أكثر المنتجات مشاهدةً</div>
+        <div id="stat-top-products" style="font-size:0.85rem;color:var(--muted);">جاري التحميل...</div>
+      </div>
+
+      <!-- Orders list -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--white);">📦 آخر الطلبات</div>
+        <div id="stat-recent-orders" style="font-size:0.85rem;color:var(--muted);">جاري التحميل...</div>
+      </div>
+
+      <!-- Visits by hour chart -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:14px;color:var(--white);">⏰ الزيارات حسب الساعة</div>
+        <div id="stat-hours-chart" style="display:flex;align-items:flex-end;gap:3px;height:80px;"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;color:var(--muted);font-size:0.65rem;">
+          <span>12ص</span><span>6ص</span><span>12ظ</span><span>6م</span><span>11م</span>
+        </div>
+      </div>
+
+      <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
+    </div><!-- end admin-tab-analytics -->
 
     <!-- VIDEO MANAGEMENT -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
@@ -1567,6 +1731,112 @@ function closeAdmin() {
   document.getElementById('admin-overlay').classList.remove('active');
 }
 
+function switchAdminTab(tab) {
+  const tabs = ['products', 'analytics'];
+  tabs.forEach(t => {
+    const el = document.getElementById(`admin-tab-${t}`);
+    const btn = document.getElementById(`tab-${t}`);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+    if (btn) {
+      btn.style.background = t === tab ? 'var(--red)' : 'var(--card)';
+      btn.style.color = t === tab ? 'white' : 'var(--muted)';
+      btn.style.border = t === tab ? 'none' : '1px solid var(--border)';
+    }
+  });
+  if (tab === 'analytics') renderAnalyticsDashboard();
+}
+
+async function renderAnalyticsDashboard() {
+  // Show loading
+  document.getElementById('stat-visits').textContent = '...';
+  document.getElementById('stat-orders').textContent = '...';
+  document.getElementById('stat-views').textContent = '...';
+  document.getElementById('stat-total-visits').textContent = '...';
+  document.getElementById('stat-top-products').textContent = 'جاري التحميل...';
+  document.getElementById('stat-recent-orders').textContent = 'جاري التحميل...';
+
+  const { events, dailyVisits } = await loadAnalytics();
+  const today = new Date().toLocaleDateString('ar-IQ').replace(/\//g, '-');
+
+  // Visits from daily counter
+  const todayVisitDoc = dailyVisits.find(d => d.day === today);
+  const visits = todayVisitDoc ? todayVisitDoc.visits : 0;
+  const totalVisits = dailyVisits.reduce((s, d) => s + d.visits, 0);
+
+  // Orders and views from event docs
+  const todayEvents = events.filter(e => e.day === new Date().toLocaleDateString('ar-IQ'));
+  const orders = todayEvents.filter(e => e.type === 'order' || e.type === 'cart_order').length;
+  const views = todayEvents.filter(e => e.type === 'product_view').length;
+
+  document.getElementById('stat-visits').textContent = visits;
+  document.getElementById('stat-orders').textContent = orders;
+  document.getElementById('stat-views').textContent = views;
+  document.getElementById('stat-total-visits').textContent = totalVisits;
+
+  // Top products by views
+  const viewEvents = events.filter(e => e.type === 'product_view');
+  const productCounts = {};
+  viewEvents.forEach(e => {
+    const key = e.productName || e.productId;
+    productCounts[key] = (productCounts[key] || 0) + 1;
+  });
+  const topProducts = Object.entries(productCounts).sort((a,b) => b[1]-a[1]).slice(0, 5);
+  const topEl = document.getElementById('stat-top-products');
+  if (topProducts.length === 0) {
+    topEl.innerHTML = '<div style="color:var(--muted)">لا توجد بيانات بعد</div>';
+  } else {
+    const maxCount = topProducts[0][1];
+    topEl.innerHTML = topProducts.map(([name, count], i) => `
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="color:var(--white);font-size:0.82rem;">${i+1}. ${name}</span>
+          <span style="color:var(--red);font-weight:700;">${count} مشاهدة</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+          <div style="width:${Math.round(count/maxCount*100)}%;height:100%;background:var(--red);border-radius:4px;transition:width 0.5s;"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Recent orders
+  const orderEvents = events.filter(e => e.type === 'order' || e.type === 'cart_order')
+    .sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+  const ordersEl = document.getElementById('stat-recent-orders');
+  if (orderEvents.length === 0) {
+    ordersEl.innerHTML = '<div style="color:var(--muted)">لا توجد طلبات بعد</div>';
+  } else {
+    ordersEl.innerHTML = orderEvents.map(e => {
+      const d = new Date(e.date);
+      const timeStr = d.toLocaleTimeString('ar-IQ', { hour:'2-digit', minute:'2-digit' });
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="color:var(--white);font-size:0.82rem;">${e.productName || 'طلب سلة'}</div>
+            <div style="color:var(--muted);font-size:0.72rem;">${e.day} · ${timeStr}</div>
+          </div>
+          <div style="color:var(--red);font-weight:700;font-size:0.85rem;">${e.total ? Number(e.total).toLocaleString()+' د.ع' : ''}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Hours chart — merge all days' hourMaps
+  const hourCounts = Array(24).fill(0);
+  dailyVisits.forEach(d => {
+    Object.entries(d.hourMap || {}).forEach(([h, c]) => {
+      hourCounts[parseInt(h)] += c;
+    });
+  });
+  const maxH = Math.max(...hourCounts, 1);
+  const chartEl = document.getElementById('stat-hours-chart');
+  chartEl.innerHTML = hourCounts.map((c, h) => `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="${h}:00 — ${c} زيارة">
+      <div style="width:100%;background:${c>0?'var(--red)':'var(--border)'};height:${Math.max(c/maxH*72,c>0?4:2)}px;border-radius:2px 2px 0 0;transition:height 0.5s;"></div>
+    </div>
+  `).join('');
+}
+
 let tempImages = [];
 function previewImages(input) {
   tempImages = [];
@@ -1930,6 +2200,9 @@ function openOrder(id) {
   if (!p) return;
   selectedProduct = p;
   selectedSize = null;
+  // Track product view
+  logEvent('product_view', { productId: String(p.id), productName: p.name, cat: p.cat });
+  trackEvent('view_item', 'product', p.name, p.price);
   // Use whichever image the customer is currently viewing
   const currentImgIdx = (window.productImgIndex && window.productImgIndex[id]) || 0;
   selectedProduct._selectedImgIdx = currentImgIdx;
@@ -2121,6 +2394,10 @@ async function orderNowDirect() {
     const data = await (res.json ? res.json() : res);
     if (data.ok) {
       showToast('✅ تم إرسال طلبك بنجاح!');
+      // Track order
+      const oTotal = (selectedProduct.price * parseInt(document.getElementById('order-qty')?.value || 1));
+      logEvent('order', { productId: String(selectedProduct.id), productName: selectedProduct.name, cat: selectedProduct.cat, total: String(oTotal) });
+      trackEvent('purchase', 'order', selectedProduct.name, oTotal);
       closeOrder();
     } else {
       showToast('❌ خطأ في الإرسال');
@@ -2249,6 +2526,9 @@ async function sendCartToTelegram() {
     const data = await res.json();
     if (data.ok) {
       showToast('✅ تم إرسال طلبك بنجاح!');
+      const cartTotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
+      logEvent('cart_order', { total: String(cartTotal), itemCount: String(cart.length) });
+      trackEvent('purchase', 'cart', 'cart_order', cartTotal);
       clearCart();
       closeCart();
     } else {
@@ -2594,7 +2874,13 @@ async function loadVideos() {
   renderAdminVideoList();
 }
 
-window.addEventListener('load', () => { loadVideos(); loadReviews(); });
+window.addEventListener('load', () => {
+  loadVideos();
+  loadReviews();
+  // Log page visit
+  logEvent('visit', {});
+  trackEvent('page_view', 'engagement', 'visit');
+});
 </script>
 <script>
 // ============ PWA SERVICE WORKER ============
