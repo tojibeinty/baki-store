@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Baki Store | باكي ستور</title>
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
+<meta name="theme-color" content="#0c0a06">
 <style>
 @import url('https://fonts.cdnfonts.com/css/bebas-neue');
 </style>
@@ -15,71 +17,70 @@ const FIREBASE_API_KEY = 'AIzaSyDNyLcBRcVOQ5jxWlML1Jk0GNaOfybPqLM';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT}/databases/(default)/documents`;
 
 async function loadProducts() {
-try {
-const res = await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}`);
-const data = await res.json();
-if (data.documents) {
-products = data.documents.map(d => {
-const fields = d.fields || {};
-const docId = d.name.split(’/’).pop();
-return {
-_docId: docId,
-id: parseInt(fields.id?.integerValue || fields.id?.doubleValue || Date.now()),
-name: fields.name?.stringValue || ‘’,
-cat: fields.cat?.stringValue || ‘men’,
-price: parseInt(fields.price?.integerValue || fields.price?.doubleValue || 0),
-oldPrice: fields.oldPrice?.integerValue ? parseInt(fields.oldPrice.integerValue) : (fields.oldPrice?.doubleValue ? parseInt(fields.oldPrice.doubleValue) : null),
-desc: fields.desc?.stringValue || ‘’,
-badge: fields.badge?.stringValue || ‘’,
-sizes: fields.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
-images: fields.images?.arrayValue?.values?.map(v => v.stringValue) || [’’]
-};
-});
-} else {
-products = [];
-}
-renderProducts();
-renderAdminList();
-updateCartCount();
-} catch(e) {
-console.error(‘خطأ:’, e);
-products = [];
-renderProducts();
-}
+  try {
+    const res = await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}`);
+    const data = await res.json();
+    if (data.documents) {
+      products = data.documents.map(d => {
+        const fields = d.fields || {};
+        const docId = d.name.split('/').pop();
+        return {
+          _docId: docId,
+          id: parseInt(fields.id?.integerValue || fields.id?.doubleValue || Date.now()),
+          name: fields.name?.stringValue || '',
+          cat: fields.cat?.stringValue || 'men',
+          price: parseInt(fields.price?.integerValue || fields.price?.doubleValue || 0),
+          oldPrice: fields.oldPrice?.integerValue ? parseInt(fields.oldPrice.integerValue) : (fields.oldPrice?.doubleValue ? parseInt(fields.oldPrice.doubleValue) : null),
+          desc: fields.desc?.stringValue || '',
+          badge: fields.badge?.stringValue || '',
+          sizes: fields.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
+          images: fields.images?.arrayValue?.values?.map(v => v.stringValue) || ['']
+        };
+      });
+    } else {
+      products = [];
+    }
+    renderProducts();
+    renderAdminList();
+    updateCartCount();
+  } catch(e) {
+    console.error('خطأ:', e);
+    products = [];
+    renderProducts();
+  }
 }
 
 async function saveProductToFirebase(product) {
-const body = {
-fields: {
-id: { integerValue: product.id },
-name: { stringValue: product.name },
-cat: { stringValue: product.cat },
-price: { integerValue: product.price },
-oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
-desc: { stringValue: product.desc || ‘’ },
-badge: { stringValue: product.badge || ‘’ },
-sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
-images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
-}
-};
-await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}`, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’ },
-body: JSON.stringify(body)
-});
-await loadProducts();
+  const body = {
+    fields: {
+      id: { integerValue: product.id },
+      name: { stringValue: product.name },
+      cat: { stringValue: product.cat },
+      price: { integerValue: product.price },
+      oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
+      desc: { stringValue: product.desc || '' },
+      badge: { stringValue: product.badge || '' },
+      sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
+      images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
+    }
+  };
+  await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  await loadProducts();
 }
 
 async function deleteProductFromFirebase(docId) {
-await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}`, {
-method: ‘DELETE’
-});
-await loadProducts();
+  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}`, {
+    method: 'DELETE'
+  });
+  await loadProducts();
 }
 
-window.addEventListener(‘load’, loadProducts);
+window.addEventListener('load', loadProducts);
 </script>
-
 <style>
   :root {
     --black: #0c0a06;
@@ -834,244 +835,229 @@ window.addEventListener(‘load’, loadProducts);
   }
   .toast.show { opacity: 1; }
 </style>
-
 </head>
 <body>
 
 <!-- TOAST -->
-
 <div class="toast" id="toast"></div>
 
 <!-- ======= ADMIN PANEL ======= -->
-
 <div id="admin-overlay">
   <div class="admin-box">
     <div class="admin-title">⚙️ لوحة التحكم</div>
 
-```
-<div class="form-group">
-  <label>اسم المنتج</label>
-  <input type="text" id="p-name" placeholder="مثال: تيشيرت باكي الكلاسيكي">
-</div>
+    <div class="form-group">
+      <label>اسم المنتج</label>
+      <input type="text" id="p-name" placeholder="مثال: تيشيرت باكي الكلاسيكي">
+    </div>
 
-<div class="form-group">
-  <label>القسم</label>
-  <select id="p-cat">
-    <option value="men">رجالي 👨</option>
-    <option value="women">نسائي 👩</option>
-    <option value="accessories">اكسسوارات 💎</option>
-  </select>
-</div>
+    <div class="form-group">
+      <label>القسم</label>
+      <select id="p-cat">
+        <option value="men">رجالي 👨</option>
+        <option value="women">نسائي 👩</option>
+        <option value="accessories">اكسسوارات 💎</option>
+      </select>
+    </div>
 
-<div class="form-group">
-  <label>السعر (دينار عراقي)</label>
-  <input type="number" id="p-price" placeholder="مثال: 35000">
-</div>
+    <div class="form-group">
+      <label>السعر (دينار عراقي)</label>
+      <input type="number" id="p-price" placeholder="مثال: 35000">
+    </div>
 
-<div class="form-group">
-  <label>الأحجام المتاحة</label>
-  <div class="size-checkboxes">
-    <label><input type="checkbox" value="XS"> XS</label>
-    <label><input type="checkbox" value="S"> S</label>
-    <label><input type="checkbox" value="M" checked> M</label>
-    <label><input type="checkbox" value="L" checked> L</label>
-    <label><input type="checkbox" value="XL"> XL</label>
-    <label><input type="checkbox" value="XXL"> XXL</label>
-    <label><input type="checkbox" value="Free Size"> Free</label>
-  </div>
-</div>
+    <div class="form-group">
+      <label>الأحجام المتاحة</label>
+      <div class="size-checkboxes">
+        <label><input type="checkbox" value="XS"> XS</label>
+        <label><input type="checkbox" value="S"> S</label>
+        <label><input type="checkbox" value="M" checked> M</label>
+        <label><input type="checkbox" value="L" checked> L</label>
+        <label><input type="checkbox" value="XL"> XL</label>
+        <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="Free Size"> Free</label>
+      </div>
+    </div>
 
-<div class="form-group">
-  <label>وصف المنتج (اختياري)</label>
-  <textarea id="p-desc" placeholder="وصف مختصر للمنتج..."></textarea>
-</div>
+    <div class="form-group">
+      <label>وصف المنتج (اختياري)</label>
+      <textarea id="p-desc" placeholder="وصف مختصر للمنتج..."></textarea>
+    </div>
 
-<div class="form-group">
-  <label>🔖 هل هو جديد / عرض؟</label>
-  <select id="p-badge">
-    <option value="">بدون</option>
-    <option value="NEW">جديد</option>
-    <option value="SALE">تخفيض</option>
-    <option value="HOT">🔥 HOT</option>
-  </select>
-</div>
+    <div class="form-group">
+      <label>🔖 هل هو جديد / عرض؟</label>
+      <select id="p-badge">
+        <option value="">بدون</option>
+        <option value="NEW">جديد</option>
+        <option value="SALE">تخفيض</option>
+        <option value="HOT">🔥 HOT</option>
+      </select>
+    </div>
 
-<div class="form-group">
-  <label>📸 صور المنتج (اختر أكثر من صورة)</label>
-  <input type="file" id="p-images" multiple accept="image/*" onchange="previewImages(this)">
-  <div class="image-preview-grid" id="img-preview"></div>
-</div>
+    <div class="form-group">
+      <label>📸 صور المنتج (اختر أكثر من صورة)</label>
+      <input type="file" id="p-images" multiple accept="image/*" onchange="previewImages(this)">
+      <div class="image-preview-grid" id="img-preview"></div>
+    </div>
 
-<div class="form-group">
-  <label>🔗 رابط الصورة (اختياري — لو عندك رابط خارجي)</label>
-  <input type="text" id="p-img-url" placeholder="https://i.ibb.co/xxx/image.jpg">
-  <div style="color:var(--muted);font-size:0.75rem;margin-top:6px">⚠️ لو حطيت رابط، ترسل صورة المنتج مع الطلب تلقائياً</div>
-</div>
+    <div class="form-group">
+      <label>🔗 رابط الصورة (اختياري — لو عندك رابط خارجي)</label>
+      <input type="text" id="p-img-url" placeholder="https://i.ibb.co/xxx/image.jpg">
+      <div style="color:var(--muted);font-size:0.75rem;margin-top:6px">⚠️ لو حطيت رابط، ترسل صورة المنتج مع الطلب تلقائياً</div>
+    </div>
 
-<div class="form-group">
-  <label>🏷️ السعر القديم — يظهر مشطوباً (اختياري)</label>
-  <input type="number" id="p-old-price" placeholder="مثال: 25000 — اتركه فارغ لو ما تريد">
-</div>
+    <div class="form-group">
+      <label>🏷️ السعر القديم — يظهر مشطوباً (اختياري)</label>
+      <input type="number" id="p-old-price" placeholder="مثال: 25000 — اتركه فارغ لو ما تريد">
+    </div>
 
-<button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
-<button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
+    <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
+    <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
 
-<!-- VIDEO MANAGEMENT -->
-<div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
-  <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#d4a017;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
-  <div class="form-group">
-    <label>رابط YouTube (مثال: https://youtu.be/xxxxx)</label>
-    <input type="text" id="v-url" placeholder="https://youtu.be/xxxxx">
-  </div>
-  <div class="form-group">
-    <label>عنوان الفيديو (اختياري)</label>
-    <input type="text" id="v-title" placeholder="مثال: تيشيرت باكي الكلاسيكي">
-  </div>
-  <button class="btn-primary" onclick="addVideo()" style="margin-top:0">➕ إضافة الفيديو</button>
-  <div id="admin-video-list" style="margin-top:16px;"></div>
-</div>
+    <!-- VIDEO MANAGEMENT -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#d4a017;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
+      <div class="form-group">
+        <label>رابط YouTube (مثال: https://youtu.be/xxxxx)</label>
+        <input type="text" id="v-url" placeholder="https://youtu.be/xxxxx">
+      </div>
+      <div class="form-group">
+        <label>عنوان الفيديو (اختياري)</label>
+        <input type="text" id="v-title" placeholder="مثال: تيشيرت باكي الكلاسيكي">
+      </div>
+      <button class="btn-primary" onclick="addVideo()" style="margin-top:0">➕ إضافة الفيديو</button>
+      <div id="admin-video-list" style="margin-top:16px;"></div>
+    </div>
 
-<div class="admin-product-list" id="admin-list"></div>
+    <div class="admin-product-list" id="admin-list"></div>
 
-<!-- REVIEWS MANAGEMENT -->
-<div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
-  <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">💬 آراء الزبائن</div>
-  <div id="admin-reviews-list"></div>
-</div>
-```
-
+    <!-- REVIEWS MANAGEMENT -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">💬 آراء الزبائن</div>
+      <div id="admin-reviews-list"></div>
+    </div>
   </div>
 </div>
 
 <!-- ======= ORDER MODAL ======= -->
-
 <div id="order-modal">
   <div class="order-box">
     <button class="modal-close" onclick="closeOrder()">✖</button>
     <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;margin-bottom:20px;color:var(--red)">تفاصيل الطلب</h2>
 
-```
-<div class="order-product-preview">
-  <img id="order-img" src="" alt="">
-  <div>
-    <div class="order-product-name" id="order-name"></div>
-    <div class="order-product-price" id="order-price"></div>
-    <div style="color:var(--muted);font-size:0.8rem;margin-top:4px" id="order-cat"></div>
-  </div>
-</div>
+    <div class="order-product-preview">
+      <img id="order-img" src="" alt="">
+      <div>
+        <div class="order-product-name" id="order-name"></div>
+        <div class="order-product-price" id="order-price"></div>
+        <div style="color:var(--muted);font-size:0.8rem;margin-top:4px" id="order-cat"></div>
+      </div>
+    </div>
 
-<div class="form-group">
-  <label>📏 اختر الحجم</label>
-  <div class="size-selector" id="order-sizes"></div>
-</div>
+    <div class="form-group">
+      <label>📏 اختر الحجم</label>
+      <div class="size-selector" id="order-sizes"></div>
+    </div>
 
-<div class="form-group">
-  <label>🔢 الكمية</label>
-  <input type="number" id="order-qty" value="1" min="1" max="10">
-</div>
+    <div class="form-group">
+      <label>🔢 الكمية</label>
+      <input type="number" id="order-qty" value="1" min="1" max="10">
+    </div>
 
-<div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
-  <div style="color:var(--red);font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
-</div>
+    <div style="border-top:1px solid var(--border);margin:20px 0;padding-top:20px">
+      <div style="color:var(--red);font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
+    </div>
 
-<div class="form-group">
-  <label>الاسم الكامل *</label>
-  <input type="text" id="customer-name" placeholder="اكتب اسمك هنا">
-</div>
+    <div class="form-group">
+      <label>الاسم الكامل *</label>
+      <input type="text" id="customer-name" placeholder="اكتب اسمك هنا">
+    </div>
 
-<div class="form-group">
-  <label>رقم الهاتف *</label>
-  <input type="tel" id="customer-phone" placeholder="07XXXXXXXXX">
-</div>
+    <div class="form-group">
+      <label>رقم الهاتف *</label>
+      <input type="tel" id="customer-phone" placeholder="07XXXXXXXXX">
+    </div>
 
-<div class="form-group">
-  <label>العنوان / المحافظة (اختياري)</label>
-  <input type="text" id="customer-address" placeholder="مثال: بغداد - الكرخ">
-</div>
+    <div class="form-group">
+      <label>العنوان / المحافظة (اختياري)</label>
+      <input type="text" id="customer-address" placeholder="مثال: بغداد - الكرخ">
+    </div>
 
-<div class="form-group">
-  <label>📝 ملاحظات إضافية (اختياري)</label>
-  <textarea id="order-note" placeholder="أي ملاحظات للطلب..."></textarea>
-</div>
+    <div class="form-group">
+      <label>📝 ملاحظات إضافية (اختياري)</label>
+      <textarea id="order-note" placeholder="أي ملاحظات للطلب..."></textarea>
+    </div>
 
-<div style="display:flex;gap:10px;margin-top:10px">
-  <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#d4a017;flex:1">
-    🛍 أضف للسلة
-  </button>
-  <button class="telegram-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
-    ✈️ اطلب الآن
-  </button>
-</div>
-<p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">اطلب الآن = إرسال مباشر لتيليجرام بدون سلة</p>
-```
-
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#d4a017;flex:1">
+        🛍 أضف للسلة
+      </button>
+      <button class="telegram-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
+        ✈️ اطلب الآن
+      </button>
+    </div>
+    <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">اطلب الآن = إرسال مباشر لتيليجرام بدون سلة</p>
   </div>
 </div>
 
 <!-- ======= EDIT PRODUCT MODAL ======= -->
-
 <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
   <div style="background:#111;border:1px solid #d4a017;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
     <button onclick="closeEdit()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#d4a017;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
 
-```
-<input type="hidden" id="edit-docid">
+    <input type="hidden" id="edit-docid">
 
-<div class="form-group">
-  <label>اسم المنتج</label>
-  <input type="text" id="edit-name">
-</div>
-<div class="form-group">
-  <label>القسم</label>
-  <select id="edit-cat">
-    <option value="men">رجالي 👨</option>
-    <option value="women">نسائي 👩</option>
-    <option value="accessories">اكسسوارات 💎</option>
-  </select>
-</div>
-<div class="form-group">
-  <label>السعر الجديد (د.ع)</label>
-  <input type="number" id="edit-price">
-</div>
-<div class="form-group">
-  <label>السعر القديم — سيظهر مشطوباً (اختياري)</label>
-  <input type="number" id="edit-old-price" placeholder="اتركه فارغ لو ما تريد سعر مشطوب">
-</div>
-<div class="form-group">
-  <label>الوصف</label>
-  <textarea id="edit-desc"></textarea>
-</div>
-<div class="form-group">
-  <label>الشارة</label>
-  <select id="edit-badge">
-    <option value="">بدون</option>
-    <option value="NEW">جديد</option>
-    <option value="SALE">تخفيض</option>
-    <option value="HOT">🔥 HOT</option>
-  </select>
-</div>
-<div class="form-group">
-  <label>الأحجام</label>
-  <div class="size-checkboxes" id="edit-sizes">
-    <label><input type="checkbox" value="XS"> XS</label>
-    <label><input type="checkbox" value="S"> S</label>
-    <label><input type="checkbox" value="M"> M</label>
-    <label><input type="checkbox" value="L"> L</label>
-    <label><input type="checkbox" value="XL"> XL</label>
-    <label><input type="checkbox" value="XXL"> XXL</label>
-    <label><input type="checkbox" value="Free Size"> Free</label>
-  </div>
-</div>
-<button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
-<button class="btn-secondary" onclick="closeEdit()">إلغاء</button>
-```
-
+    <div class="form-group">
+      <label>اسم المنتج</label>
+      <input type="text" id="edit-name">
+    </div>
+    <div class="form-group">
+      <label>القسم</label>
+      <select id="edit-cat">
+        <option value="men">رجالي 👨</option>
+        <option value="women">نسائي 👩</option>
+        <option value="accessories">اكسسوارات 💎</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>السعر الجديد (د.ع)</label>
+      <input type="number" id="edit-price">
+    </div>
+    <div class="form-group">
+      <label>السعر القديم — سيظهر مشطوباً (اختياري)</label>
+      <input type="number" id="edit-old-price" placeholder="اتركه فارغ لو ما تريد سعر مشطوب">
+    </div>
+    <div class="form-group">
+      <label>الوصف</label>
+      <textarea id="edit-desc"></textarea>
+    </div>
+    <div class="form-group">
+      <label>الشارة</label>
+      <select id="edit-badge">
+        <option value="">بدون</option>
+        <option value="NEW">جديد</option>
+        <option value="SALE">تخفيض</option>
+        <option value="HOT">🔥 HOT</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>الأحجام</label>
+      <div class="size-checkboxes" id="edit-sizes">
+        <label><input type="checkbox" value="XS"> XS</label>
+        <label><input type="checkbox" value="S"> S</label>
+        <label><input type="checkbox" value="M"> M</label>
+        <label><input type="checkbox" value="L"> L</label>
+        <label><input type="checkbox" value="XL"> XL</label>
+        <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="Free Size"> Free</label>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
+    <button class="btn-secondary" onclick="closeEdit()">إلغاء</button>
   </div>
 </div>
 
 <!-- ======= PASSWORD MODAL ======= -->
-
 <div id="password-modal" style="
   display:none; position:fixed; inset:0;
   background:rgba(0,0,0,0.97);
@@ -1121,7 +1107,6 @@ window.addEventListener(‘load’, loadProducts);
 </div>
 
 <!-- ======= NAV ======= -->
-
 <nav>
   <a class="nav-logo" href="#hero">
     <img src="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" alt="Baki Store Logo">
@@ -1150,7 +1135,6 @@ window.addEventListener(‘load’, loadProducts);
 </nav>
 
 <!-- ======= HERO ======= -->
-
 <section id="hero">
   <div class="hero-bg"></div>
   <div class="hero-logo-bg"></div>
@@ -1170,7 +1154,6 @@ window.addEventListener(‘load’, loadProducts);
 </section>
 
 <!-- ======= CATEGORIES ======= -->
-
 <section id="categories">
   <div class="section-header">
     <div class="section-tag">COLLECTIONS</div>
@@ -1218,7 +1201,6 @@ window.addEventListener(‘load’, loadProducts);
 </section>
 
 <!-- ======= SHOP ======= -->
-
 <section id="shop">
   <div class="section-header">
     <div class="section-tag">SHOP</div>
@@ -1249,7 +1231,6 @@ window.addEventListener(‘load’, loadProducts);
 </section>
 
 <!-- ======= VIDEOS SECTION ======= -->
-
 <section id="videos" style="background:var(--deep);padding:80px 40px;">
   <div class="section-header">
     <div class="section-tag">LOOK GOOD</div>
@@ -1262,27 +1243,23 @@ window.addEventListener(‘load’, loadProducts);
       <div style="font-family:var(--font-display);font-size:1.5rem;letter-spacing:2px;">لا توجد فيديوهات بعد</div>
     </div>
 
-```
-<div id="video-slider" style="display:none;">
-  <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;">
-    <iframe id="video-frame" width="100%" height="100%" style="position:absolute;inset:0;border:none;" allowfullscreen allow="autoplay"></iframe>
-  </div>
+    <div id="video-slider" style="display:none;">
+      <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:16/9;">
+        <iframe id="video-frame" width="100%" height="100%" style="position:absolute;inset:0;border:none;" allowfullscreen allow="autoplay"></iframe>
+      </div>
 
-  <!-- Controls -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;">
-    <button onclick="prevVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">◀</button>
-    <div id="video-dots" style="display:flex;gap:8px;"></div>
-    <button onclick="nextVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">▶</button>
-  </div>
-  <div id="video-title" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:10px;"></div>
-</div>
-```
-
+      <!-- Controls -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;">
+        <button onclick="prevVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">◀</button>
+        <div id="video-dots" style="display:flex;gap:8px;"></div>
+        <button onclick="nextVideo()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:10px 18px;cursor:pointer;font-size:1rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b'" onmouseout="this.style.borderColor='var(--border)'">▶</button>
+      </div>
+      <div id="video-title" style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:10px;"></div>
+    </div>
   </div>
 </section>
 
 <!-- ======= FEATURES ======= -->
-
 <section id="features">
   <div class="features-grid">
     <div class="feature-item">
@@ -1309,7 +1286,6 @@ window.addEventListener(‘load’, loadProducts);
 </section>
 
 <!-- ======= REVIEWS ======= -->
-
 <section id="reviews" style="background:var(--black);padding:80px 40px;">
   <div class="section-header">
     <div class="section-tag">REVIEWS</div>
@@ -1317,42 +1293,37 @@ window.addEventListener(‘load’, loadProducts);
   </div>
 
   <!-- نموذج كتابة رأي -->
-
   <div style="max-width:550px;margin:0 auto 50px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;">
     <div style="font-weight:700;font-size:1rem;margin-bottom:16px;color:var(--white)">✍️ اكتب رأيك</div>
 
-```
-<!-- نجوم -->
-<div style="margin-bottom:14px;">
-  <div style="color:var(--muted);font-size:0.82rem;margin-bottom:8px;font-weight:600">تقييمك</div>
-  <div id="star-selector" style="display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end;">
-    <span onclick="setRating(5)" data-star="5" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
-    <span onclick="setRating(4)" data-star="4" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
-    <span onclick="setRating(3)" data-star="3" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
-    <span onclick="setRating(2)" data-star="2" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
-    <span onclick="setRating(1)" data-star="1" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
-  </div>
-</div>
+    <!-- نجوم -->
+    <div style="margin-bottom:14px;">
+      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:8px;font-weight:600">تقييمك</div>
+      <div id="star-selector" style="display:flex;gap:6px;flex-direction:row-reverse;justify-content:flex-end;">
+        <span onclick="setRating(5)" data-star="5" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
+        <span onclick="setRating(4)" data-star="4" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
+        <span onclick="setRating(3)" data-star="3" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
+        <span onclick="setRating(2)" data-star="2" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
+        <span onclick="setRating(1)" data-star="1" style="font-size:1.8rem;cursor:pointer;opacity:0.3;transition:all 0.2s;">⭐</span>
+      </div>
+    </div>
 
-<div style="margin-bottom:12px;">
-  <div style="color:var(--muted);font-size:0.82rem;margin-bottom:6px;font-weight:600">اسمك</div>
-  <input type="text" id="review-name" placeholder="مثال: أحمد — بغداد" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;">
-</div>
+    <div style="margin-bottom:12px;">
+      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:6px;font-weight:600">اسمك</div>
+      <input type="text" id="review-name" placeholder="مثال: أحمد — بغداد" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;">
+    </div>
 
-<div style="margin-bottom:16px;">
-  <div style="color:var(--muted);font-size:0.82rem;margin-bottom:6px;font-weight:600">رأيك بالمتجر</div>
-  <textarea id="review-text" placeholder="شاركنا تجربتك..." style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;height:90px;resize:none;"></textarea>
-</div>
+    <div style="margin-bottom:16px;">
+      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:6px;font-weight:600">رأيك بالمتجر</div>
+      <textarea id="review-text" placeholder="شاركنا تجربتك..." style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;height:90px;resize:none;"></textarea>
+    </div>
 
-<button onclick="submitReview()" style="background:var(--red);color:var(--black);border:none;border-radius:8px;padding:12px;width:100%;font-family:var(--font-body);font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-  إرسال الرأي ✨
-</button>
-```
-
+    <button onclick="submitReview()" style="background:var(--red);color:var(--black);border:none;border-radius:8px;padding:12px;width:100%;font-family:var(--font-body);font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+      إرسال الرأي ✨
+    </button>
   </div>
 
   <!-- عرض الآراء -->
-
   <div id="reviews-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1200px;margin:0 auto;">
     <div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1;">
       <div style="font-size:2.5rem;margin-bottom:12px">💬</div>
@@ -1362,7 +1333,6 @@ window.addEventListener(‘load’, loadProducts);
 </section>
 
 <!-- ======= FOOTER ======= -->
-
 <footer>
   <div class="footer-logo">BAKI <span>STORE</span></div>
   <div class="footer-sub">باكي ستور · ملابس جيم نسائي ورجالي واكسسوارات</div>
@@ -1372,7 +1342,6 @@ window.addEventListener(‘load’, loadProducts);
 </footer>
 
 <!-- ======= CART MODAL ======= -->
-
 <div id="cart-modal" style="
   display:none; position:fixed; inset:0;
   background:rgba(0,0,0,0.92);
@@ -1395,82 +1364,78 @@ window.addEventListener(‘load’, loadProducts);
     " onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'"
        onmouseout="this.style.borderColor='#333';this.style.color='#888'">✖</button>
 
-```
-<h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#d4a017;margin-bottom:24px;text-align:center">🛍 سلة المشتريات</h2>
+    <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#d4a017;margin-bottom:24px;text-align:center">🛍 سلة المشتريات</h2>
 
-<div id="cart-items-list"></div>
+    <div id="cart-items-list"></div>
 
-<div id="cart-footer" style="display:none">
-  <div style="border-top:1px solid #2a2a2a;margin:20px 0;padding-top:20px;display:flex;justify-content:space-between;align-items:center">
-    <span style="color:#888;font-size:0.9rem">الإجمالي:</span>
-    <span id="cart-total" style="font-family:var(--font-num);font-size:1.6rem;color:#d4a017"></span>
-  </div>
+    <div id="cart-footer" style="display:none">
+      <div style="border-top:1px solid #2a2a2a;margin:20px 0;padding-top:20px;display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#888;font-size:0.9rem">الإجمالي:</span>
+        <span id="cart-total" style="font-family:var(--font-num);font-size:1.6rem;color:#d4a017"></span>
+      </div>
 
-  <div style="border-top:1px solid #2a2a2a;padding-top:20px;margin-bottom:16px">
-    <div style="color:#d4a017;font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
-  </div>
-  <div style="margin-bottom:14px">
-    <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">الاسم الكامل *</label>
-    <input type="text" id="cart-name" placeholder="اكتب اسمك هنا" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
-  </div>
-  <div style="margin-bottom:14px">
-    <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">رقم الهاتف *</label>
-    <input type="tel" id="cart-phone" placeholder="07XXXXXXXXX" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
-  </div>
-  <div style="margin-bottom:14px">
-    <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">العنوان (اختياري)</label>
-    <input type="text" id="cart-address" placeholder="مثال: بغداد - الكرخ" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
-  </div>
-  <div style="margin-bottom:20px">
-    <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">ملاحظات (اختياري)</label>
-    <textarea id="cart-note" placeholder="أي ملاحظات..." style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl;height:80px;resize:vertical"></textarea>
-  </div>
+      <div style="border-top:1px solid #2a2a2a;padding-top:20px;margin-bottom:16px">
+        <div style="color:#d4a017;font-weight:700;font-size:0.9rem;margin-bottom:14px">👤 معلومات المستلم</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">الاسم الكامل *</label>
+        <input type="text" id="cart-name" placeholder="اكتب اسمك هنا" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">رقم الهاتف *</label>
+        <input type="tel" id="cart-phone" placeholder="07XXXXXXXXX" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">العنوان (اختياري)</label>
+        <input type="text" id="cart-address" placeholder="مثال: بغداد - الكرخ" style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">ملاحظات (اختياري)</label>
+        <textarea id="cart-note" placeholder="أي ملاحظات..." style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl;height:80px;resize:vertical"></textarea>
+      </div>
 
-  <button onclick="sendCartToTelegram()" style="
-    background:#229ED9; color:white; border:none;
-    border-radius:8px; padding:16px; width:100%;
-    font-family:var(--font-body); font-size:1rem;
-    font-weight:700; cursor:pointer; transition:all 0.2s;
-    display:flex; align-items:center; justify-content:center; gap:10px;
-  " onmouseover="this.style.background='#1a85b5'" onmouseout="this.style.background='#229ED9'"
-     id="cart-send-btn">
-    ✈️ إرسال الطلب مباشرة
-  </button>
-  <button onclick="clearCart()" style="
-    background:transparent; color:#666; border:1px solid #333;
-    border-radius:8px; padding:12px; width:100%;
-    font-family:var(--font-body); font-size:0.85rem;
-    cursor:pointer; margin-top:10px; transition:all 0.2s;
-  " onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'"
-     onmouseout="this.style.borderColor='#333';this.style.color='#666'">
-    🗑 تفريغ السلة
-  </button>
-</div>
+      <button onclick="sendCartToTelegram()" style="
+        background:#229ED9; color:white; border:none;
+        border-radius:8px; padding:16px; width:100%;
+        font-family:var(--font-body); font-size:1rem;
+        font-weight:700; cursor:pointer; transition:all 0.2s;
+        display:flex; align-items:center; justify-content:center; gap:10px;
+      " onmouseover="this.style.background='#1a85b5'" onmouseout="this.style.background='#229ED9'"
+         id="cart-send-btn">
+        ✈️ إرسال الطلب مباشرة
+      </button>
+      <button onclick="clearCart()" style="
+        background:transparent; color:#666; border:1px solid #333;
+        border-radius:8px; padding:12px; width:100%;
+        font-family:var(--font-body); font-size:0.85rem;
+        cursor:pointer; margin-top:10px; transition:all 0.2s;
+      " onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'"
+         onmouseout="this.style.borderColor='#333';this.style.color='#666'">
+        🗑 تفريغ السلة
+      </button>
+    </div>
 
-<div id="cart-empty" style="text-align:center;padding:50px 0;color:#555">
-  <div style="font-size:3rem;margin-bottom:16px">🛍</div>
-  <div style="font-family:var(--font-display);font-size:1.5rem;letter-spacing:2px;margin-bottom:8px;color:#444">السلة فارغة</div>
-  <div style="font-size:0.85rem">أضف منتجات من المتجر</div>
-</div>
-```
-
+    <div id="cart-empty" style="text-align:center;padding:50px 0;color:#555">
+      <div style="font-size:3rem;margin-bottom:16px">🛍</div>
+      <div style="font-family:var(--font-display);font-size:1.5rem;letter-spacing:2px;margin-bottom:8px;color:#444">السلة فارغة</div>
+      <div style="font-size:0.85rem">أضف منتجات من المتجر</div>
+    </div>
   </div>
 </div>
 
 <!-- ======= WHATSAPP BUTTON ======= -->
-
 <a href="https://wa.me/9647846467878" target="_blank" style="
-position:fixed;bottom:30px;right:24px;
-background:#1ead5a;color:white;
-width:52px;height:52px;border-radius:50%;
-display:flex;align-items:center;justify-content:center;
-z-index:8000;
-box-shadow:0 4px 16px rgba(30,173,90,0.3);
-text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;
+  position:fixed;bottom:30px;right:24px;
+  background:#1ead5a;color:white;
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  z-index:8000;
+  box-shadow:0 4px 16px rgba(30,173,90,0.3);
+  text-decoration:none;transition:transform 0.2s,box-shadow 0.2s;
 " onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 24px rgba(30,173,90,0.4)'"
-onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 16px rgba(30,173,90,0.3)'"
-title="تواصل عبر واتساب">
-<svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 16px rgba(30,173,90,0.3)'"
+   title="تواصل عبر واتساب">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
 <script>
@@ -2168,7 +2133,7 @@ function renderVideos() {
     <div onclick="showVideo(${i})" style="width:10px;height:10px;border-radius:50%;background:${i===currentVideo?'#c0392b':'#333'};cursor:pointer;transition:background 0.2s;"></div>
   `).join('');
   clearInterval(videoTimer);
-  videoTimer = setInterval(() => nextVideo(), 8000);
+  videoTimer = setInterval(() => nextVideo(), 20000);
 }
 
 function showVideo(i) {
@@ -2336,8 +2301,12 @@ async function submitReview() {
   if (!text) { showToast('❌ اكتب رأيك أولاً'); return; }
   if (selectedRating === 0) { showToast('❌ اختر تقييمك بالنجوم'); return; }
   const date = new Date().toLocaleDateString('ar-IQ');
+
+  const btn = document.querySelector('#reviews button[onclick="submitReview()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
+
   try {
-    await fetch(`${FS_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
+    const res = await fetch(`${FS_BASE}/reviews?key=${FIREBASE_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields: {
@@ -2347,12 +2316,23 @@ async function submitReview() {
         date: { stringValue: date }
       }})
     });
-    document.getElementById('review-name').value = '';
-    document.getElementById('review-text').value = '';
-    setRating(0);
-    showToast('✅ شكراً! تم إرسال رأيك');
-    await loadReviews();
-  } catch(e) { showToast('❌ خطأ في الإرسال'); }
+    const data = await res.json();
+    if (data.name) {
+      document.getElementById('review-name').value = '';
+      document.getElementById('review-text').value = '';
+      setRating(0);
+      showToast('✅ شكراً! تم إرسال رأيك');
+      await loadReviews();
+    } else {
+      console.error('Firebase error:', data);
+      showToast('❌ خطأ: ' + (data.error?.message || 'حاول مرة ثانية'));
+    }
+  } catch(e) {
+    console.error(e);
+    showToast('❌ تعذر الاتصال');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = 'إرسال الرأي ✨'; }
+  }
 }
 
 async function deleteReview(docId) {
@@ -2367,6 +2347,5 @@ renderVideos();
 renderAdminVideoList();
 window.addEventListener('load', () => { loadVideos(); loadReviews(); });
 </script>
-
 </body>
 </html>
