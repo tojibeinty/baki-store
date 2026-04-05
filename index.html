@@ -1112,18 +1112,58 @@ async function loadAnalytics() {
       </div>
 
       <div id="payment-methods-admin">
-        ${['cash','supercell','usdt','cod'].map(m => `
+
+        <!-- كاش -->
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${m!=='cod'?'12px':'0'};">
-            <div style="font-weight:700;font-size:0.9rem;">${{cash:'💵 كاش',supercell:'💳 سوبر كي',usdt:'₿ USDT',cod:'🚚 الدفع عند الاستلام'}[m]}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:0.9rem;">💵 كاش</div>
             <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-              <input type="checkbox" id="pay-${m}" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
-              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-${m}-track"></span>
-              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-${m}-thumb"></span>
+              <input type="checkbox" id="pay-cash" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
+              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-cash-track"></span>
+              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-cash-thumb"></span>
             </label>
           </div>
-          ${m!=='cod'?`<input type="text" id="pay-${m}-account" placeholder="${{cash:'رقم الهاتف / الحساب',supercell:'رقم سوبر كي',usdt:'عنوان المحفظة USDT'}[m]}" onchange="savePaymentSettings()" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:ltr;text-align:right;">`:``}
-        </div>`).join('')}
+          <input type="text" id="pay-cash-account" placeholder="رقم الهاتف / الحساب" onchange="savePaymentSettings()" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:ltr;text-align:right;">
+        </div>
+
+        <!-- سوبر كي -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:0.9rem;">💳 سوبر كي</div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="pay-supercell" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
+              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-supercell-track"></span>
+              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-supercell-thumb"></span>
+            </label>
+          </div>
+          <input type="text" id="pay-supercell-account" placeholder="رقم سوبر كي" onchange="savePaymentSettings()" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:ltr;text-align:right;">
+        </div>
+
+        <!-- USDT -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-weight:700;font-size:0.9rem;">₿ USDT</div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="pay-usdt" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
+              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-usdt-track"></span>
+              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-usdt-thumb"></span>
+            </label>
+          </div>
+          <input type="text" id="pay-usdt-account" placeholder="عنوان المحفظة USDT" onchange="savePaymentSettings()" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:ltr;text-align:right;">
+        </div>
+
+        <!-- عند الاستلام -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;font-size:0.9rem;">🚚 الدفع عند الاستلام</div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="pay-cod" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
+              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-cod-track"></span>
+              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-cod-thumb"></span>
+            </label>
+          </div>
+        </div>
+
       </div>
     </div>
 
