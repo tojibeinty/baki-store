@@ -1295,6 +1295,11 @@ async function loadAnalytics() {
 
     <!-- Payment details shown after selection -->
     <div id="payment-details" style="display:none;">
+      <!-- المبلغ المطلوب -->
+      <div style="background:rgba(192,57,43,0.1);border:1px solid var(--red);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;">
+        <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px;">💰 المبلغ المطلوب دفعه</div>
+        <div id="payment-total-amount" style="font-family:var(--font-num);font-size:2rem;font-weight:700;color:var(--red);"></div>
+      </div>
       <div id="payment-account-info" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">
         <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px;">ادفع على هذا الحساب</div>
         <div id="payment-account-number" style="font-size:1.2rem;font-weight:700;color:var(--red);direction:ltr;letter-spacing:2px;"></div>
@@ -1313,6 +1318,10 @@ async function loadAnalytics() {
 
     <!-- COD - no receipt needed -->
     <div id="payment-cod-confirm" style="display:none;">
+      <div style="background:rgba(192,57,43,0.1);border:1px solid var(--red);border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;">
+        <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px;">💰 المبلغ عند الاستلام</div>
+        <div id="payment-cod-amount" style="font-family:var(--font-num);font-size:2rem;font-weight:700;color:var(--red);"></div>
+      </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;margin-bottom:16px;">
         <div style="font-size:2rem;margin-bottom:10px;">🚚</div>
         <div style="font-weight:700;margin-bottom:6px;">الدفع عند الاستلام</div>
@@ -2532,7 +2541,8 @@ async function orderNowDirect() {
 
   // لو نظام الدفع مفعّل — افتح مودال الدفع
   if (paymentSettings.enabled) {
-    openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '' });
+    const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
+    openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
     return;
   }
 
@@ -3177,10 +3187,14 @@ function selectPaymentMethod(method) {
   if (method === 'cod') {
     document.getElementById('payment-details').style.display = 'none';
     document.getElementById('payment-cod-confirm').style.display = 'block';
+    const codAmount = document.getElementById('payment-cod-amount');
+    if (codAmount && pendingOrderData.total) codAmount.textContent = pendingOrderData.total;
   } else {
     document.getElementById('payment-cod-confirm').style.display = 'none';
     const account = paymentSettings[method]?.account || '';
     document.getElementById('payment-account-number').textContent = account || 'لم يتم إضافة رقم الحساب';
+    const totalEl = document.getElementById('payment-total-amount');
+    if (totalEl && pendingOrderData.total) totalEl.textContent = pendingOrderData.total;
     document.getElementById('payment-details').style.display = 'block';
     document.getElementById('receipt-preview').innerHTML = '';
     document.getElementById('payment-receipt').value = '';
