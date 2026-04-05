@@ -691,12 +691,15 @@ async function loadAnalytics() {
   .product-img-wrap {
     position: relative;
     overflow: hidden;
-    height: 280px;
+    height: 220px;
     background: #111;
   }
   .product-img-wrap img {
     width: 100%; height: 100%;
     object-fit: cover;
+  }
+  @media (max-width: 600px) {
+    .product-img-wrap { height: 180px; }
   }
   .product-card:hover .product-img-wrap .card-main-img { transform: scale(1.06); transition: transform 0.5s; }
   .product-img-nav {
@@ -1091,6 +1094,39 @@ async function loadAnalytics() {
       <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
     </div><!-- end admin-tab-analytics -->
 
+    <!-- PAYMENT SETTINGS -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:20px;">💳 إعدادات الدفع</div>
+
+      <!-- Master switch -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div>
+          <div style="font-weight:700;font-size:0.95rem;">تفعيل نظام الدفع</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:3px;">لو مطفي — الزبون يطلب مباشرة بدون دفع</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer;">
+          <input type="checkbox" id="pay-master" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;">
+          <span id="pay-master-track" style="position:absolute;inset:0;background:#333;border-radius:14px;transition:0.3s;"></span>
+          <span id="pay-master-thumb" style="position:absolute;left:4px;top:4px;width:20px;height:20px;background:white;border-radius:50%;transition:0.3s;"></span>
+        </label>
+      </div>
+
+      <div id="payment-methods-admin">
+        ${['cash','supercell','usdt','cod'].map(m => `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${m!=='cod'?'12px':'0'};">
+            <div style="font-weight:700;font-size:0.9rem;">${{cash:'💵 كاش',supercell:'💳 سوبر كي',usdt:'₿ USDT',cod:'🚚 الدفع عند الاستلام'}[m]}</div>
+            <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+              <input type="checkbox" id="pay-${m}" onchange="savePaymentSettings()" style="opacity:0;width:0;height:0;" checked>
+              <span style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.3s;" id="pay-${m}-track"></span>
+              <span style="position:absolute;left:4px;top:4px;width:16px;height:16px;background:white;border-radius:50%;transition:0.3s;" id="pay-${m}-thumb"></span>
+            </label>
+          </div>
+          ${m!=='cod'?`<input type="text" id="pay-${m}-account" placeholder="${{cash:'رقم الهاتف / الحساب',supercell:'رقم سوبر كي',usdt:'عنوان المحفظة USDT'}[m]}" onchange="savePaymentSettings()" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:ltr;text-align:right;">`:``}
+        </div>`).join('')}
+      </div>
+    </div>
+
     <!-- VIDEO MANAGEMENT -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
       <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:#c0392b;margin-bottom:16px;">🎬 فيديوهات "على الجسم أحسن"</div>
@@ -1206,6 +1242,46 @@ async function loadAnalytics() {
       </button>
     </div>
     <p style="color:var(--muted);font-size:0.75rem;text-align:center;margin-top:10px">اطلب الآن = إرسال مباشر لتيليجرام بدون سلة</p>
+  </div>
+</div>
+
+<!-- ======= PAYMENT MODAL ======= -->
+<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+  <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;">
+    <button onclick="closePayment()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
+    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:20px;text-align:center;">💳 اختر طريقة الدفع</div>
+
+    <div id="payment-methods-list" style="margin-bottom:20px;"></div>
+
+    <!-- Payment details shown after selection -->
+    <div id="payment-details" style="display:none;">
+      <div id="payment-account-info" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">
+        <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px;">ادفع على هذا الحساب</div>
+        <div id="payment-account-number" style="font-size:1.2rem;font-weight:700;color:var(--red);direction:ltr;letter-spacing:2px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label>📸 ارفع صورة الحوالة</label>
+        <input type="file" id="payment-receipt" accept="image/*" onchange="previewReceipt(this)" style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--white);font-family:var(--font-body);">
+        <div id="receipt-preview" style="margin-top:10px;"></div>
+      </div>
+
+      <button id="pay-send-btn" onclick="sendOrderWithPayment()" class="telegram-btn" style="width:100%;margin-top:10px;">
+        ✈️ إرسال الطلب مع الحوالة
+      </button>
+    </div>
+
+    <!-- COD - no receipt needed -->
+    <div id="payment-cod-confirm" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;margin-bottom:16px;">
+        <div style="font-size:2rem;margin-bottom:10px;">🚚</div>
+        <div style="font-weight:700;margin-bottom:6px;">الدفع عند الاستلام</div>
+        <div style="color:var(--muted);font-size:0.85rem;">سيتم التواصل معك لتأكيد الطلب</div>
+      </div>
+      <button onclick="sendOrderCOD()" class="telegram-btn" style="width:100%;">
+        ✅ تأكيد الطلب
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2055,10 +2131,10 @@ function renderProducts() {
       <div class="product-img-wrap" style="position:relative;">
         <!-- scroll container -->
         <div id="pimg-track-${p.id}"
-             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:280px;direction:ltr;"
+             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:220px;direction:ltr;"
              onscroll="event.stopPropagation();onProductScroll(event,${p.id},${p.images.length})">
           ${p.images.map((img, i) => `
-            <div style="min-width:100%;scroll-snap-align:start;flex-shrink:0;height:280px;overflow:hidden;background:#111;">
+            <div style="min-width:100%;scroll-snap-align:start;flex-shrink:0;height:220px;overflow:hidden;background:#111;">
               <img ${i === 0 ? `src="${optimizeImg(img) || ''}"` : `src="" data-src="${optimizeImg(img) || ''}"`}
                    class="card-main-img lazy-img"
                    loading="${i === 0 ? 'eager' : 'lazy'}"
@@ -2414,6 +2490,13 @@ async function orderNowDirect() {
     `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '');
 
+  // لو نظام الدفع مفعّل — افتح مودال الدفع
+  if (paymentSettings.enabled) {
+    openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '' });
+    return;
+  }
+
+  // بدون نظام دفع — أرسل مباشرة
   const photoUrl = selectedProduct.images[variantIdx] || selectedProduct.images[0] || '';
   const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
@@ -2423,8 +2506,7 @@ async function orderNowDirect() {
     const data = await (res.json ? res.json() : res);
     if (data.ok) {
       showToast('✅ تم إرسال طلبك بنجاح!');
-      // Track order
-      const oTotal = (selectedProduct.price * parseInt(document.getElementById('order-qty')?.value || 1));
+      const oTotal = (selectedProduct.price * parseInt(qty));
       logEvent('order', { productId: String(selectedProduct.id), productName: selectedProduct.name, cat: selectedProduct.cat, total: String(oTotal) });
       trackEvent('purchase', 'order', selectedProduct.name, oTotal);
       closeOrder();
@@ -2961,10 +3043,180 @@ function observeLazyImgs() {
   document.querySelectorAll('img.lazy-img[data-src]').forEach(img => lazyObserver.observe(img));
 }
 
+// ============ PAYMENT SYSTEM ============
+let paymentSettings = {
+  enabled: false,
+  cash: { enabled: true, account: '' },
+  supercell: { enabled: true, account: '' },
+  usdt: { enabled: true, account: '' },
+  cod: { enabled: true }
+};
+let selectedPaymentMethod = null;
+let receiptBase64 = null;
+let pendingOrderData = null;
+
+function savePaymentSettings() {
+  paymentSettings.enabled = document.getElementById('pay-master')?.checked || false;
+  ['cash','supercell','usdt','cod'].forEach(m => {
+    paymentSettings[m].enabled = document.getElementById(`pay-${m}`)?.checked || false;
+    if (m !== 'cod') paymentSettings[m].account = document.getElementById(`pay-${m}-account`)?.value || '';
+  });
+  localStorage.setItem('baki_payment', JSON.stringify(paymentSettings));
+  updateToggleUI();
+}
+
+function loadPaymentSettings() {
+  const saved = localStorage.getItem('baki_payment');
+  if (saved) paymentSettings = JSON.parse(saved);
+  // Set UI
+  const master = document.getElementById('pay-master');
+  if (master) master.checked = paymentSettings.enabled;
+  ['cash','supercell','usdt','cod'].forEach(m => {
+    const cb = document.getElementById(`pay-${m}`);
+    if (cb) cb.checked = paymentSettings[m]?.enabled !== false;
+    if (m !== 'cod') {
+      const inp = document.getElementById(`pay-${m}-account`);
+      if (inp) inp.value = paymentSettings[m]?.account || '';
+    }
+  });
+  updateToggleUI();
+}
+
+function updateToggleUI() {
+  const updateToggle = (id, checked) => {
+    const track = document.getElementById(`${id}-track`);
+    const thumb = document.getElementById(`${id}-thumb`);
+    if (track) track.style.background = checked ? 'var(--red)' : '#333';
+    if (thumb) thumb.style.transform = checked ? 'translateX(24px)' : 'translateX(0)';
+  };
+  updateToggle('pay-master', paymentSettings.enabled);
+  ['cash','supercell','usdt','cod'].forEach(m => {
+    updateToggle(`pay-${m}`, paymentSettings[m]?.enabled !== false);
+  });
+}
+
+function openPaymentModal(orderData) {
+  pendingOrderData = orderData;
+  selectedPaymentMethod = null;
+  receiptBase64 = null;
+
+  const methodNames = { cash:'💵 كاش', supercell:'💳 سوبر كي', usdt:'₿ USDT', cod:'🚚 الدفع عند الاستلام' };
+  const list = document.getElementById('payment-methods-list');
+  const methods = ['cash','supercell','usdt','cod'].filter(m => paymentSettings[m]?.enabled !== false);
+
+  list.innerHTML = methods.map(m => `
+    <button onclick="selectPaymentMethod('${m}')" id="pay-btn-${m}" style="
+      width:100%;background:var(--card);border:1px solid var(--border);
+      color:var(--white);border-radius:10px;padding:16px;margin-bottom:10px;
+      cursor:pointer;font-family:var(--font-body);font-size:1rem;font-weight:700;
+      text-align:right;transition:all 0.2s;display:flex;align-items:center;gap:12px;
+    " onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+      <span style="font-size:1.4rem">${methodNames[m].split(' ')[0]}</span>
+      <span>${methodNames[m].split(' ').slice(1).join(' ')}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('payment-details').style.display = 'none';
+  document.getElementById('payment-cod-confirm').style.display = 'none';
+  document.getElementById('payment-modal').style.display = 'flex';
+}
+
+function closePayment() {
+  document.getElementById('payment-modal').style.display = 'none';
+  pendingOrderData = null;
+}
+
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method;
+  // highlight selected
+  ['cash','supercell','usdt','cod'].forEach(m => {
+    const btn = document.getElementById(`pay-btn-${m}`);
+    if (btn) btn.style.borderColor = m === method ? 'var(--red)' : 'var(--border)';
+  });
+
+  if (method === 'cod') {
+    document.getElementById('payment-details').style.display = 'none';
+    document.getElementById('payment-cod-confirm').style.display = 'block';
+  } else {
+    document.getElementById('payment-cod-confirm').style.display = 'none';
+    const account = paymentSettings[method]?.account || '';
+    document.getElementById('payment-account-number').textContent = account || 'لم يتم إضافة رقم الحساب';
+    document.getElementById('payment-details').style.display = 'block';
+    document.getElementById('receipt-preview').innerHTML = '';
+    document.getElementById('payment-receipt').value = '';
+    receiptBase64 = null;
+  }
+}
+
+function previewReceipt(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    receiptBase64 = e.target.result;
+    document.getElementById('receipt-preview').innerHTML = `
+      <img src="${receiptBase64}" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;border:1px solid var(--border);">
+    `;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function sendOrderWithPayment() {
+  if (!receiptBase64) { showToast('❌ ارفع صورة الحوالة أولاً'); return; }
+  const methodNames = { cash:'كاش', supercell:'سوبر كي', usdt:'USDT' };
+  const text = pendingOrderData.text + `\n💳 طريقة الدفع: ${methodNames[selectedPaymentMethod]}`;
+
+  const btn = document.getElementById('pay-send-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...';
+
+  try {
+    // Send text message
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+    // Send receipt photo
+    const blob = await (await fetch(receiptBase64)).blob();
+    const form = new FormData();
+    form.append('chat_id', CHAT_ID);
+    form.append('photo', blob, 'receipt.jpg');
+    form.append('caption', '📸 صورة الحوالة');
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: form });
+
+    showToast('✅ تم إرسال طلبك بنجاح!');
+    closePayment();
+    closeOrder();
+  } catch(e) {
+    showToast('❌ خطأ في الإرسال');
+  } finally {
+    btn.disabled = false; btn.textContent = '✈️ إرسال الطلب مع الحوالة';
+  }
+}
+
+async function sendOrderCOD() {
+  const text = pendingOrderData.text + `\n💳 طريقة الدفع: الدفع عند الاستلام 🚚`;
+  const btn = document.querySelector('#payment-cod-confirm button');
+  btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...';
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+    showToast('✅ تم إرسال طلبك بنجاح!');
+    closePayment();
+    closeOrder();
+  } catch(e) {
+    showToast('❌ خطأ في الإرسال');
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ تأكيد الطلب';
+  }
+}
+
 // ============ INIT ============
 updateCartCount();
 renderVideos();
 renderAdminVideoList();
+loadPaymentSettings();
 async function loadVideos() {
   try {
     const res = await fetch(`${FS_BASE}/videos?key=${FIREBASE_API_KEY}`);
