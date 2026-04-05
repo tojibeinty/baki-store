@@ -3219,22 +3219,46 @@ async function sendOrderWithPayment() {
   if (!receiptBase64) { showToast('❌ ارفع صورة الحوالة أولاً'); return; }
   const methodNames = { cash:'كاش', supercell:'سوبر كي', usdt:'USDT' };
   const text = pendingOrderData.text + `\n💳 طريقة الدفع: ${methodNames[selectedPaymentMethod]}`;
+  const photoUrl = pendingOrderData.photoUrl || '';
 
   const btn = document.getElementById('pay-send-btn');
   btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...';
 
   try {
-    // Send text message
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
-    });
-    // Send receipt photo
+    let orderMessageId = null;
+
+    // Step 1: Send product image with order text as caption (or text only if no image)
+    if (photoUrl && photoUrl.startsWith('http')) {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          photo: photoUrl,
+          caption: text,
+          parse_mode: 'Markdown'
+        })
+      });
+      const data = await res.json();
+      if (data.ok) orderMessageId = data.result.message_id;
+    } else {
+      // No product image — send text only
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+      });
+      const data = await res.json();
+      if (data.ok) orderMessageId = data.result.message_id;
+    }
+
+    // Step 2: Send receipt as REPLY to the order message
     const blob = await (await fetch(receiptBase64)).blob();
     const form = new FormData();
     form.append('chat_id', CHAT_ID);
     form.append('photo', blob, 'receipt.jpg');
     form.append('caption', '📸 صورة الحوالة');
+    if (orderMessageId) {
+      form.append('reply_to_message_id', orderMessageId);
+    }
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: form });
 
     showToast('✅ تم إرسال طلبك بنجاح!');
