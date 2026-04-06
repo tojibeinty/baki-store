@@ -1223,7 +1223,7 @@ async function loadAnalytics() {
     <!-- Product preview: full slider on top, info below -->
     <div style="background:var(--card);border-radius:10px;overflow:hidden;margin-bottom:20px;">
       <!-- Full-width image slider -->
-      <div style="position:relative;width:100%;height:220px;background:#111;direction:ltr;">
+      <div style="position:relative;width:100%;height:180px;background:#111;direction:ltr;">
         <div id="order-img-track"
              style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;direction:ltr;"
              onscroll="onOrderImgScroll(event)">
@@ -2371,11 +2371,11 @@ function openOrder(id) {
   // Build image slider in order modal
   const track = document.getElementById('order-img-track');
   track.innerHTML = p.images.map((img, i) => `
-    <div style="min-width:100%;scroll-snap-align:start;flex-shrink:0;height:220px;">
-      <img src="${optimizeImg(img, 500) || 'https://via.placeholder.com/400x220/111/555?text=Product'}"
-           style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"
+    <div style="min-width:100%;width:100%;scroll-snap-align:start;-webkit-scroll-snap-align:start;flex-shrink:0;height:180px;min-height:180px;background:#111;">
+      <img src="${optimizeImg(img, 500) || 'https://via.placeholder.com/400x180/111/555?text=Product'}"
+           style="width:100%;height:180px;min-height:180px;object-fit:contain;object-position:center center;display:block;pointer-events:none;-webkit-transform:translateZ(0);"
            loading="lazy"
-           onerror="this.src='https://via.placeholder.com/400x220/111/555?text=Product'">
+           onerror="this.src='https://via.placeholder.com/400x180/111/555?text=Product'">
     </div>
   `).join('');
   // Scroll to selected image
