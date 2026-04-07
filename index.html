@@ -2087,12 +2087,18 @@ async function useCoupon(coupon) {
 
 function calcDiscountedTotal(originalText, coupon) {
   if (!coupon) return originalText;
-  // Extract price number from text and apply discount
-  const match = originalText.match(/الإجمالي[:\s]*([\d,]+)\s*د\.ع/);
+  // استخرج المبلغ الإجمالي من النص
+  const match = originalText.match(/الإجمالي[^0-9]*([\d,]+)/);
   if (!match) return originalText;
   const original = parseInt(match[1].replace(/,/g, ''));
-  const discounted = Math.round(original * (1 - coupon.discount / 100));
-  return originalText + `\n🎟️ كوبون خصم: ${coupon.code} (-${coupon.discount}%)\n💰 بعد الخصم: ${discounted.toLocaleString()} د.ع`;
+  const saved = Math.round(original * coupon.discount / 100);
+  const discounted = original - saved;
+  return originalText +
+    `\n\n🎟️ كوبون الخصم: ${coupon.code}` +
+    `\n💸 نسبة الخصم: ${coupon.discount}%` +
+    `\n💵 المبلغ الأصلي: ${original.toLocaleString()} د.ع` +
+    `\n✂️ الخصم: -${saved.toLocaleString()} د.ع` +
+    `\n✅ السعر بعد الخصم: ${discounted.toLocaleString()} د.ع`;
 }
 
 function switchAdminTab(tab) {
