@@ -10,6 +10,38 @@ const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT
 const BOT_TOKEN = '7951459262:AAGo1UOG5K5_t6onmt65yctR6KIyIA2se58';       // 👈 token البوت من BotFather
 const ADMIN_CHAT_ID = '6263195701'; // 👈 chat_id حسابك من @userinfobot
 
+// ============ Cloudinary ============
+const CLOUDINARY_CLOUD = 'dx2drikbu';
+const CLOUDINARY_API_KEY = '928216213266583';
+const CLOUDINARY_API_SECRET = 'xuJxppmIZ920Xs8HSIuYgLGeEWI';
+
+async function uploadToCloudinary(imageBuffer, filename) {
+  const crypto = await import('crypto');
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = 'baki-store';
+
+  // Cloudinary signature: SHA1(param_string + api_secret)
+  const paramStr = `folder=${folder}&timestamp=${timestamp}`;
+  const signature = crypto.createHash('sha1')
+    .update(paramStr + CLOUDINARY_API_SECRET)
+    .digest('hex');
+
+  const formData = new FormData();
+  formData.append('file', new Blob([imageBuffer]), filename || 'product.jpg');
+  formData.append('api_key', CLOUDINARY_API_KEY);
+  formData.append('timestamp', String(timestamp));
+  formData.append('folder', folder);
+  formData.append('signature', signature);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (!data.secure_url) throw new Error(data.error?.message || 'Cloudinary upload failed');
+  return data.secure_url;
+}
+
 // ============ حالة المحادثة (في الذاكرة — Vercel serverless) ============
 // ملاحظة: Vercel serverless لا يحتفظ بالحالة بين الطلبات
 // لذا نستخدم Firebase لحفظ حالة المحادثة
@@ -288,18 +320,40 @@ async function handleMessage(msg) {
   }
 
   if (step === 'await_image_file') {
-    // المستخدم أرسل صورة
+    // المستخدم أرسل صورة مباشرة
     if (photo && photo.length > 0) {
-      const fileId = photo[photo.length - 1].file_id;
-      // احصل على رابط الصورة من تيليغرام
-      const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-      const fileData = await fileRes.json();
-      const filePath = fileData.result?.file_path;
-      const imageUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
-      await setSession(chatId, { ...session, step: 'await_badge', image: imageUrl });
-      await sendMessage(chatId, '✅ استلمت الصورة!\n\n🏅 اختر *الباج* (الشارة على المنتج):', BADGE_KEYBOARD);
+      await sendMessage(chatId, '⏳ جاري رفع الصورة على Cloudinary...');
+      try {
+        const fileId = photo[photo.length - 1].file_id;
+        // احصل على مسار الملف من تيليغرام
+        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileData = await fileRes.json();
+        const filePath = fileData.result?.file_path;
+        // حمّل الصورة من تيليغرام
+        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
+        const imageBuffer = await tgImageRes.arrayBuffer();
+        // ارفعها على Cloudinary
+        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        await setSession(chatId, { ...session, step: 'await_badge', image: cloudUrl });
+        await sendMessage(chatId, '✅ تم رفع الصورة بنجاح!\n\n🏅 اختر *الباج* (الشارة على المنتج):', BADGE_KEYBOARD);
+      } catch (e) {
+        await sendMessage(chatId, '❌ فشل رفع الصورة، حاول مرة ثانية.');
+        console.error('Cloudinary error:', e);
+      }
+    } else if (text && text.startsWith('http')) {
+      // المستخدم أرسل رابط — ارفعه على Cloudinary أيضاً
+      await sendMessage(chatId, '⏳ جاري رفع الصورة...');
+      try {
+        const imgRes = await fetch(text.trim());
+        const imageBuffer = await imgRes.arrayBuffer();
+        const cloudUrl = await uploadToCloudinary(imageBuffer, 'product.jpg');
+        await setSession(chatId, { ...session, step: 'await_badge', image: cloudUrl });
+        await sendMessage(chatId, '✅ تم رفع الصورة!\n\n🏅 اختر *الباج*:', BADGE_KEYBOARD);
+      } catch {
+        await sendMessage(chatId, '❌ فشل رفع الصورة، تأكد من الرابط وحاول مرة ثانية.');
+      }
     } else {
-      await sendMessage(chatId, '❌ أرسل صورة أو رابط صورة من imgbb:\nhttps://imgbb.com');
+      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة من جهازك، أو أرسل *رابط* صورة يبدأ بـ https://');
     }
     return;
   }
