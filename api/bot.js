@@ -147,7 +147,18 @@ const MAIN_MENU = {
     [{ text: '🗑 حذف منتج', callback_data: 'delete_product' }],
     [{ text: '🎟 إضافة كوبون', callback_data: 'add_coupon' }],
     [{ text: '🎟 عرض الكوبونات', callback_data: 'list_coupons' }],
+    [{ text: '💳 وسائل الدفع', callback_data: 'payment_menu' }],
     [{ text: '📊 إحصائيات', callback_data: 'stats' }],
+  ]
+};
+
+const PAYMENT_MENU = {
+  inline_keyboard: [
+    [{ text: '💵 كاش (زين كاش / آسياسيل)', callback_data: 'pay_manage_cash' }],
+    [{ text: '🎮 سوبر كي (Supercell)', callback_data: 'pay_manage_supercell' }],
+    [{ text: '💎 USDT', callback_data: 'pay_manage_usdt' }],
+    [{ text: '🚚 الدفع عند الاستلام (COD)', callback_data: 'pay_manage_cod' }],
+    [{ text: '🔙 رجوع', callback_data: 'back_main' }],
   ]
 };
 
@@ -253,6 +264,66 @@ async function getStats() {
     }
     return `📊 *إحصائيات باكي ستور*\n\n📦 المنتجات: ${prodCount}\n🎟 الكوبونات: ${couponCount}\n👁 زيارات اليوم: ${todayVisits}`;
   } catch { return '❌ خطأ في تحميل الإحصائيات'; }
+}
+
+// ============ وسائل الدفع ============
+const PAY_LABELS = {
+  cash: '💵 كاش (زين كاش / آسياسيل)',
+  supercell: '🎮 سوبر كي',
+  usdt: '💎 USDT',
+  cod: '🚚 الدفع عند الاستلام'
+};
+
+async function loadPaymentSettings() {
+  try {
+    const doc = await fsGet('settings', 'payment');
+    if (!doc?.fields) return { cash: { enabled: false, account: '' }, supercell: { enabled: false, account: '' }, usdt: { enabled: false, account: '' }, cod: { enabled: false, account: '' } };
+    const f = doc.fields;
+    return {
+      cash:      { enabled: f.cashEnabled?.booleanValue ?? false,      account: f.cashAccount?.stringValue ?? '' },
+      supercell: { enabled: f.supercellEnabled?.booleanValue ?? false,  account: f.supercellAccount?.stringValue ?? '' },
+      usdt:      { enabled: f.usdtEnabled?.booleanValue ?? false,       account: f.usdtAccount?.stringValue ?? '' },
+      cod:       { enabled: f.codEnabled?.booleanValue ?? false,        account: '' }
+    };
+  } catch { return { cash: { enabled: false, account: '' }, supercell: { enabled: false, account: '' }, usdt: { enabled: false, account: '' }, cod: { enabled: false, account: '' } }; }
+}
+
+async function savePaymentSettings(settings) {
+  await fetch(`${FS_BASE}/settings/payment?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=cashEnabled&updateMask.fieldPaths=cashAccount&updateMask.fieldPaths=supercellEnabled&updateMask.fieldPaths=supercellAccount&updateMask.fieldPaths=usdtEnabled&updateMask.fieldPaths=usdtAccount&updateMask.fieldPaths=codEnabled`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: {
+      cashEnabled:      { booleanValue: settings.cash.enabled },
+      cashAccount:      { stringValue: settings.cash.account || '' },
+      supercellEnabled: { booleanValue: settings.supercell.enabled },
+      supercellAccount: { stringValue: settings.supercell.account || '' },
+      usdtEnabled:      { booleanValue: settings.usdt.enabled },
+      usdtAccount:      { stringValue: settings.usdt.account || '' },
+      codEnabled:       { booleanValue: settings.cod.enabled },
+    }})
+  });
+}
+
+function paymentStatusText(settings) {
+  return Object.entries(PAY_LABELS).map(([key, label]) => {
+    const s = settings[key];
+    const status = s.enabled ? '✅ مفعّل' : '❌ موقوف';
+    const account = key !== 'cod' && s.account ? `\n   📋 الحساب: \`${s.account}\`` : '';
+    return `${label}\n   ${status}${account}`;
+  }).join('\n\n');
+}
+
+function payManageKeyboard(method, settings) {
+  const s = settings[method];
+  const toggleLabel = s.enabled ? '🔴 إيقاف' : '🟢 تفعيل';
+  const rows = [
+    [{ text: toggleLabel, callback_data: `pay_toggle_${method}` }],
+  ];
+  if (method !== 'cod') {
+    rows.push([{ text: '✏️ تغيير رقم الحساب', callback_data: `pay_edit_account_${method}` }]);
+  }
+  rows.push([{ text: '🔙 رجوع لوسائل الدفع', callback_data: 'payment_menu' }]);
+  return { inline_keyboard: rows };
 }
 
 // ============ معالج الرسائل الرئيسي ============
@@ -400,6 +471,22 @@ async function handleMessage(msg) {
     return;
   }
 
+  // ============ خطوات تعديل حساب الدفع ============
+  if (step === 'await_pay_account') {
+    const method = session.payMethod;
+    const account = text.trim();
+    try {
+      const settings = await loadPaymentSettings();
+      settings[method].account = account;
+      await savePaymentSettings(settings);
+      await clearSession(chatId);
+      await sendMessage(chatId, `✅ تم تحديث رقم حساب *${PAY_LABELS[method]}*:\n\`${account}\``, PAYMENT_MENU);
+    } catch {
+      await sendMessage(chatId, '❌ خطأ في الحفظ.', PAYMENT_MENU);
+    }
+    return;
+  }
+
   // fallback
   await sendMessage(chatId, '👇 استخدم /start للقائمة الرئيسية', MAIN_MENU);
 }
@@ -523,6 +610,57 @@ async function handleCallback(cb) {
     } catch {
       await sendMessage(chatId, '❌ خطأ في حفظ المنتج.', MAIN_MENU);
     }
+    return;
+  }
+
+  if (data === 'back_main') {
+    await clearSession(chatId);
+    await sendMessage(chatId, '🏠 القائمة الرئيسية:', MAIN_MENU);
+    return;
+  }
+
+  // ============ قائمة وسائل الدفع ============
+  if (data === 'payment_menu') {
+    const settings = await loadPaymentSettings();
+    await sendMessage(chatId,
+      `💳 *وسائل الدفع*\n\n${paymentStatusText(settings)}\n\nاختر وسيلة لإدارتها:`,
+      PAYMENT_MENU
+    );
+    return;
+  }
+
+  // إدارة وسيلة معينة
+  if (data.startsWith('pay_manage_')) {
+    const method = data.replace('pay_manage_', '');
+    const settings = await loadPaymentSettings();
+    const s = settings[method];
+    const statusIcon = s.enabled ? '✅ مفعّل' : '❌ موقوف';
+    let msg = `${PAY_LABELS[method]}\n\nالحالة: *${statusIcon}*`;
+    if (method !== 'cod' && s.account) msg += `\nرقم الحساب: \`${s.account}\``;
+    await sendMessage(chatId, msg, payManageKeyboard(method, settings));
+    return;
+  }
+
+  // تفعيل / إيقاف
+  if (data.startsWith('pay_toggle_')) {
+    const method = data.replace('pay_toggle_', '');
+    try {
+      const settings = await loadPaymentSettings();
+      settings[method].enabled = !settings[method].enabled;
+      await savePaymentSettings(settings);
+      const newStatus = settings[method].enabled ? '✅ تم التفعيل' : '🔴 تم الإيقاف';
+      await sendMessage(chatId, `${newStatus} — *${PAY_LABELS[method]}*`, payManageKeyboard(method, settings));
+    } catch {
+      await sendMessage(chatId, '❌ خطأ في الحفظ.');
+    }
+    return;
+  }
+
+  // تعديل رقم الحساب
+  if (data.startsWith('pay_edit_account_')) {
+    const method = data.replace('pay_edit_account_', '');
+    await setSession(chatId, { step: 'await_pay_account', payMethod: method });
+    await sendMessage(chatId, `✏️ أرسل *رقم الحساب الجديد* لـ ${PAY_LABELS[method]}:\n\n_(أرسل /cancel للإلغاء)_`);
     return;
   }
 }
