@@ -2109,17 +2109,25 @@ async function applyCouponCOD() {
 }
 
 async function useCoupon(coupon) {
-  // Decrement usesLeft, delete if reaches 0
-  const newUses = coupon.usesLeft - 1;
-  if (newUses <= 0) {
-    await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
-  } else {
-    await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=usesLeft`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: { usesLeft: { integerValue: newUses } } })
-    });
-  }
+  // اقرأ القيمة الحالية من Firebase مباشرة (مو من الكاش)
+  try {
+    const res = await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`);
+    const data = await res.json();
+    const currentUses = parseInt(data.fields?.usesLeft?.integerValue || data.fields?.usesLeft?.doubleValue || 0);
+    const newUses = currentUses - 1;
+
+    if (newUses <= 0) {
+      // انتهت الاستخدامات — احذف الكوبون
+      await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+    } else {
+      // نقص واحد وحفظ
+      await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=usesLeft`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: { usesLeft: { integerValue: newUses } } })
+      });
+    }
+  } catch(e) { console.error('خطأ في تحديث الكوبون:', e); }
 }
 
 function calcDiscountedTotal(originalText, coupon) {
@@ -2812,8 +2820,7 @@ async function orderNowDirect() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
 
   try {
-    const res = await sendOrderWithPhoto(text, photoUrl);
-    const data = await (res.json ? res.json() : res);
+    const data = await sendOrderWithPhoto(text, photoUrl);
     if (data.ok) {
       showToast('✅ تم إرسال طلبك بنجاح!');
       const oTotal = (selectedProduct.price * parseInt(qty));
@@ -3060,16 +3067,8 @@ function renderAdminVideoList() {
 
 // ============ SEND ORDER WITH PHOTO ============
 async function sendOrderWithPhoto(text, photoUrl) {
-  // أرسل الصورة مع الطلب
-  if (photoUrl && photoUrl.startsWith('data:')) {
-    // base64 — أرسل نص بدون صورة لأن تيليجرام ما يقبل base64 مباشرة
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
-    });
-  } else if (photoUrl && photoUrl.startsWith('http')) {
-    // رابط خارجي — أرسل صورة مع caption
+  if (photoUrl && photoUrl.startsWith('http')) {
+    // رابط خارجي — أرسل صورة مع نص الطلب كـ caption
     try {
       const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
         method: 'POST',
@@ -3077,22 +3076,23 @@ async function sendOrderWithPhoto(text, photoUrl) {
         body: JSON.stringify({ chat_id: CHAT_ID, photo: photoUrl, caption: text, parse_mode: 'Markdown' })
       });
       const data = await res.json();
-      if (!data.ok) throw new Error();
-      return data;
+      if (data.ok) return data;
+      // لو فشلت الصورة (مثلاً base64 أو رابط منتهي) أرسل نص
+      throw new Error('photo_failed');
     } catch {
-      // لو فشلت الصورة، أرسل نص فقط
-      return await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      return (await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
-      });
+      })).json();
     }
   } else {
-    return await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    // base64 أو لا توجد صورة — أرسل نص فقط
+    return (await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
-    });
+    })).json();
   }
 }
 // اضغط على اللوغو 5 مرات متتالية لإظهار زر الإدارة
