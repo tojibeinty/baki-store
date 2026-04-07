@@ -7,8 +7,8 @@ const FIREBASE_PROJECT = 'baki-store-9bc21';
 const FIREBASE_API_KEY = 'AIzaSyDNyLcBRcVOQ5jxWlML1Jk0GNaOfybPqLM';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT}/databases/(default)/documents`;
 
-const BOT_TOKEN = process.env.ADMIN_BOT_TOKEN;   // بوت إداري منفصل
-const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;  // chat_id الخاص بيك
+const BOT_TOKEN = '7951459262:AAGo1UOG5K5_t6onmt65yctR6KIyIA2se58';       // 👈 token البوت من BotFather
+const ADMIN_CHAT_ID = '6263195701'; // 👈 chat_id حسابك من @userinfobot
 
 // ============ حالة المحادثة (في الذاكرة — Vercel serverless) ============
 // ملاحظة: Vercel serverless لا يحتفظ بالحالة بين الطلبات
