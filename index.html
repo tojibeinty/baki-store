@@ -1145,6 +1145,31 @@ async function loadAnalytics() {
 
       <!-- List -->
       <div class="admin-product-list" id="pt-admin-list" style="margin-top:24px;"></div>
+
+      <!-- ===== PRINT DESIGNS LIBRARY ===== -->
+      <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+        <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:8px;">🖼 مكتبة الطبعات</div>
+        <div style="color:var(--muted);font-size:0.8rem;margin-bottom:20px;">أضف طبعات هنا — الزبون يشوفها ويختار منها أو يرفع تصميمه</div>
+
+        <div class="form-group">
+          <label>اسم الطبعة</label>
+          <input type="text" id="pd-name" placeholder="مثال: شعار باكي الكلاسيكي">
+        </div>
+        <div class="form-group">
+          <label>📸 صورة الطبعة (PNG شفاف أفضل)</label>
+          <input type="file" id="pd-image" accept="image/*" onchange="previewPdImage(this)">
+          <div id="pd-img-preview" style="margin-top:8px;"></div>
+        </div>
+        <div class="form-group">
+          <label>🔗 أو رابط صورة الطبعة</label>
+          <input type="text" id="pd-url" placeholder="https://res.cloudinary.com/..." dir="ltr"
+            style="direction:ltr;"
+            onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <button class="btn-primary" onclick="addPrintDesign()" style="margin-bottom:0;">➕ إضافة الطبعة للمكتبة</button>
+
+        <div id="pd-admin-list" style="margin-top:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;"></div>
+      </div>
     </div><!-- end admin-tab-print -->
 
     <!-- Analytics Tab -->
@@ -1803,8 +1828,10 @@ async function loadAnalytics() {
               <div style="font-size:0.8rem;color:var(--muted);"><strong style="color:var(--white);">ارفع تصميمك</strong><br>PNG أو JPG</div>
             </div>
             <input type="file" id="studio-file" accept="image/*" style="display:none" onchange="studioOnFile(this)">
-            <div style="text-align:center;color:var(--muted);font-size:0.72rem;margin:10px 0;letter-spacing:2px;">— أو اختر رمز —</div>
-            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+            <div style="text-align:center;color:var(--muted);font-size:0.72rem;margin:10px 0;letter-spacing:2px;">— أو اختر من المكتبة —</div>
+            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:220px;overflow-y:auto;padding:2px;">
+              <div id="studio-lib-empty" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.75rem;padding:12px;">جاري التحميل...</div>
+            </div>
           </div>
 
           <!-- Position & Scale -->
@@ -4069,7 +4096,7 @@ function renderPtAdminList() {
     `).join('');
 }
 
-window.addEventListener('load', loadPrintProducts);
+window.addEventListener('load', () => { loadPrintProducts(); loadPrintDesigns(); });
 
 
 const PRINT_COLORS = [
@@ -4077,7 +4104,121 @@ const PRINT_COLORS = [
   { label: 'أحمر',      hex: '#c0392b' },
   { label: 'أزرق داكن', hex: '#1a3a5c' },
 ];
-const STUDIO_LIBRARY = ['★','♥','☽','⚡','◆','∞','✦','⚘'];
+// مكتبة الطبعات — تتحمّل من Firebase
+let printDesigns = [];
+
+async function loadPrintDesigns() {
+  try {
+    const res = await fetch(`${FS_BASE}/printDesigns?key=${FIREBASE_API_KEY}`);
+    const data = await res.json();
+    if (data.documents) {
+      printDesigns = data.documents.map(d => ({
+        _docId: d.name.split('/').pop(),
+        id: d.name.split('/').pop(),
+        name: d.fields?.name?.stringValue || 'طبعة',
+        url: d.fields?.url?.stringValue || ''
+      })).filter(d => d.url);
+    } else {
+      printDesigns = [];
+    }
+    renderStudioLib();
+    renderPdAdminList();
+  } catch(e) {
+    printDesigns = [];
+  }
+}
+
+async function savePrintDesignToFirebase(design) {
+  const body = {
+    fields: {
+      name: { stringValue: design.name },
+      url:  { stringValue: design.url }
+    }
+  };
+  await fetch(`${FS_BASE}/printDesigns?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  await loadPrintDesigns();
+}
+
+async function deletePrintDesign(docId) {
+  if (!confirm('حذف هذه الطبعة؟')) return;
+  await fetch(`${FS_BASE}/printDesigns/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+  await loadPrintDesigns();
+}
+
+function previewPdImage(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const prev = document.getElementById('pd-img-preview');
+  const r = new FileReader();
+  r.onload = e => {
+    prev.innerHTML = `<img src="${e.target.result}" style="width:80px;height:80px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:#111;">`;
+  };
+  r.readAsDataURL(f);
+}
+
+async function addPrintDesign() {
+  const name = (document.getElementById('pd-name')?.value || '').trim() || 'طبعة';
+  const urlInput = document.getElementById('pd-url')?.value.trim() || '';
+  const file = document.getElementById('pd-image')?.files[0];
+
+  let url = urlInput;
+  if (file && !url) {
+    showToast('⏳ جاري رفع الطبعة...');
+    try { url = await uploadToCloudinary(file); }
+    catch(e) { showToast('❌ فشل رفع الصورة'); return; }
+  }
+  if (!url) { showToast('❌ أضف صورة أو رابط'); return; }
+
+  showToast('⏳ جاري الحفظ...');
+  try {
+    await savePrintDesignToFirebase({ name, url });
+    document.getElementById('pd-name').value = '';
+    document.getElementById('pd-url').value = '';
+    document.getElementById('pd-image').value = '';
+    document.getElementById('pd-img-preview').innerHTML = '';
+    showToast('✅ تمت إضافة الطبعة');
+  } catch(e) { showToast('❌ خطأ في الحفظ'); }
+}
+
+function renderPdAdminList() {
+  const list = document.getElementById('pd-admin-list');
+  if (!list) return;
+  if (printDesigns.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;">لا توجد طبعات بعد</p>';
+    return;
+  }
+  list.innerHTML = printDesigns.map(d => `
+    <div style="position:relative;background:var(--deep);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <img src="${d.url}" alt="${d.name}" style="width:100%;aspect-ratio:1;object-fit:contain;background:#111;display:block;"
+        onerror="this.src='https://via.placeholder.com/100/181818/555?text=!'">
+      <div style="padding:6px 8px;font-size:0.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
+      <button onclick="deletePrintDesign('${d._docId}')"
+        style="position:absolute;top:6px;right:6px;background:rgba(192,57,43,0.85);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+  `).join('');
+}
+
+function renderStudioLib() {
+  const lib = document.getElementById('studio-lib');
+  if (!lib) return;
+  if (printDesigns.length === 0) {
+    lib.innerHTML = '<div id="studio-lib-empty" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:0.75rem;padding:12px;">لا توجد طبعات في المكتبة بعد</div>';
+    return;
+  }
+  lib.innerHTML = printDesigns.map(d => `
+    <div onclick="studioSetDesign('${d.url}','${d._docId}',this)"
+      class="studio-design-item"
+      data-id="${d._docId}"
+      style="border-radius:8px;border:2px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.15s;background:#111;aspect-ratio:1;">
+      <img src="${d.url}" alt="${d.name}"
+        style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;"
+        onerror="this.src='https://via.placeholder.com/100/181818/555?text=!'">
+    </div>
+  `).join('');
+}
 
 let studioState = {
   product: null,
@@ -4172,17 +4313,30 @@ function studioSelectTshirt(id) {
   document.getElementById('studio-price-display').textContent = p.price.toLocaleString() + ' د.ع';
 }
 
-// Build library
-function studioInitLib() {
-  const lib = document.getElementById('studio-lib');
-  if (!lib) return;
-  lib.innerHTML = STUDIO_LIBRARY.map((em,i) => `
-    <div onclick="studioSetEmoji('${em}',this)"
-      style="aspect-ratio:1;background:var(--deep);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all 0.15s;${i===0?'border-color:var(--red);':''}"
-      class="studio-lib-item">
-      ${em}
-    </div>
-  `).join('');
+// studioSetDesign — اختيار طبعة من المكتبة
+function studioSetDesign(url, id, btn) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    studioState.designImg = img;
+    studioState.designEmoji = null;
+    studioState.selectedDesignUrl = url;
+    document.querySelectorAll('.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
+    if (btn) btn.style.borderColor='var(--red)';
+    studioDraw();
+  };
+  img.onerror = () => {
+    // fallback: حمّل بدون CORS
+    const img2 = new Image();
+    img2.onload = () => {
+      studioState.designImg = img2;
+      studioState.designEmoji = null;
+      studioState.selectedDesignUrl = url;
+      studioDraw();
+    };
+    img2.src = url + '?t=' + Date.now();
+  };
+  img.src = url;
 }
 
 let _studioCanvas = null;
@@ -4287,17 +4441,18 @@ function studioSetSize(s, btn) {
 }
 
 function studioSetEmoji(em, btn) {
+  // kept for backward compat — not used with new design system
   studioState.designEmoji = em;
   studioState.designImg = null;
-  document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
-  if (btn) btn.style.borderColor='var(--red)';
   studioDraw();
 }
 
 function studioClear() {
   studioState.designImg = null;
   studioState.designEmoji = null;
-  document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
+  studioState.selectedDesignUrl = null;
+  document.querySelectorAll('.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
+  document.getElementById('studio-file').value = '';
   studioDraw();
 }
 
@@ -4309,7 +4464,9 @@ function studioOnFile(inp) {
     img.onload = () => {
       studioState.designImg = img;
       studioState.designEmoji = null;
-      document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
+      studioState.selectedDesignUrl = null;
+      // إلغاء تحديد أي طبعة من المكتبة
+      document.querySelectorAll('.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
       studioDraw();
     };
     img.src = e.target.result;
@@ -4404,16 +4561,21 @@ async function studioSendOrder() {
   const colorLabel = PRINT_COLORS.find(c=>c.hex===studioState.printColor)?.label || studioState.printColor;
   const designLabel = studioState.designImg ? 'تصميم مرفوع' : (studioState.designEmoji || 'بدون');
 
+  const posLabel = studioState.pos==='chest'?'الصدر':studioState.pos==='center'?'الوسط':'كامل';
+  const designSourceLabel = studioState.selectedDesignUrl
+    ? '✅ من مكتبة الطبعات'
+    : (studioState.designImg ? '📤 تصميم مرفوع من الزبون' : '—');
+
   const caption =
     `🎨 *طلب طبعة — باكي ستور*\n\n` +
     `👤 الاسم: ${name}\n` +
     `📱 الهاتف: ${phone}\n` +
     `📍 المحافظة: ${city}\n` +
-    `👕 التيشيرت: ${p.name}${p.fabric?' ('+p.fabric+')':''}\n` +
+    `👕 التيشيرت: ${p.name}${p.fabric?' — '+p.fabric:''}\n` +
     `🎨 لون الطبعة: ${colorLabel}\n` +
-    `🖼 التصميم: ${designLabel}\n` +
+    `🖼 التصميم: ${designSourceLabel}\n` +
     `📏 المقاس: ${studioState.size||'—'}\n` +
-    `📌 الموضع: ${studioState.pos==='chest'?'الصدر':studioState.pos==='center'?'الوسط':'كامل'}\n` +
+    `📌 الموضع: ${posLabel} — حجم ${studioState.scale}%\n` +
     `💰 السعر: ${p.price.toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '');
 
@@ -4503,6 +4665,22 @@ async function studioSendOrder() {
       });
     }
 
+    // لو الزبون اختار طبعة من المكتبة — أرسل صورتها منفصلة بوضوح
+    if (studioState.selectedDesignUrl) {
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: CHAT_ID,
+            photo: studioState.selectedDesignUrl,
+            caption: `🖼 الطبعة المختارة من المكتبة\n👕 ${p.name} — ${colorLabel}`,
+            parse_mode: 'Markdown'
+          })
+        });
+      } catch(e) { /* silent */ }
+    }
+
     document.getElementById('print-order-modal').style.display = 'none';
     document.getElementById('pom-name').value = '';
     document.getElementById('pom-phone').value = '';
@@ -4536,7 +4714,7 @@ window.addEventListener('DOMContentLoaded', () => {
     li.innerHTML = '<a onclick="scrollToSection(\'print-studio\')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
     navLinks.appendChild(li);
   }
-  studioInitLib();
+  loadPrintDesigns();
   studioInitDrag();
   renderStudioTshirts();
 });
