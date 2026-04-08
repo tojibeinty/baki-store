@@ -1794,50 +1794,18 @@ async function loadAnalytics() {
       <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">02 — صمّم طبعتك</div>
       <div style="display:grid;grid-template-columns:1fr 280px;gap:24px;" id="studio-grid">
 
-        <!-- 3D Viewer -->
-        <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;min-height:480px;position:relative;overflow:hidden;">
-
-          <!-- hint -->
-          <div style="font-size:0.72rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-            <span>↔</span><span>اسحب لتدوير التيشيرت 360°</span>
+        <!-- Viewer -->
+        <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;min-height:480px;position:relative;">
+          <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
+            <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
+              style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
+            <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
+            <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
           </div>
-
-          <!-- 3D scene -->
-          <div id="viewer3d-scene" style="perspective:900px;width:300px;height:360px;cursor:grab;user-select:none;touch-action:none;">
-            <div id="viewer3d-card" style="
-              width:100%;height:100%;
-              position:relative;
-              transform-style:preserve-3d;
-              transition:transform 0.05s linear;
-              transform:rotateY(0deg) rotateX(2deg);
-            ">
-              <!-- Front face: shirt + design overlay -->
-              <div style="position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;overflow:hidden;background:#111;">
-                <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
-                  style="width:100%;height:100%;object-fit:contain;display:block;">
-                <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
-              </div>
-              <!-- Back face: شيل التيشيرت الخلفي (نفس الصورة مع overlay) -->
-              <div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;background:#0e0e0e;">
-                <img id="studio-shirt-back" src="" alt=""
-                  style="width:100%;height:100%;object-fit:contain;display:block;filter:brightness(0.85);">
-                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-                  <span style="font-family:var(--font-display);font-size:1.2rem;letter-spacing:4px;color:rgba(255,255,255,0.15);">BACK</span>
-                </div>
-              </div>
-              <!-- Side shadow overlay for depth -->
-              <div id="viewer3d-shadow" style="position:absolute;inset:0;border-radius:12px;pointer-events:none;background:linear-gradient(to right,rgba(0,0,0,0.35) 0%,transparent 30%,transparent 70%,rgba(0,0,0,0.35) 100%);opacity:0;transition:opacity 0.1s;"></div>
-            </div>
-          </div>
-
-          <!-- design drag layer (active only on front face) -->
-          <div id="studio-drag" style="position:absolute;top:60px;left:50%;transform:translateX(-50%);width:300px;height:360px;cursor:crosshair;z-index:20;"></div>
-
-          <!-- controls row -->
-          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;">
-            <button onclick="viewer3dReset()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">↺ إعادة</button>
+          <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ إعادة الموضع</button>
             <button onclick="studioClear()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕ مسح</button>
-            <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ موضع الطبعة</button>
           </div>
         </div>
 
@@ -1915,18 +1883,9 @@ async function loadAnalytics() {
 .active-pos{border-color:var(--red)!important;background:rgba(192,57,43,0.1)!important;color:var(--white)!important;}
 #studio-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--red);border-radius:50%;cursor:pointer;}
-
-/* 3D viewer */
-#viewer3d-scene { perspective: 900px; }
-#viewer3d-card  { transform-style: preserve-3d; will-change: transform; }
-#viewer3d-scene.grabbing { cursor: grabbing; }
-/* design drag mode cursor */
-#studio-drag.design-mode { cursor: move; }
-
 @media(max-width:900px){
   #studio-grid{grid-template-columns:1fr!important;}
-  #viewer3d-scene{width:240px!important;height:296px!important;}
-  #studio-drag{width:240px!important;height:296px!important;}
+  #studio-stage{width:240px;height:296px;}
 }
 </style>
 
@@ -4067,30 +4026,18 @@ async function addPrintProduct() {
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً على الأقل'); return; }
   if (printColors.length === 0) { showToast('❌ اختر لون طبعة واحد على الأقل'); return; }
 
-  const addBtn = document.querySelector('[onclick="addPrintProduct()"]');
+  showToast('⏳ جاري رفع الصور...');
   const imageFiles = document.getElementById('pt-images').files;
   let images = [];
-
-  if (imageFiles.length > 0) {
-    // show progress
-    if (addBtn) { addBtn.disabled = true; addBtn.textContent = `⏳ جاري رفع الصور (0/${imageFiles.length})...`; }
-    try {
-      for (let i = 0; i < imageFiles.length; i++) {
-        if (addBtn) addBtn.textContent = `⏳ جاري رفع الصور (${i+1}/${imageFiles.length})...`;
-        const url = await uploadToCloudinary(imageFiles[i]);
-        images.push(url);
-        // show thumb update
-        const thumbs = document.querySelectorAll('#pt-img-preview img');
-        if (thumbs[i]) thumbs[i].style.border = '2px solid #2ecc71';
-      }
-    } catch(e) {
-      showToast('❌ خطأ في رفع الصور على Cloudinary');
-      if (addBtn) { addBtn.disabled = false; addBtn.textContent = '➕ إضافة تيشيرت الطبعة'; }
-      return;
+  try {
+    for (let i = 0; i < imageFiles.length; i++) {
+      const url = await uploadToCloudinary(imageFiles[i]);
+      images.push(url);
     }
+  } catch(e) {
+    showToast('❌ خطأ في رفع الصور');
+    return;
   }
-
-  // fallback to URL inputs
   if (images.length === 0) {
     document.querySelectorAll('#pt-url-inputs-wrap input[type=text]').forEach(inp => {
       const v = inp.value.trim();
@@ -4099,8 +4046,8 @@ async function addPrintProduct() {
     if (images.length === 0) images.push('');
   }
 
-  if (addBtn) addBtn.textContent = '⏳ جاري الحفظ...';
   const product = { id: Date.now(), name, fabric, printColors, price: parseInt(price), oldPrice, desc, sizes, images };
+  showToast('⏳ جاري الحفظ...');
   try {
     await savePrintProductToFirebase(product);
     showToast('✅ تمت إضافة تيشيرت الطبعة');
@@ -4115,8 +4062,6 @@ async function addPrintProduct() {
     ptTempImages = [];
   } catch(e) {
     showToast('❌ خطأ في الحفظ');
-  } finally {
-    if (addBtn) { addBtn.disabled = false; addBtn.textContent = '➕ إضافة تيشيرت الطبعة'; }
   }
 }
 
@@ -4331,18 +4276,11 @@ function studioSelectTshirt(id) {
   document.getElementById('studio-main').style.display = 'block';
   document.getElementById('studio-main').scrollIntoView({ behavior:'smooth', block:'start' });
 
-  // Set shirt images — front + back (use second image if available, else same)
+  // Set shirt image
   const imgEl = document.getElementById('studio-shirt-img');
-  const backEl = document.getElementById('studio-shirt-back');
   imgEl.src = p.images[0] || '';
-  if (backEl) backEl.src = p.images[1] || p.images[0] || '';
-
-  // Init canvas after image loads
   imgEl.onload = () => { setTimeout(studioInitCanvas, 60); };
   if (imgEl.complete && imgEl.src) setTimeout(studioInitCanvas, 60);
-
-  // Reset 3D rotation
-  viewer3dReset();
 
   // Render print colors from product
   const colorsWrap = document.getElementById('studio-colors');
@@ -4403,6 +4341,7 @@ function studioSetDesign(url, id, btn) {
 
 let _studioCanvas = null;
 let _studioCtx = null;
+let _studioStage = null;
 
 function getStudioCanvas() {
   if (!_studioCanvas) _studioCanvas = document.getElementById('studio-canvas');
@@ -4412,116 +4351,31 @@ function getStudioCtx() {
   if (!_studioCtx && getStudioCanvas()) _studioCtx = getStudioCanvas().getContext('2d');
   return _studioCtx;
 }
-// kept for any legacy calls
-function getStudioStage() { return document.getElementById('viewer3d-scene'); }
+function getStudioStage() {
+  if (!_studioStage) _studioStage = document.getElementById('studio-stage');
+  return _studioStage;
+}
+
+// Keep these as aliases for backward compat
 Object.defineProperty(window, 'studioCanvas', { get: getStudioCanvas });
 Object.defineProperty(window, 'studioCtx',   { get: getStudioCtx });
 Object.defineProperty(window, 'studioStage', { get: getStudioStage });
 
-// ===================== 3D VIEWER =====================
-const viewer3d = {
-  rotY: 0, rotX: 2,
-  dragging: false,
-  lastX: 0, lastY: 0,
-  vel: 0,          // inertia
-  raf: null,
-  designMode: false // true = drag moves design, false = drag rotates shirt
-};
-
-function viewer3dGetCard()  { return document.getElementById('viewer3d-card'); }
-function viewer3dGetScene() { return document.getElementById('viewer3d-scene'); }
-
-function viewer3dApply() {
-  const card = viewer3dGetCard();
-  if (!card) return;
-  card.style.transform = `rotateY(${viewer3d.rotY}deg) rotateX(${viewer3d.rotX}deg)`;
-  // shadow depth effect
-  const shadow = document.getElementById('viewer3d-shadow');
-  if (shadow) {
-    const absY = Math.abs(viewer3d.rotY % 360);
-    // max shadow at 90 / 270
-    const norm = Math.sin((absY * Math.PI) / 180);
-    shadow.style.opacity = Math.abs(norm) * 0.7;
-  }
-  // flip drag layer: hide when looking at back face
-  const dragEl = document.getElementById('studio-drag');
-  if (dragEl) {
-    const yMod = ((viewer3d.rotY % 360) + 360) % 360;
-    const isBack = yMod > 90 && yMod < 270;
-    dragEl.style.pointerEvents = isBack ? 'none' : 'auto';
-    dragEl.style.opacity = isBack ? '0' : '1';
-  }
-}
-
-function viewer3dInertia() {
-  if (Math.abs(viewer3d.vel) < 0.05) { viewer3d.vel = 0; return; }
-  viewer3d.rotY += viewer3d.vel;
-  viewer3d.vel *= 0.93;
-  viewer3dApply();
-  viewer3d.raf = requestAnimationFrame(viewer3dInertia);
-}
-
-function viewer3dReset() {
-  cancelAnimationFrame(viewer3d.raf);
-  viewer3d.rotY = 0; viewer3d.rotX = 2; viewer3d.vel = 0;
-  viewer3dApply();
-}
-
-function viewer3dSetMode(designMode) {
-  viewer3d.designMode = designMode;
-  const dragEl = document.getElementById('studio-drag');
-  const scene  = viewer3dGetScene();
-  if (dragEl) dragEl.classList.toggle('design-mode', designMode);
-  if (scene)  scene.style.cursor = designMode ? 'default' : 'grab';
-}
-
-function viewer3dInitEvents() {
-  const scene = viewer3dGetScene();
-  if (!scene) return;
-
-  function onStart(x) {
-    cancelAnimationFrame(viewer3d.raf);
-    viewer3d.dragging = true;
-    viewer3d.lastX = x;
-    viewer3d.vel = 0;
-    scene.classList.add('grabbing');
-  }
-  function onMove(x) {
-    if (!viewer3d.dragging || viewer3d.designMode) return;
-    const dx = x - viewer3d.lastX;
-    viewer3d.vel = dx * 0.6;
-    viewer3d.rotY += dx * 0.55;
-    viewer3d.lastX = x;
-    viewer3dApply();
-  }
-  function onEnd() {
-    viewer3d.dragging = false;
-    scene.classList.remove('grabbing');
-    viewer3dInertia();
-  }
-
-  scene.addEventListener('mousedown',  e => { if (!viewer3d.designMode) { e.preventDefault(); onStart(e.clientX); } });
-  window.addEventListener('mousemove', e => onMove(e.clientX));
-  window.addEventListener('mouseup',   () => onEnd());
-
-  scene.addEventListener('touchstart', e => { if (!viewer3d.designMode) onStart(e.touches[0].clientX); }, { passive: true });
-  scene.addEventListener('touchmove',  e => { onMove(e.touches[0].clientX); }, { passive: true });
-  scene.addEventListener('touchend',   () => onEnd());
-}
-
-// ===================== CANVAS / DESIGN =====================
 function studioInitCanvas() {
+  const stage = getStudioStage();
   const canvas = getStudioCanvas();
-  if (!canvas) return;
-  canvas.width  = 300;
-  canvas.height = 360;
+  if (!stage || !canvas) return;
+  canvas.width  = stage.offsetWidth;
+  canvas.height = stage.offsetHeight;
   studioResetPos();
   studioDraw();
 }
 
 function studioGetCenter() {
-  if (studioState.pos === 'chest')  return { x: 150, y: 108 };
-  return { x: 150, y: 180 };
+  const canvas = getStudioCanvas();
+  const w = canvas ? canvas.width : 300, h = canvas ? canvas.height : 370;
+  if (studioState.pos === 'chest')  return { x: w*0.5, y: h*0.3 };
+  return { x: w*0.5, y: h*0.5 };
 }
 
 function studioResetPos() {
@@ -4534,17 +4388,21 @@ function studioDraw() {
   const ctx = getStudioCtx();
   const canvas = getStudioCanvas();
   if (!ctx || !canvas) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
   const size = studioState.pos === 'full'
-    ? canvas.width * 0.65
-    : canvas.width * (studioState.scale / 100);
+    ? w * 0.65
+    : w * (studioState.scale / 100);
+  const x = studioState.dragX - size/2;
+  const y = studioState.dragY - size/2;
   ctx.save();
   ctx.globalAlpha = 0.92;
   if (studioState.designImg) {
-    ctx.drawImage(studioState.designImg, studioState.dragX - size/2, studioState.dragY - size/2, size, size);
+    ctx.drawImage(studioState.designImg, x, y, size, size);
   } else if (studioState.designEmoji) {
-    ctx.font = `${Math.round(size * 0.72)}px serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `${Math.round(size*0.72)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = studioState.printColor;
     ctx.fillText(studioState.designEmoji, studioState.dragX, studioState.dragY);
   }
@@ -4616,58 +4474,41 @@ function studioOnFile(inp) {
   r.readAsDataURL(f);
 }
 
-// Drag — يحرك الطبعة فقط (التدوير يشتغل على viewer3d-scene)
+// Drag — يتحمّل بعد DOM
 function studioInitDrag() {
-  const dragEl = document.getElementById('studio-drag');
-  if (!dragEl) return;
-
-  function getXY(e) {
-    const r = dragEl.getBoundingClientRect();
+  const studioDragEl = document.getElementById('studio-drag');
+  if (!studioDragEl) return;
+  function sGetXY(e) {
+    const r = studioDragEl.getBoundingClientRect();
     const src = e.touches ? e.touches[0] : e;
     return { x: src.clientX - r.left, y: src.clientY - r.top };
   }
-
-  dragEl.addEventListener('mousedown', e => {
-    e.stopPropagation();
-    studioState.dragging = true;
-    const {x,y} = getXY(e);
-    studioState.sx = x; studioState.sy = y;
-    studioState.sdx = studioState.dragX; studioState.sdy = studioState.dragY;
-    viewer3d.designMode = true;
+  studioDragEl.addEventListener('mousedown', e => {
+    const {x,y} = sGetXY(e);
+    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
+    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
   });
   window.addEventListener('mousemove', e => {
     if (!studioState.dragging) return;
-    const r = dragEl.getBoundingClientRect();
-    studioState.dragX = studioState.sdx + (e.clientX - r.left - studioState.sx);
-    studioState.dragY = studioState.sdy + (e.clientY - r.top  - studioState.sy);
+    const r = studioDragEl.getBoundingClientRect();
+    studioState.dragX = studioState.sdx+(e.clientX-r.left-studioState.sx);
+    studioState.dragY = studioState.sdy+(e.clientY-r.top-studioState.sy);
     studioDraw();
   });
-  window.addEventListener('mouseup', () => {
-    studioState.dragging = false;
-    // return to rotate mode after short delay
-    setTimeout(() => { viewer3d.designMode = false; }, 200);
-  });
-
-  dragEl.addEventListener('touchstart', e => {
-    e.stopPropagation();
-    studioState.dragging = true;
-    const {x,y} = getXY(e);
-    studioState.sx = x; studioState.sy = y;
-    studioState.sdx = studioState.dragX; studioState.sdy = studioState.dragY;
-    viewer3d.designMode = true;
-  }, { passive: true });
-  dragEl.addEventListener('touchmove', e => {
-    if (!studioState.dragging) return;
-    const {x,y} = getXY(e);
-    studioState.dragX = studioState.sdx + (x - studioState.sx);
-    studioState.dragY = studioState.sdy + (y - studioState.sy);
-    studioDraw();
-    e.preventDefault();
-  }, { passive: false });
-  dragEl.addEventListener('touchend', () => {
-    studioState.dragging = false;
-    setTimeout(() => { viewer3d.designMode = false; }, 200);
-  });
+  window.addEventListener('mouseup', ()=>studioState.dragging=false);
+  studioDragEl.addEventListener('touchstart', e=>{
+    const {x,y}=sGetXY(e);
+    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
+    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
+  },{passive:true});
+  studioDragEl.addEventListener('touchmove', e=>{
+    if(!studioState.dragging) return;
+    const {x,y}=sGetXY(e);
+    studioState.dragX=studioState.sdx+(x-studioState.sx);
+    studioState.dragY=studioState.sdy+(y-studioState.sy);
+    studioDraw(); e.preventDefault();
+  },{passive:false});
+  studioDragEl.addEventListener('touchend',()=>studioState.dragging=false);
 }
 
 function studioOrder() {
@@ -4738,45 +4579,63 @@ async function studioSendOrder() {
     `💰 السعر: ${p.price.toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '');
 
+  // --- بناء صورة مدمجة: التيشيرت + الطبعة ---
   function buildPreviewBlob() {
     return new Promise((resolve) => {
       const shirtImg = document.getElementById('studio-shirt-img');
+      const mainCanvas = getStudioCanvas();
+
+      // canvas مؤقت بحجم ثابت للإرسال
       const out = document.createElement('canvas');
-      out.width = 600; out.height = 720;
+      out.width = 600; out.height = 740;
       const ctx = out.getContext('2d');
 
       const draw = () => {
         ctx.clearRect(0, 0, out.width, out.height);
+        // خلفية داكنة تتناسب مع ثيم المتجر
         ctx.fillStyle = '#111111';
         ctx.fillRect(0, 0, out.width, out.height);
 
+        // رسم صورة التيشيرت
         if (shirtImg && shirtImg.complete && shirtImg.naturalWidth > 0) {
           ctx.drawImage(shirtImg, 0, 0, out.width, out.height);
         }
 
-        // scale positions from 300×360 → 600×720 (×2)
-        const scale2x = 2;
-        const size = studioState.pos === 'full'
+        // حساب موضع الطبعة بنسبة من الكانفاس الأصلي
+        const cw = mainCanvas ? mainCanvas.width  : 300;
+        const ch = mainCanvas ? mainCanvas.height : 370;
+        const scale = studioState.pos === 'full'
           ? out.width * 0.65
-          : (300 * (studioState.scale / 100)) * scale2x;
-        const dx = studioState.dragX * scale2x - size / 2;
-        const dy = studioState.dragY * scale2x - size / 2;
+          : out.width * (studioState.scale / 100);
+        const dx = out.width  * (studioState.dragX / cw) - scale/2;
+        const dy = out.height * (studioState.dragY / ch) - scale/2;
 
         ctx.save();
         ctx.globalAlpha = 0.92;
         if (studioState.designImg) {
-          ctx.drawImage(studioState.designImg, dx, dy, size, size);
+          ctx.drawImage(studioState.designImg, dx, dy, scale, scale);
         } else if (studioState.designEmoji) {
-          ctx.font = `${Math.round(size * 0.72)}px serif`;
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.font = `${Math.round(scale * 0.72)}px serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
           ctx.fillStyle = studioState.printColor;
-          ctx.fillText(studioState.designEmoji, studioState.dragX * scale2x, studioState.dragY * scale2x);
+          ctx.fillText(
+            studioState.designEmoji,
+            out.width  * (studioState.dragX / cw),
+            out.height * (studioState.dragY / ch)
+          );
         }
         ctx.restore();
+
         out.toBlob(blob => resolve(blob), 'image/png');
       };
 
-      if (shirtImg && !shirtImg.complete) { shirtImg.onload = draw; } else { draw(); }
+      // لو الصورة محتاجة وقت تحمّل
+      if (shirtImg && !shirtImg.complete) {
+        shirtImg.onload = draw;
+      } else {
+        draw();
+      }
     });
   }
 
@@ -4857,7 +4716,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   loadPrintDesigns();
   studioInitDrag();
-  viewer3dInitEvents();
   renderStudioTshirts();
 });
 
