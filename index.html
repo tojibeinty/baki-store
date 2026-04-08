@@ -62,6 +62,8 @@ async function loadProducts() {
           oldPrice: fields.oldPrice?.integerValue ? parseInt(fields.oldPrice.integerValue) : (fields.oldPrice?.doubleValue ? parseInt(fields.oldPrice.doubleValue) : null),
           desc: fields.desc?.stringValue || '',
           badge: fields.badge?.stringValue || '',
+          fabric: fields.fabric?.stringValue || '',
+          printColors: fields.printColors?.arrayValue?.values?.map(v => v.stringValue) || [],
           sizes: fields.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
           images: fields.images?.arrayValue?.values?.map(v => v.stringValue) || ['']
         };
@@ -1712,7 +1714,7 @@ async function loadAnalytics() {
           <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
             <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
               style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
-            <canvas id="studio-canvas"></canvas>
+            <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
             <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
           </div>
           <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
@@ -2730,10 +2732,12 @@ async function updateProductInFirebase(docId, product) {
     oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
     desc: { stringValue: product.desc || '' },
     badge: { stringValue: product.badge || '' },
+    fabric: { stringValue: product.fabric || '' },
+    printColors: { arrayValue: { values: (product.printColors || []).map(c => ({ stringValue: c })) } },
     sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
     images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
   };
-  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=cat&updateMask.fieldPaths=price&updateMask.fieldPaths=oldPrice&updateMask.fieldPaths=desc&updateMask.fieldPaths=badge&updateMask.fieldPaths=sizes&updateMask.fieldPaths=images`, {
+  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=cat&updateMask.fieldPaths=price&updateMask.fieldPaths=oldPrice&updateMask.fieldPaths=desc&updateMask.fieldPaths=badge&updateMask.fieldPaths=fabric&updateMask.fieldPaths=printColors&updateMask.fieldPaths=sizes&updateMask.fieldPaths=images`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields })
@@ -3929,20 +3933,41 @@ function studioInitLib() {
   `).join('');
 }
 
-const studioCanvas = document.getElementById('studio-canvas');
-const studioCtx = studioCanvas ? studioCanvas.getContext('2d') : null;
-const studioStage = document.getElementById('studio-stage');
+let _studioCanvas = null;
+let _studioCtx = null;
+let _studioStage = null;
+
+function getStudioCanvas() {
+  if (!_studioCanvas) _studioCanvas = document.getElementById('studio-canvas');
+  return _studioCanvas;
+}
+function getStudioCtx() {
+  if (!_studioCtx && getStudioCanvas()) _studioCtx = getStudioCanvas().getContext('2d');
+  return _studioCtx;
+}
+function getStudioStage() {
+  if (!_studioStage) _studioStage = document.getElementById('studio-stage');
+  return _studioStage;
+}
+
+// Keep these as aliases for backward compat
+Object.defineProperty(window, 'studioCanvas', { get: getStudioCanvas });
+Object.defineProperty(window, 'studioCtx',   { get: getStudioCtx });
+Object.defineProperty(window, 'studioStage', { get: getStudioStage });
 
 function studioInitCanvas() {
-  if (!studioStage || !studioCanvas) return;
-  studioCanvas.width  = studioStage.offsetWidth;
-  studioCanvas.height = studioStage.offsetHeight;
+  const stage = getStudioStage();
+  const canvas = getStudioCanvas();
+  if (!stage || !canvas) return;
+  canvas.width  = stage.offsetWidth;
+  canvas.height = stage.offsetHeight;
   studioResetPos();
   studioDraw();
 }
 
 function studioGetCenter() {
-  const w = studioCanvas.width, h = studioCanvas.height;
+  const canvas = getStudioCanvas();
+  const w = canvas ? canvas.width : 300, h = canvas ? canvas.height : 370;
   if (studioState.pos === 'chest')  return { x: w*0.5, y: h*0.3 };
   return { x: w*0.5, y: h*0.5 };
 }
@@ -3954,26 +3979,28 @@ function studioResetPos() {
 }
 
 function studioDraw() {
-  if (!studioCtx) return;
-  const w = studioCanvas.width, h = studioCanvas.height;
-  studioCtx.clearRect(0,0,w,h);
+  const ctx = getStudioCtx();
+  const canvas = getStudioCanvas();
+  if (!ctx || !canvas) return;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
   const size = studioState.pos === 'full'
     ? w * 0.65
     : w * (studioState.scale / 100);
   const x = studioState.dragX - size/2;
   const y = studioState.dragY - size/2;
-  studioCtx.save();
-  studioCtx.globalAlpha = 0.92;
+  ctx.save();
+  ctx.globalAlpha = 0.92;
   if (studioState.designImg) {
-    studioCtx.drawImage(studioState.designImg, x, y, size, size);
+    ctx.drawImage(studioState.designImg, x, y, size, size);
   } else if (studioState.designEmoji) {
-    studioCtx.font = `${Math.round(size*0.72)}px serif`;
-    studioCtx.textAlign = 'center';
-    studioCtx.textBaseline = 'middle';
-    studioCtx.fillStyle = studioState.printColor;
-    studioCtx.fillText(studioState.designEmoji, studioState.dragX, studioState.dragY);
+    ctx.font = `${Math.round(size*0.72)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = studioState.printColor;
+    ctx.fillText(studioState.designEmoji, studioState.dragX, studioState.dragY);
   }
-  studioCtx.restore();
+  ctx.restore();
 }
 
 function studioSetColor(hex, btn) {
@@ -4038,9 +4065,10 @@ function studioOnFile(inp) {
   r.readAsDataURL(f);
 }
 
-// Drag
-const studioDragEl = document.getElementById('studio-drag');
-if (studioDragEl) {
+// Drag — يتحمّل بعد DOM
+function studioInitDrag() {
+  const studioDragEl = document.getElementById('studio-drag');
+  if (!studioDragEl) return;
   function sGetXY(e) {
     const r = studioDragEl.getBoundingClientRect();
     const src = e.touches ? e.touches[0] : e;
@@ -4090,11 +4118,12 @@ function studioOrder() {
   const pvctx = pvc.getContext('2d');
   pvctx.clearRect(0,0,pvc.width,pvc.height);
   const shirtImg = document.getElementById('studio-shirt-img');
+  const mainCanvas = getStudioCanvas();
   if (shirtImg && shirtImg.complete) {
     pvctx.drawImage(shirtImg, 0, 0, pvc.width, pvc.height);
     const s = pvc.width * (studioState.scale/100) * 0.85;
-    const px = pvc.width  * (studioState.dragX / studioCanvas.width)  - s/2;
-    const py = pvc.height * (studioState.dragY / studioCanvas.height) - s/2;
+    const px = mainCanvas ? pvc.width  * (studioState.dragX / mainCanvas.width)  - s/2 : pvc.width/2 - s/2;
+    const py = mainCanvas ? pvc.height * (studioState.dragY / mainCanvas.height) - s/2 : pvc.height*0.3 - s/2;
     pvctx.globalAlpha = 0.9;
     if (studioState.designImg) {
       pvctx.drawImage(studioState.designImg, px, py, s, s);
@@ -4102,7 +4131,7 @@ function studioOrder() {
       pvctx.font = `${Math.round(s*0.72)}px serif`;
       pvctx.textAlign='center'; pvctx.textBaseline='middle';
       pvctx.fillStyle = studioState.printColor;
-      pvctx.fillText(studioState.designEmoji, pvc.width*(studioState.dragX/studioCanvas.width), pvc.height*(studioState.dragY/studioCanvas.height));
+      pvctx.fillText(studioState.designEmoji, mainCanvas ? pvc.width*(studioState.dragX/mainCanvas.width) : pvc.width/2, mainCanvas ? pvc.height*(studioState.dragY/mainCanvas.height) : pvc.height*0.3);
     }
   }
 
@@ -4178,11 +4207,9 @@ async function studioSendOrder() {
   }
 }
 
-// Hook into loadProducts to also render studio list
-const _origLoadProducts = window.loadProducts;
+// Hook into renderProducts to also render studio list
 window.addEventListener('load', () => {
-  studioInitLib();
-  // Re-render studio list after products load
+  // Patch renderProducts once to also update studio list
   const origRender = window.renderProducts;
   window.renderProducts = function() {
     origRender && origRender.apply(this, arguments);
@@ -4195,10 +4222,11 @@ window.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelector('.nav-links');
   if (navLinks) {
     const li = document.createElement('li');
-    li.innerHTML = '<a onclick="scrollTo('print-studio')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
+    li.innerHTML = '<a onclick="scrollTo(\'print-studio\')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
     navLinks.appendChild(li);
   }
   studioInitLib();
+  studioInitDrag();
   renderStudioTshirts();
 });
 
