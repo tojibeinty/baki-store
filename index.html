@@ -981,9 +981,10 @@ async function loadAnalytics() {
 <div id="admin-overlay">
   <div class="admin-box">
     <!-- Admin Tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;">
-      <button onclick="switchAdminTab('products')" id="tab-products" style="flex:1;padding:10px;background:var(--red);color:white;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📦 المنتجات</button>
-      <button onclick="switchAdminTab('analytics')" id="tab-analytics" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;">📊 الإحصائيات</button>
+    <div style="display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;flex-wrap:wrap;">
+      <button onclick="switchAdminTab('products')" id="tab-products" style="flex:1;padding:10px;background:var(--red);color:white;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">📦 المنتجات</button>
+      <button onclick="switchAdminTab('print')" id="tab-print" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">🎨 طبعاتك</button>
+      <button onclick="switchAdminTab('analytics')" id="tab-analytics" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">📊 الإحصائيات</button>
     </div>
 
     <!-- Products Tab -->
@@ -1002,34 +1003,6 @@ async function loadAnalytics() {
         <option value="women">نسائي 👩</option>
         <option value="accessories">اكسسوارات 💎</option>
       </select>
-    </div>
-
-    <div class="form-group">
-      <label>نوع القماش</label>
-      <select id="p-fabric">
-        <option value="">— اختر نوع القماش —</option>
-        <option value="قطني 100%">قطني 100%</option>
-        <option value="قماش أديداس">قماش أديداس</option>
-        <option value="قماش نايك">قماش نايك</option>
-        <option value="بوليستر">بوليستر</option>
-        <option value="قطني بوليستر">قطني بوليستر</option>
-        <option value="اوفر سايز">اوفر سايز</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>ألوان الطبعة المتاحة</label>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
-        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-          <input type="checkbox" value="أسود" id="print-black" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#111;border-radius:50%;border:1px solid #555;"></span> أسود
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-          <input type="checkbox" value="أحمر" id="print-red" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#c0392b;border-radius:50%;"></span> أحمر
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-          <input type="checkbox" value="أزرق داكن" id="print-navy" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#1a3a5c;border-radius:50%;"></span> أزرق داكن
-        </label>
-      </div>
     </div>
 
     <div class="form-group">
@@ -1086,6 +1059,93 @@ async function loadAnalytics() {
     <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
     <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
     </div><!-- end admin-tab-products -->
+
+    <!-- ======= PRINT TAB ======= -->
+    <div id="admin-tab-print" style="display:none;">
+      <div class="admin-title" style="font-size:1.8rem;margin-bottom:20px;">🎨 إدارة تيشيرتات الطبعة</div>
+
+      <div class="form-group">
+        <label>اسم التيشيرت</label>
+        <input type="text" id="pt-name" placeholder="مثال: تيشيرت باكي أوفر سايز">
+      </div>
+
+      <div class="form-group">
+        <label>نوع القماش</label>
+        <select id="pt-fabric">
+          <option value="">— اختر نوع القماش —</option>
+          <option value="قطني 100%">قطني 100%</option>
+          <option value="قماش أديداس">قماش أديداس</option>
+          <option value="قماش نايك">قماش نايك</option>
+          <option value="بوليستر">بوليستر</option>
+          <option value="قطني بوليستر">قطني بوليستر</option>
+          <option value="اوفر سايز">اوفر سايز</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>ألوان الطبعة المتاحة</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أسود" id="pt-print-black" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#111;border-radius:50%;border:1px solid #555;"></span> أسود
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أحمر" id="pt-print-red" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#c0392b;border-radius:50%;"></span> أحمر
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أزرق داكن" id="pt-print-navy" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#1a3a5c;border-radius:50%;"></span> أزرق داكن
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>السعر (دينار عراقي)</label>
+        <input type="number" id="pt-price" placeholder="مثال: 35000">
+      </div>
+
+      <div class="form-group">
+        <label>الأحجام المتاحة</label>
+        <div class="size-checkboxes" id="pt-sizes-wrap">
+          <label><input type="checkbox" value="XS"> XS</label>
+          <label><input type="checkbox" value="S"> S</label>
+          <label><input type="checkbox" value="M" checked> M</label>
+          <label><input type="checkbox" value="L" checked> L</label>
+          <label><input type="checkbox" value="XL"> XL</label>
+          <label><input type="checkbox" value="XXL"> XXL</label>
+          <label><input type="checkbox" value="Free Size"> Free</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>وصف (اختياري)</label>
+        <textarea id="pt-desc" placeholder="وصف مختصر للتيشيرت..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>📸 صور التيشيرت (ترفع هون — ما تروح للمنتجات)</label>
+        <input type="file" id="pt-images" multiple accept="image/*" onchange="previewPrintImages(this)">
+        <div class="image-preview-grid" id="pt-img-preview"></div>
+      </div>
+
+      <div class="form-group">
+        <label>🔗 أو روابط صور مباشرة</label>
+        <div id="pt-url-inputs-wrap" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button type="button" onclick="addPtUrlInput()" style="margin-top:8px;background:transparent;border:1px dashed var(--red);color:var(--red);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;font-weight:600;width:100%;transition:all 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.08)'" onmouseout="this.style.background='transparent'">➕ إضافة رابط</button>
+      </div>
+
+      <div class="form-group">
+        <label>🏷️ السعر القديم (اختياري)</label>
+        <input type="number" id="pt-old-price" placeholder="مثال: 45000">
+      </div>
+
+      <button class="btn-primary" onclick="addPrintProduct()">➕ إضافة تيشيرت الطبعة</button>
+      <button class="btn-secondary" style="margin-top:8px;" onclick="closeAdmin()">✖ إغلاق</button>
+
+      <!-- List -->
+      <div class="admin-product-list" id="pt-admin-list" style="margin-top:24px;"></div>
+    </div><!-- end admin-tab-print -->
 
     <!-- Analytics Tab -->
     <div id="admin-tab-analytics" style="display:none;">
@@ -1854,7 +1914,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <button onclick="studioSendOrder()"
+    <button id="pom-send-btn" onclick="studioSendOrder()"
       style="width:100%;padding:15px;background:#229ED9;color:white;border:none;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;"
       onmouseover="this.style.background='#1a85b5'" onmouseout="this.style.background='#229ED9'">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.487c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.286 13.98 4.33 13.07c-.645-.204-.658-.645.136-.953l10.874-4.192c.537-.194 1.006.13.834.953z"/></svg>
@@ -2305,7 +2365,7 @@ function calcDiscountedTotal(originalText, coupon) {
 }
 
 function switchAdminTab(tab) {
-  const tabs = ['products', 'analytics'];
+  const tabs = ['products', 'print', 'analytics'];
   tabs.forEach(t => {
     const el = document.getElementById(`admin-tab-${t}`);
     const btn = document.getElementById(`tab-${t}`);
@@ -2317,6 +2377,7 @@ function switchAdminTab(tab) {
     }
   });
   if (tab === 'analytics') renderAnalyticsDashboard();
+  if (tab === 'print') renderPtAdminList();
 }
 
 async function renderAnalyticsDashboard() {
@@ -3817,8 +3878,199 @@ window.addEventListener('appinstalled', () => {
 </script>
 <script>
 // ============================================================
-// PRINT STUDIO
+// PRINT PRODUCTS — collection منفصلة عن المنتجات العادية
 // ============================================================
+let printProducts = [];
+
+async function loadPrintProducts() {
+  try {
+    const res = await fetch(`${FS_BASE}/printProducts?key=${FIREBASE_API_KEY}`);
+    const data = await res.json();
+    if (data.documents) {
+      printProducts = data.documents.map(d => {
+        const f = d.fields || {};
+        return {
+          _docId: d.name.split('/').pop(),
+          id: parseInt(f.id?.integerValue || f.id?.doubleValue || Date.now()),
+          name: f.name?.stringValue || '',
+          fabric: f.fabric?.stringValue || '',
+          printColors: f.printColors?.arrayValue?.values?.map(v => v.stringValue) || [],
+          price: parseInt(f.price?.integerValue || f.price?.doubleValue || 0),
+          oldPrice: f.oldPrice?.integerValue ? parseInt(f.oldPrice.integerValue) : null,
+          desc: f.desc?.stringValue || '',
+          sizes: f.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
+          images: f.images?.arrayValue?.values?.map(v => v.stringValue) || ['']
+        };
+      });
+    } else {
+      printProducts = [];
+    }
+    renderStudioTshirts();
+    renderPtAdminList();
+  } catch(e) {
+    console.error('خطأ تحميل طبعات:', e);
+    printProducts = [];
+  }
+}
+
+async function savePrintProductToFirebase(p) {
+  const body = {
+    fields: {
+      id: { integerValue: p.id },
+      name: { stringValue: p.name },
+      fabric: { stringValue: p.fabric || '' },
+      printColors: { arrayValue: { values: (p.printColors||[]).map(c=>({stringValue:c})) } },
+      price: { integerValue: p.price },
+      oldPrice: p.oldPrice ? { integerValue: p.oldPrice } : { nullValue: null },
+      desc: { stringValue: p.desc || '' },
+      sizes: { arrayValue: { values: p.sizes.map(s=>({stringValue:s})) } },
+      images: { arrayValue: { values: p.images.map(i=>({stringValue:i})) } }
+    }
+  };
+  await fetch(`${FS_BASE}/printProducts?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  await loadPrintProducts();
+}
+
+async function deletePrintProductFromFirebase(docId) {
+  await fetch(`${FS_BASE}/printProducts/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+  await loadPrintProducts();
+}
+
+// ---- Admin UI helpers ----
+let ptUrlInputCount = 0;
+function addPtUrlInput() {
+  ptUrlInputCount++;
+  const wrap = document.getElementById('pt-url-inputs-wrap');
+  const row = document.createElement('div');
+  row.id = `pt-url-row-${ptUrlInputCount}`;
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" placeholder="https://res.cloudinary.com/... — رابط الصورة"
+      style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;direction:ltr;"
+      onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+    <button type="button" onclick="document.getElementById('pt-url-row-${ptUrlInputCount}').remove()"
+      style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:0.85rem;flex-shrink:0;transition:all 0.2s;"
+      onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'"
+      onmouseout="this.style.borderColor='#444';this.style.color='#888'">✖</button>
+  `;
+  wrap.appendChild(row);
+}
+
+let ptTempImages = [];
+function previewPrintImages(inp) {
+  const preview = document.getElementById('pt-img-preview');
+  preview.innerHTML = '';
+  ptTempImages = new Array(inp.files.length);
+  Array.from(inp.files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      ptTempImages[i] = e.target.result;
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'preview-img';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addPrintProduct() {
+  const name   = document.getElementById('pt-name').value.trim();
+  const fabric = document.getElementById('pt-fabric').value;
+  const price  = document.getElementById('pt-price').value;
+  const desc   = document.getElementById('pt-desc').value.trim();
+  const oldPriceVal = document.getElementById('pt-old-price').value;
+  const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
+
+  const printColors = ['pt-print-black','pt-print-red','pt-print-navy']
+    .map(id => document.getElementById(id))
+    .filter(el => el && el.checked)
+    .map(el => el.value);
+
+  const sizes = Array.from(document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]'))
+    .filter(c => c.checked).map(c => c.value);
+
+  if (!name || !price) { showToast('❌ يرجى إدخال الاسم والسعر'); return; }
+  if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً على الأقل'); return; }
+  if (printColors.length === 0) { showToast('❌ اختر لون طبعة واحد على الأقل'); return; }
+
+  showToast('⏳ جاري رفع الصور...');
+  const imageFiles = document.getElementById('pt-images').files;
+  let images = [];
+  try {
+    for (let i = 0; i < imageFiles.length; i++) {
+      const url = await uploadToCloudinary(imageFiles[i]);
+      images.push(url);
+    }
+  } catch(e) {
+    showToast('❌ خطأ في رفع الصور');
+    return;
+  }
+  if (images.length === 0) {
+    document.querySelectorAll('#pt-url-inputs-wrap input[type=text]').forEach(inp => {
+      const v = inp.value.trim();
+      if (v) images.push(v);
+    });
+    if (images.length === 0) images.push('');
+  }
+
+  const product = { id: Date.now(), name, fabric, printColors, price: parseInt(price), oldPrice, desc, sizes, images };
+  showToast('⏳ جاري الحفظ...');
+  try {
+    await savePrintProductToFirebase(product);
+    showToast('✅ تمت إضافة تيشيرت الطبعة');
+    // Reset form
+    ['pt-name','pt-price','pt-old-price','pt-desc'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('pt-fabric').value = '';
+    document.getElementById('pt-images').value = '';
+    document.getElementById('pt-img-preview').innerHTML = '';
+    document.getElementById('pt-url-inputs-wrap').innerHTML = '';
+    ['pt-print-black','pt-print-red','pt-print-navy'].forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
+    document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]').forEach(c => c.checked = ['M','L'].includes(c.value));
+    ptTempImages = [];
+  } catch(e) {
+    showToast('❌ خطأ في الحفظ');
+  }
+}
+
+async function deletePrintProduct(docId) {
+  if (!confirm('هل تريد حذف هذا التيشيرت؟')) return;
+  showToast('⏳ جاري الحذف...');
+  try {
+    await deletePrintProductFromFirebase(docId);
+    showToast('🗑 تم الحذف');
+  } catch(e) {
+    showToast('❌ خطأ في الحذف');
+  }
+}
+
+function renderPtAdminList() {
+  const list = document.getElementById('pt-admin-list');
+  if (!list) return;
+  if (printProducts.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">لا توجد تيشيرتات طبعة بعد</p>';
+    return;
+  }
+  list.innerHTML = '<h3 style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:2px;margin-bottom:14px;color:var(--muted)">التيشيرتات الحالية</h3>' +
+    printProducts.map(p => `
+      <div class="admin-product-item">
+        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=T'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=T'">
+        <div class="admin-product-info">
+          <strong>${p.name}</strong>
+          <span>${p.fabric || '—'} · ${p.price.toLocaleString()} د.ع · ألوان: ${(p.printColors||[]).join(', ')}</span>
+        </div>
+        <button class="btn-delete" onclick="deletePrintProduct('${p._docId}')">🗑</button>
+      </div>
+    `).join('');
+}
+
+window.addEventListener('load', loadPrintProducts);
+
+
 const PRINT_COLORS = [
   { label: 'أسود',      hex: '#111111' },
   { label: 'أحمر',      hex: '#c0392b' },
@@ -3841,12 +4093,11 @@ let studioState = {
 function renderStudioTshirts() {
   const list = document.getElementById('studio-tshirt-list');
   if (!list) return;
-  const printable = products.filter(p => p.printColors && p.printColors.length > 0);
-  if (printable.length === 0) {
-    list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">لا توجد تيشيرتات متاحة للطبعة بعد — أضف تيشيرتات من لوحة التحكم</p>';
+  if (printProducts.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">لا توجد تيشيرتات متاحة للطبعة بعد — أضف تيشيرتات من لوحة التحكم ← 🎨 طبعاتك</p>';
     return;
   }
-  list.innerHTML = printable.map(p => `
+  list.innerHTML = printProducts.map(p => `
     <div onclick="studioSelectTshirt(${p.id})"
       style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.25s;"
       id="studio-card-${p.id}"
@@ -3870,7 +4121,7 @@ function renderStudioTshirts() {
 }
 
 function studioSelectTshirt(id) {
-  const p = products.find(x => x.id === id);
+  const p = printProducts.find(x => x.id === id);
   if (!p) return;
   studioState.product = p;
 
@@ -4152,47 +4403,103 @@ async function studioSendOrder() {
   const colorLabel = PRINT_COLORS.find(c=>c.hex===studioState.printColor)?.label || studioState.printColor;
   const designLabel = studioState.designImg ? 'تصميم مرفوع' : (studioState.designEmoji || 'بدون');
 
-  const text = `🎨 *طلب طبعة — باكي ستور*
-
-` +
-    `👤 الاسم: ${name}
-` +
-    `📱 الهاتف: ${phone}
-` +
-    `📍 المحافظة: ${city}
-` +
-    `👕 التيشيرت: ${p.name}${p.fabric?' ('+p.fabric+')':''}
-` +
-    `🎨 لون الطبعة: ${colorLabel}
-` +
-    `🖼 التصميم: ${designLabel}
-` +
-    `📏 المقاس: ${studioState.size||'—'}
-` +
-    `📌 الموضع: ${studioState.pos==='chest'?'الصدر':studioState.pos==='center'?'الوسط':'كامل'}
-` +
+  const caption =
+    `🎨 *طلب طبعة — باكي ستور*\n\n` +
+    `👤 الاسم: ${name}\n` +
+    `📱 الهاتف: ${phone}\n` +
+    `📍 المحافظة: ${city}\n` +
+    `👕 التيشيرت: ${p.name}${p.fabric?' ('+p.fabric+')':''}\n` +
+    `🎨 لون الطبعة: ${colorLabel}\n` +
+    `🖼 التصميم: ${designLabel}\n` +
+    `📏 المقاس: ${studioState.size||'—'}\n` +
+    `📌 الموضع: ${studioState.pos==='chest'?'الصدر':studioState.pos==='center'?'الوسط':'كامل'}\n` +
     `💰 السعر: ${p.price.toLocaleString()} د.ع` +
-    (note ? `
-📝 ملاحظات: ${note}` : '');
+    (note ? `\n📝 ملاحظات: ${note}` : '');
+
+  // --- بناء صورة مدمجة: التيشيرت + الطبعة ---
+  function buildPreviewBlob() {
+    return new Promise((resolve) => {
+      const shirtImg = document.getElementById('studio-shirt-img');
+      const mainCanvas = getStudioCanvas();
+
+      // canvas مؤقت بحجم ثابت للإرسال
+      const out = document.createElement('canvas');
+      out.width = 600; out.height = 740;
+      const ctx = out.getContext('2d');
+
+      const draw = () => {
+        ctx.clearRect(0, 0, out.width, out.height);
+        // خلفية داكنة تتناسب مع ثيم المتجر
+        ctx.fillStyle = '#111111';
+        ctx.fillRect(0, 0, out.width, out.height);
+
+        // رسم صورة التيشيرت
+        if (shirtImg && shirtImg.complete && shirtImg.naturalWidth > 0) {
+          ctx.drawImage(shirtImg, 0, 0, out.width, out.height);
+        }
+
+        // حساب موضع الطبعة بنسبة من الكانفاس الأصلي
+        const cw = mainCanvas ? mainCanvas.width  : 300;
+        const ch = mainCanvas ? mainCanvas.height : 370;
+        const scale = studioState.pos === 'full'
+          ? out.width * 0.65
+          : out.width * (studioState.scale / 100);
+        const dx = out.width  * (studioState.dragX / cw) - scale/2;
+        const dy = out.height * (studioState.dragY / ch) - scale/2;
+
+        ctx.save();
+        ctx.globalAlpha = 0.92;
+        if (studioState.designImg) {
+          ctx.drawImage(studioState.designImg, dx, dy, scale, scale);
+        } else if (studioState.designEmoji) {
+          ctx.font = `${Math.round(scale * 0.72)}px serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = studioState.printColor;
+          ctx.fillText(
+            studioState.designEmoji,
+            out.width  * (studioState.dragX / cw),
+            out.height * (studioState.dragY / ch)
+          );
+        }
+        ctx.restore();
+
+        out.toBlob(blob => resolve(blob), 'image/png');
+      };
+
+      // لو الصورة محتاجة وقت تحمّل
+      if (shirtImg && !shirtImg.complete) {
+        shirtImg.onload = draw;
+      } else {
+        draw();
+      }
+    });
+  }
+
+  // --- زر إرسال: تعطيله أثناء الإرسال ---
+  const sendBtn = document.getElementById('pom-send-btn');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ جاري الإرسال...'; }
 
   try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:CHAT_ID,text,parse_mode:'Markdown'})
-    });
+    const blob = await buildPreviewBlob();
 
-    // Send preview image if design uploaded
-    if (studioState.designImg) {
-      const pvc = document.getElementById('print-preview-canvas');
-      pvc.toBlob(async blob => {
-        if (!blob) return;
-        const fd = new FormData();
-        fd.append('chat_id', CHAT_ID);
-        fd.append('photo', blob, 'print-design.png');
-        fd.append('caption', `طبعة ${p.name} — ${colorLabel}`);
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:'POST',body:fd});
-      },'image/png');
+    if (blob) {
+      // إرسال الصورة مع التفاصيل كـ caption
+      const fd = new FormData();
+      fd.append('chat_id', CHAT_ID);
+      fd.append('photo', blob, 'print-order.png');
+      fd.append('caption', caption);
+      fd.append('parse_mode', 'Markdown');
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.description);
+    } else {
+      // fallback: رسالة نص فقط لو فشل بناء الصورة
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: caption, parse_mode: 'Markdown' })
+      });
     }
 
     document.getElementById('print-order-modal').style.display = 'none';
@@ -4204,16 +4511,19 @@ async function studioSendOrder() {
     logEvent('order', { productName: p.name, total: p.price });
   } catch(e) {
     showToast('❌ خطأ في الإرسال، تأكد من اتصالك');
+    console.error(e);
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '✅ إرسال الطلب'; }
   }
 }
 
 // Hook into renderProducts to also render studio list
 window.addEventListener('load', () => {
-  // Patch renderProducts once to also update studio list
+  // Patch renderProducts once to also update studio list (products tab changes)
   const origRender = window.renderProducts;
   window.renderProducts = function() {
     origRender && origRender.apply(this, arguments);
-    renderStudioTshirts();
+    // studio list comes from printProducts, not products — no need to re-render here
   };
 });
 
