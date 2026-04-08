@@ -2147,8 +2147,9 @@ const BOT_TOKEN = '8582381777:AAHwzm_ibO_HCcL22VNv5kTUL5w43Uu0Vyo';
 const CHAT_ID = '6263195701';
 
 // ============ UTILS ============
-function scrollTo(id) {
-  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -2625,7 +2626,7 @@ function filterCat(cat) {
   });
   document.getElementById('cat-'+cat).classList.add('cat-active');
   filterProducts(cat);
-  scrollTo('shop');
+  scrollToSection('shop');
   // sync filter tab
   document.querySelectorAll('.filter-tab').forEach(t => {
     t.classList.toggle('active', t.textContent.includes({ men:'رجالي', women:'نسائي', accessories:'اكسسوارات' }[cat]));
@@ -4532,7 +4533,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelector('.nav-links');
   if (navLinks) {
     const li = document.createElement('li');
-    li.innerHTML = '<a onclick="scrollTo(\'print-studio\')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
+    li.innerHTML = '<a onclick="scrollToSection(\'print-studio\')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
     navLinks.appendChild(li);
   }
   studioInitLib();
