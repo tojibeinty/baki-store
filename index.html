@@ -89,6 +89,8 @@ async function saveProductToFirebase(product) {
       oldPrice: product.oldPrice ? { integerValue: product.oldPrice } : { nullValue: null },
       desc: { stringValue: product.desc || '' },
       badge: { stringValue: product.badge || '' },
+      fabric: { stringValue: product.fabric || '' },
+      printColors: { arrayValue: { values: (product.printColors || []).map(c => ({ stringValue: c })) } },
       sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
       images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
     }
@@ -1001,6 +1003,34 @@ async function loadAnalytics() {
     </div>
 
     <div class="form-group">
+      <label>نوع القماش</label>
+      <select id="p-fabric">
+        <option value="">— اختر نوع القماش —</option>
+        <option value="قطني 100%">قطني 100%</option>
+        <option value="قماش أديداس">قماش أديداس</option>
+        <option value="قماش نايك">قماش نايك</option>
+        <option value="بوليستر">بوليستر</option>
+        <option value="قطني بوليستر">قطني بوليستر</option>
+        <option value="اوفر سايز">اوفر سايز</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>ألوان الطبعة المتاحة</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+          <input type="checkbox" value="أسود" id="print-black" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#111;border-radius:50%;border:1px solid #555;"></span> أسود
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+          <input type="checkbox" value="أحمر" id="print-red" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#c0392b;border-radius:50%;"></span> أحمر
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+          <input type="checkbox" value="أزرق داكن" id="print-navy" style="accent-color:var(--red);width:auto;"> <span style="display:inline-block;width:14px;height:14px;background:#1a3a5c;border-radius:50%;"></span> أزرق داكن
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
       <label>السعر (دينار عراقي)</label>
       <input type="number" id="p-price" placeholder="مثال: 35000">
     </div>
@@ -1655,6 +1685,182 @@ async function loadAnalytics() {
 </section>
 
 <!-- ======= FEATURES ======= -->
+
+<!-- ======= PRINT STUDIO SECTION ======= -->
+<section id="print-studio" style="padding:100px 40px;background:var(--black);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 50% 0%,rgba(192,57,43,0.07) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.012) 60px,rgba(255,255,255,0.012) 61px);pointer-events:none;"></div>
+  <div class="section-header">
+    <div class="section-tag">✦ جديد</div>
+    <div class="section-title">صمّم <span>طبعتك</span></div>
+    <p style="color:var(--muted);font-size:0.9rem;margin-top:14px;letter-spacing:1px;">اختر تيشيرتك وصمّم طبعتك — يوصلك مطبوع وجاهز</p>
+  </div>
+
+  <!-- Step 1: Choose tshirt -->
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="margin-bottom:32px;">
+      <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">01 — اختر التيشيرت</div>
+      <div id="studio-tshirt-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;max-width:1100px;"></div>
+    </div>
+
+    <!-- Studio: shows after tshirt selected -->
+    <div id="studio-main" style="display:none;">
+      <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">02 — صمّم طبعتك</div>
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:24px;" id="studio-grid">
+
+        <!-- Viewer -->
+        <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;min-height:480px;position:relative;">
+          <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
+            <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
+              style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
+            <canvas id="studio-canvas"></canvas>
+            <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
+          </div>
+          <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ إعادة الموضع</button>
+            <button onclick="studioClear()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕ مسح</button>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <!-- Print color -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">لون الطبعة</div>
+            <div id="studio-colors" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+          </div>
+
+          <!-- Upload or library -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">التصميم</div>
+            <div onclick="document.getElementById('studio-file').click()"
+              style="border:1.5px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s;"
+              onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:1.5rem;opacity:0.4;margin-bottom:4px;">↑</div>
+              <div style="font-size:0.8rem;color:var(--muted);"><strong style="color:var(--white);">ارفع تصميمك</strong><br>PNG أو JPG</div>
+            </div>
+            <input type="file" id="studio-file" accept="image/*" style="display:none" onchange="studioOnFile(this)">
+            <div style="text-align:center;color:var(--muted);font-size:0.72rem;margin:10px 0;letter-spacing:2px;">— أو اختر رمز —</div>
+            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+          </div>
+
+          <!-- Position & Scale -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">الموضع</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
+              <button class="studio-pos-btn active-pos" onclick="studioSetPos('chest',this)">صدر</button>
+              <button class="studio-pos-btn" onclick="studioSetPos('center',this)">وسط</button>
+              <button class="studio-pos-btn" onclick="studioSetPos('full',this)">كامل</button>
+            </div>
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">الحجم</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="range" min="15" max="90" value="40" step="1" id="studio-scale"
+                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;"
+                oninput="studioOnScale(this)">
+              <span id="studio-scale-val" style="font-family:var(--font-num);font-size:1rem;color:var(--red);min-width:34px;text-align:center;">40%</span>
+            </div>
+          </div>
+
+          <!-- Size -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">المقاس</div>
+            <div id="studio-sizes" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+          </div>
+
+          <!-- Price + CTA -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <span style="font-size:0.8rem;color:var(--muted);">السعر الكلي</span>
+              <span id="studio-price-display" style="font-family:var(--font-num);font-size:1.5rem;color:var(--red);">— د.ع</span>
+            </div>
+            <button onclick="studioOrder()"
+              style="width:100%;padding:15px;background:var(--red);color:white;border:none;border-radius:10px;font-family:var(--font-display);font-size:1.3rem;letter-spacing:3px;cursor:pointer;transition:all 0.25s;"
+              onmouseover="this.style.background='#e74c3c';this.style.transform='translateY(-2px)'"
+              onmouseout="this.style.background='var(--red)';this.style.transform='translateY(0)'">
+              اطلب الآن ✦
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.studio-pos-btn{padding:8px 0;background:var(--deep);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font-body);font-size:0.78rem;cursor:pointer;transition:all 0.2s;text-align:center;}
+.studio-pos-btn:hover{border-color:var(--red);color:var(--white);}
+.active-pos{border-color:var(--red)!important;background:rgba(192,57,43,0.1)!important;color:var(--white)!important;}
+#studio-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--red);border-radius:50%;cursor:pointer;}
+@media(max-width:900px){
+  #studio-grid{grid-template-columns:1fr!important;}
+  #studio-stage{width:240px;height:296px;}
+}
+</style>
+
+<!-- ======= PRINT ORDER MODAL ======= -->
+<div id="print-order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+  <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:480px;animation:modalIn 0.3s ease;position:relative;">
+    <button onclick="document.getElementById('print-order-modal').style.display='none'"
+      style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.85rem;transition:all 0.2s;"
+      onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕</button>
+    <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:4px;margin-bottom:4px;">أكمل طلبك</div>
+    <div style="color:var(--muted);font-size:0.85rem;margin-bottom:22px;">سيتم إرسال طلبك عبر تيليغرام مع التفاصيل كاملة</div>
+
+    <!-- Preview -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:14px;align-items:center;margin-bottom:22px;">
+      <canvas id="print-preview-canvas" width="80" height="100" style="border-radius:8px;background:#111;flex-shrink:0;"></canvas>
+      <div>
+        <div id="pom-tshirt-name" style="font-weight:700;font-size:0.95rem;margin-bottom:3px;"></div>
+        <div id="pom-details" style="color:var(--muted);font-size:0.8rem;"></div>
+        <div id="pom-price" style="color:var(--red);font-family:var(--font-num);font-size:1.2rem;margin-top:4px;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="display:block;color:var(--muted);font-size:0.8rem;margin-bottom:6px;font-weight:600;">الاسم الكامل</label>
+        <input type="text" id="pom-name" placeholder="اسمك الكريم"
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="display:block;color:var(--muted);font-size:0.8rem;margin-bottom:6px;font-weight:600;">رقم الهاتف</label>
+        <input type="tel" id="pom-phone" placeholder="07XXXXXXXXX" dir="ltr"
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="display:block;color:var(--muted);font-size:0.8rem;margin-bottom:6px;font-weight:600;">المحافظة</label>
+        <select id="pom-city"
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+          <option value="">اختر المحافظة</option>
+          <option>بغداد</option><option>البصرة</option><option>أربيل</option><option>النجف</option>
+          <option>كربلاء</option><option>الموصل</option><option>كركوك</option><option>السليمانية</option>
+          <option>ذي قار</option><option>ميسان</option><option>واسط</option><option>ديالى</option>
+          <option>الأنبار</option><option>بابل</option><option>صلاح الدين</option><option>دهوك</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;color:var(--muted);font-size:0.8rem;margin-bottom:6px;font-weight:600;">ملاحظات (اختياري)</label>
+        <input type="text" id="pom-note" placeholder="أي تعليمات خاصة..."
+          style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+    </div>
+
+    <button onclick="studioSendOrder()"
+      style="width:100%;padding:15px;background:#229ED9;color:white;border:none;border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;"
+      onmouseover="this.style.background='#1a85b5'" onmouseout="this.style.background='#229ED9'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.487c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.286 13.98 4.33 13.07c-.645-.204-.658-.645.136-.953l10.874-4.192c.537-.194 1.006.13.834.953z"/></svg>
+      إرسال الطلب عبر تيليغرام
+    </button>
+  </div>
+</div>
+
 <section id="features">
   <div class="features-grid">
     <div class="feature-item">
@@ -1845,38 +2051,33 @@ let selectedSize = null;
 let productImagesData = {};
 
 
+// ============ CLOUDINARY CONFIG ============
+const CLOUDINARY_CLOUD  = 'dx2drikbu';
+const CLOUDINARY_KEY    = '928216213266583';
+const CLOUDINARY_SECRET = 'xuJxppmIZ920Xs8HSIuYgLGeEWI';
+
 async function uploadImageToFirebase(file) {
-  const base64 = await compressImageToBase64(file, 1000, 0.75, 200000);
-  return base64;
+  return uploadToCloudinary(file);
 }
 
-function compressImageToBase64(file, maxWidth, quality, maxBytes) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width, h = img.height;
-        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        let q = quality;
-        const tryCompress = () => {
-          const data = canvas.toDataURL('image/jpeg', q);
-          if (data.length <= maxBytes || q <= 0.2) {
-            resolve(data);
-          } else {
-            q -= 0.1;
-            tryCompress();
-          }
-        };
-        tryCompress();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
+async function uploadToCloudinary(file) {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = 'baki-store';
+  const paramStr = `folder=${folder}&timestamp=${timestamp}`;
+  // SHA-1 signature via SubtleCrypto
+  const msgBuf = new TextEncoder().encode(paramStr + CLOUDINARY_SECRET);
+  const hashBuf = await crypto.subtle.digest('SHA-1', msgBuf);
+  const signature = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('api_key', CLOUDINARY_KEY);
+  fd.append('timestamp', timestamp);
+  fd.append('folder', folder);
+  fd.append('signature', signature);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!data.secure_url) throw new Error(data.error?.message || 'Cloudinary error');
+  return data.secure_url;
 }
 
 // ============ TELEGRAM CONFIG ============
@@ -2255,6 +2456,9 @@ async function addProduct() {
   const price = document.getElementById('p-price').value;
   const desc = document.getElementById('p-desc').value.trim();
   const badge = document.getElementById('p-badge').value;
+  const fabric = document.getElementById('p-fabric') ? document.getElementById('p-fabric').value : '';
+  const printColorBoxes = document.querySelectorAll('#print-black, #print-red, #print-navy');
+  const printColors = Array.from(printColorBoxes).filter(c => c.checked).map(c => c.value);
   const checkboxes = document.querySelectorAll('.size-checkboxes input[type=checkbox]');
   const sizes = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
 
@@ -2288,7 +2492,7 @@ async function addProduct() {
   const oldPriceVal = document.getElementById('p-old-price').value;
   const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
   const id = Date.now();
-  const product = { id, name, cat, price: parseInt(price), oldPrice, desc, badge, sizes, images };
+  const product = { id, name, cat, price: parseInt(price), oldPrice, desc, badge, sizes, images, fabric: fabric || '', printColors: printColors.length ? printColors : ['أسود','أحمر','أزرق داكن'] };
 
   showToast('⏳ جاري الحفظ...');
   try {
@@ -2307,6 +2511,8 @@ async function addProduct() {
   document.getElementById('p-badge').value = '';
   document.getElementById('p-images').value = '';
   document.getElementById('img-preview').innerHTML = '';
+  if (document.getElementById('p-fabric')) document.getElementById('p-fabric').value = '';
+  document.querySelectorAll('#print-black,#print-red,#print-navy').forEach(c => c.checked = false);
   tempImages = [];
 }
 
@@ -3604,6 +3810,402 @@ window.addEventListener('appinstalled', () => {
   const btn = document.getElementById('pwa-install-btn');
   if (btn) btn.style.display = 'none';
 });
+</script>
+<script>
+// ============================================================
+// PRINT STUDIO
+// ============================================================
+const PRINT_COLORS = [
+  { label: 'أسود',      hex: '#111111' },
+  { label: 'أحمر',      hex: '#c0392b' },
+  { label: 'أزرق داكن', hex: '#1a3a5c' },
+];
+const STUDIO_LIBRARY = ['★','♥','☽','⚡','◆','∞','✦','⚘'];
+
+let studioState = {
+  product: null,
+  printColor: '#111111',
+  designImg: null,
+  designEmoji: '★',
+  pos: 'chest',
+  scale: 40,
+  size: null,
+  dragX: 0, dragY: 0,
+  dragging: false, sx: 0, sy: 0, sdx: 0, sdy: 0
+};
+
+function renderStudioTshirts() {
+  const list = document.getElementById('studio-tshirt-list');
+  if (!list) return;
+  const printable = products.filter(p => p.printColors && p.printColors.length > 0);
+  if (printable.length === 0) {
+    list.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">لا توجد تيشيرتات متاحة للطبعة بعد — أضف تيشيرتات من لوحة التحكم</p>';
+    return;
+  }
+  list.innerHTML = printable.map(p => `
+    <div onclick="studioSelectTshirt(${p.id})"
+      style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.25s;"
+      id="studio-card-${p.id}"
+      onmouseover="this.style.borderColor='var(--red)';this.style.transform='translateY(-4px)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+      <div style="height:160px;overflow:hidden;background:#111;">
+        <img src="${optimizeImg(p.images[0]) || ''}" alt="${p.name}"
+          style="width:100%;height:100%;object-fit:cover;display:block;"
+          onerror="this.src='https://via.placeholder.com/300x200/181818/555?text=Tshirt'">
+      </div>
+      <div style="padding:12px;">
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">${p.name}</div>
+        ${p.fabric ? `<div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px;">${p.fabric}</div>` : ''}
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+          ${(p.printColors||[]).map(c=>`<span style="font-size:0.7rem;background:rgba(192,57,43,0.1);color:var(--red);border:1px solid rgba(192,57,43,0.3);border-radius:20px;padding:2px 8px;">${c}</span>`).join('')}
+        </div>
+        <div style="font-family:var(--font-num);color:var(--red);font-size:1.1rem;">${p.price.toLocaleString()} <span style="font-size:0.75rem;font-family:var(--font-body);color:var(--muted);">د.ع</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function studioSelectTshirt(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  studioState.product = p;
+
+  // Highlight selected card
+  document.querySelectorAll('[id^="studio-card-"]').forEach(c => c.style.border='1px solid var(--border)');
+  const card = document.getElementById('studio-card-'+id);
+  if (card) card.style.border='2px solid var(--red)';
+
+  // Show studio
+  document.getElementById('studio-main').style.display = 'block';
+  document.getElementById('studio-main').scrollIntoView({ behavior:'smooth', block:'start' });
+
+  // Set shirt image
+  const imgEl = document.getElementById('studio-shirt-img');
+  imgEl.src = p.images[0] || '';
+  imgEl.onload = () => { setTimeout(studioInitCanvas, 60); };
+  if (imgEl.complete && imgEl.src) setTimeout(studioInitCanvas, 60);
+
+  // Render print colors from product
+  const colorsWrap = document.getElementById('studio-colors');
+  const available = (p.printColors||[]).map(name => PRINT_COLORS.find(c=>c.label===name)).filter(Boolean);
+  if (available.length === 0) { colorsWrap.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;">لا ألوان محددة</span>'; }
+  else {
+    colorsWrap.innerHTML = available.map((c,i) => `
+      <div onclick="studioSetColor('${c.hex}', this)"
+        style="display:flex;align-items:center;gap:7px;background:var(--deep);border:2px solid ${i===0?'var(--red)':'var(--border)'};border-radius:8px;padding:7px 12px;cursor:pointer;transition:all 0.15s;"
+        class="studio-color-opt">
+        <span style="display:inline-block;width:16px;height:16px;background:${c.hex};border-radius:50%;border:1px solid #555;flex-shrink:0;"></span>
+        <span style="font-size:0.82rem;color:var(--white);">${c.label}</span>
+      </div>
+    `).join('');
+    studioState.printColor = available[0].hex;
+  }
+
+  // Render sizes
+  const sizesWrap = document.getElementById('studio-sizes');
+  studioState.size = p.sizes[0] || null;
+  sizesWrap.innerHTML = p.sizes.map((s,i) => `
+    <button onclick="studioSetSize('${s}',this)"
+      style="background:${i===0?'var(--red)':'var(--card)'};border:1px solid ${i===0?'var(--red)':'var(--border)'};color:${i===0?'white':'var(--muted)'};border-radius:6px;padding:7px 13px;cursor:pointer;font-family:var(--font-body);font-size:0.82rem;font-weight:700;transition:all 0.2s;"
+      class="studio-size-btn">
+      ${s}
+    </button>
+  `).join('');
+
+  // Price
+  document.getElementById('studio-price-display').textContent = p.price.toLocaleString() + ' د.ع';
+}
+
+// Build library
+function studioInitLib() {
+  const lib = document.getElementById('studio-lib');
+  if (!lib) return;
+  lib.innerHTML = STUDIO_LIBRARY.map((em,i) => `
+    <div onclick="studioSetEmoji('${em}',this)"
+      style="aspect-ratio:1;background:var(--deep);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all 0.15s;${i===0?'border-color:var(--red);':''}"
+      class="studio-lib-item">
+      ${em}
+    </div>
+  `).join('');
+}
+
+const studioCanvas = document.getElementById('studio-canvas');
+const studioCtx = studioCanvas ? studioCanvas.getContext('2d') : null;
+const studioStage = document.getElementById('studio-stage');
+
+function studioInitCanvas() {
+  if (!studioStage || !studioCanvas) return;
+  studioCanvas.width  = studioStage.offsetWidth;
+  studioCanvas.height = studioStage.offsetHeight;
+  studioResetPos();
+  studioDraw();
+}
+
+function studioGetCenter() {
+  const w = studioCanvas.width, h = studioCanvas.height;
+  if (studioState.pos === 'chest')  return { x: w*0.5, y: h*0.3 };
+  return { x: w*0.5, y: h*0.5 };
+}
+
+function studioResetPos() {
+  const c = studioGetCenter();
+  studioState.dragX = c.x;
+  studioState.dragY = c.y;
+}
+
+function studioDraw() {
+  if (!studioCtx) return;
+  const w = studioCanvas.width, h = studioCanvas.height;
+  studioCtx.clearRect(0,0,w,h);
+  const size = studioState.pos === 'full'
+    ? w * 0.65
+    : w * (studioState.scale / 100);
+  const x = studioState.dragX - size/2;
+  const y = studioState.dragY - size/2;
+  studioCtx.save();
+  studioCtx.globalAlpha = 0.92;
+  if (studioState.designImg) {
+    studioCtx.drawImage(studioState.designImg, x, y, size, size);
+  } else if (studioState.designEmoji) {
+    studioCtx.font = `${Math.round(size*0.72)}px serif`;
+    studioCtx.textAlign = 'center';
+    studioCtx.textBaseline = 'middle';
+    studioCtx.fillStyle = studioState.printColor;
+    studioCtx.fillText(studioState.designEmoji, studioState.dragX, studioState.dragY);
+  }
+  studioCtx.restore();
+}
+
+function studioSetColor(hex, btn) {
+  studioState.printColor = hex;
+  document.querySelectorAll('.studio-color-opt').forEach(b => b.style.borderColor = 'var(--border)');
+  if (btn) btn.style.borderColor = 'var(--red)';
+  studioDraw();
+}
+
+function studioSetPos(p, btn) {
+  studioState.pos = p;
+  document.querySelectorAll('.studio-pos-btn').forEach(b => b.classList.remove('active-pos'));
+  if (btn) btn.classList.add('active-pos');
+  studioResetPos();
+  studioDraw();
+}
+
+function studioOnScale(el) {
+  studioState.scale = parseInt(el.value);
+  document.getElementById('studio-scale-val').textContent = studioState.scale + '%';
+  studioDraw();
+}
+
+function studioSetSize(s, btn) {
+  studioState.size = s;
+  document.querySelectorAll('.studio-size-btn').forEach(b => {
+    b.style.background = 'var(--card)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--muted)';
+  });
+  if (btn) { btn.style.background='var(--red)'; btn.style.borderColor='var(--red)'; btn.style.color='white'; }
+}
+
+function studioSetEmoji(em, btn) {
+  studioState.designEmoji = em;
+  studioState.designImg = null;
+  document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
+  if (btn) btn.style.borderColor='var(--red)';
+  studioDraw();
+}
+
+function studioClear() {
+  studioState.designImg = null;
+  studioState.designEmoji = null;
+  document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
+  studioDraw();
+}
+
+function studioOnFile(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      studioState.designImg = img;
+      studioState.designEmoji = null;
+      document.querySelectorAll('.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
+      studioDraw();
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+
+// Drag
+const studioDragEl = document.getElementById('studio-drag');
+if (studioDragEl) {
+  function sGetXY(e) {
+    const r = studioDragEl.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  }
+  studioDragEl.addEventListener('mousedown', e => {
+    const {x,y} = sGetXY(e);
+    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
+    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!studioState.dragging) return;
+    const r = studioDragEl.getBoundingClientRect();
+    studioState.dragX = studioState.sdx+(e.clientX-r.left-studioState.sx);
+    studioState.dragY = studioState.sdy+(e.clientY-r.top-studioState.sy);
+    studioDraw();
+  });
+  window.addEventListener('mouseup', ()=>studioState.dragging=false);
+  studioDragEl.addEventListener('touchstart', e=>{
+    const {x,y}=sGetXY(e);
+    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
+    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
+  },{passive:true});
+  studioDragEl.addEventListener('touchmove', e=>{
+    if(!studioState.dragging) return;
+    const {x,y}=sGetXY(e);
+    studioState.dragX=studioState.sdx+(x-studioState.sx);
+    studioState.dragY=studioState.sdy+(y-studioState.sy);
+    studioDraw(); e.preventDefault();
+  },{passive:false});
+  studioDragEl.addEventListener('touchend',()=>studioState.dragging=false);
+}
+
+function studioOrder() {
+  const p = studioState.product;
+  if (!p) return;
+  if (!studioState.designImg && !studioState.designEmoji) { showToast('❌ اختر تصميماً أولاً'); return; }
+
+  // Fill modal
+  document.getElementById('pom-tshirt-name').textContent = p.name + (p.fabric ? ` — ${p.fabric}` : '');
+  const colorLabel = PRINT_COLORS.find(c=>c.hex===studioState.printColor)?.label || studioState.printColor;
+  document.getElementById('pom-details').textContent = `لون الطبعة: ${colorLabel} — مقاس ${studioState.size||'—'}`;
+  document.getElementById('pom-price').textContent = p.price.toLocaleString() + ' د.ع';
+
+  // Preview canvas
+  const pvc = document.getElementById('print-preview-canvas');
+  const pvctx = pvc.getContext('2d');
+  pvctx.clearRect(0,0,pvc.width,pvc.height);
+  const shirtImg = document.getElementById('studio-shirt-img');
+  if (shirtImg && shirtImg.complete) {
+    pvctx.drawImage(shirtImg, 0, 0, pvc.width, pvc.height);
+    const s = pvc.width * (studioState.scale/100) * 0.85;
+    const px = pvc.width  * (studioState.dragX / studioCanvas.width)  - s/2;
+    const py = pvc.height * (studioState.dragY / studioCanvas.height) - s/2;
+    pvctx.globalAlpha = 0.9;
+    if (studioState.designImg) {
+      pvctx.drawImage(studioState.designImg, px, py, s, s);
+    } else if (studioState.designEmoji) {
+      pvctx.font = `${Math.round(s*0.72)}px serif`;
+      pvctx.textAlign='center'; pvctx.textBaseline='middle';
+      pvctx.fillStyle = studioState.printColor;
+      pvctx.fillText(studioState.designEmoji, pvc.width*(studioState.dragX/studioCanvas.width), pvc.height*(studioState.dragY/studioCanvas.height));
+    }
+  }
+
+  const modal = document.getElementById('print-order-modal');
+  modal.style.display = 'flex';
+}
+
+async function studioSendOrder() {
+  const name  = document.getElementById('pom-name').value.trim();
+  const phone = document.getElementById('pom-phone').value.trim();
+  const city  = document.getElementById('pom-city').value;
+  const note  = document.getElementById('pom-note').value.trim();
+  const p     = studioState.product;
+
+  if (!name || !phone || !city) { showToast('❌ يرجى تعبئة الاسم والهاتف والمحافظة'); return; }
+  if (!p) return;
+
+  const colorLabel = PRINT_COLORS.find(c=>c.hex===studioState.printColor)?.label || studioState.printColor;
+  const designLabel = studioState.designImg ? 'تصميم مرفوع' : (studioState.designEmoji || 'بدون');
+
+  const text = `🎨 *طلب طبعة — باكي ستور*
+
+` +
+    `👤 الاسم: ${name}
+` +
+    `📱 الهاتف: ${phone}
+` +
+    `📍 المحافظة: ${city}
+` +
+    `👕 التيشيرت: ${p.name}${p.fabric?' ('+p.fabric+')':''}
+` +
+    `🎨 لون الطبعة: ${colorLabel}
+` +
+    `🖼 التصميم: ${designLabel}
+` +
+    `📏 المقاس: ${studioState.size||'—'}
+` +
+    `📌 الموضع: ${studioState.pos==='chest'?'الصدر':studioState.pos==='center'?'الوسط':'كامل'}
+` +
+    `💰 السعر: ${p.price.toLocaleString()} د.ع` +
+    (note ? `
+📝 ملاحظات: ${note}` : '');
+
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:CHAT_ID,text,parse_mode:'Markdown'})
+    });
+
+    // Send preview image if design uploaded
+    if (studioState.designImg) {
+      const pvc = document.getElementById('print-preview-canvas');
+      pvc.toBlob(async blob => {
+        if (!blob) return;
+        const fd = new FormData();
+        fd.append('chat_id', CHAT_ID);
+        fd.append('photo', blob, 'print-design.png');
+        fd.append('caption', `طبعة ${p.name} — ${colorLabel}`);
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:'POST',body:fd});
+      },'image/png');
+    }
+
+    document.getElementById('print-order-modal').style.display = 'none';
+    document.getElementById('pom-name').value = '';
+    document.getElementById('pom-phone').value = '';
+    document.getElementById('pom-city').value = '';
+    document.getElementById('pom-note').value = '';
+    showToast('✅ تم إرسال طلبك بنجاح!');
+    logEvent('order', { productName: p.name, total: p.price });
+  } catch(e) {
+    showToast('❌ خطأ في الإرسال، تأكد من اتصالك');
+  }
+}
+
+// Hook into loadProducts to also render studio list
+const _origLoadProducts = window.loadProducts;
+window.addEventListener('load', () => {
+  studioInitLib();
+  // Re-render studio list after products load
+  const origRender = window.renderProducts;
+  window.renderProducts = function() {
+    origRender && origRender.apply(this, arguments);
+    renderStudioTshirts();
+  };
+});
+
+// Also add Print Studio to navbar
+window.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelector('.nav-links');
+  if (navLinks) {
+    const li = document.createElement('li');
+    li.innerHTML = '<a onclick="scrollTo('print-studio')" style="color:var(--red);font-weight:700;">✦ طبعاتك</a>';
+    navLinks.appendChild(li);
+  }
+  studioInitLib();
+  renderStudioTshirts();
+});
+
+window.addEventListener('resize', () => {
+  if (studioState.product) setTimeout(studioInitCanvas, 150);
+});
+// End Print Studio
 </script>
 </body>
 </html>
