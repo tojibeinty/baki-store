@@ -486,9 +486,7 @@ async function handleMessage(msg) {
         const imageBuffer = await tgImageRes.arrayBuffer();
         const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
         await setSession(chatId, { ...session, step: 'await_tshirt_save', tshirtImage: cloudUrl });
-        await sendMessage(chatId, '✅ تم رفع الصورة!
-
-اضغط *حفظ* للإضافة:', {
+        await sendMessage(chatId, '✅ تم رفع الصورة!\n\nاضغط *حفظ* للإضافة:', {
           inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
         });
       } catch {
@@ -496,9 +494,7 @@ async function handleMessage(msg) {
       }
     } else if (text && text.startsWith('http')) {
       await setSession(chatId, { ...session, step: 'await_tshirt_save', tshirtImage: text.trim() });
-      await sendMessage(chatId, '✅ تم!
-
-اضغط *حفظ* للإضافة:', {
+      await sendMessage(chatId, '✅ تم!\n\nاضغط *حفظ* للإضافة:', {
         inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
       });
     } else {
@@ -527,18 +523,14 @@ async function handleMessage(msg) {
         const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
         await saveDesign({ name: session.designName, image: cloudUrl });
         await clearSession(chatId);
-        await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*
-
-🖼 الاسم: ${session.designName}`, MAIN_MENU);
+        await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
       } catch {
         await sendMessage(chatId, '❌ فشل رفع الطبعة، حاول مرة ثانية.');
       }
     } else if (text && text.startsWith('http')) {
       await saveDesign({ name: session.designName, image: text.trim() });
       await clearSession(chatId);
-      await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*
-
-🖼 الاسم: ${session.designName}`, MAIN_MENU);
+      await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
     } else {
       await sendMessage(chatId, '📸 أرسل صورة مباشرة أو رابط يبدأ بـ https://');
     }
@@ -642,21 +634,13 @@ async function handleCallback(cb) {
   // ============ إضافة تيشيرت للطبعات ============
   if (data === 'add_tshirt') {
     await setSession(chatId, { step: 'await_tshirt_name' });
-    await sendMessage(chatId, '👕 *إضافة تيشيرت للطبعات*
-
-أدخل *اسم* التيشيرت:
-
-_(أرسل /cancel للإلغاء)_');
+    await sendMessage(chatId, '👕 *إضافة تيشيرت للطبعات*\n\nأدخل *اسم* التيشيرت:\n\n_(أرسل /cancel للإلغاء)_');
     return;
   }
 
   if (data === 'add_design') {
     await setSession(chatId, { step: 'await_design_name' });
-    await sendMessage(chatId, '🖼 *إضافة طبعة للمكتبة*
-
-أدخل *اسم* الطبعة:
-
-_(أرسل /cancel للإلغاء)_');
+    await sendMessage(chatId, '🖼 *إضافة طبعة للمكتبة*\n\nأدخل *اسم* الطبعة:\n\n_(أرسل /cancel للإلغاء)_');
     return;
   }
 
