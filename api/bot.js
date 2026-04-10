@@ -147,6 +147,8 @@ const MAIN_MENU = {
     [{ text: '🗑 حذف منتج', callback_data: 'delete_product' }],
     [{ text: '🎟 إضافة كوبون', callback_data: 'add_coupon' }],
     [{ text: '🎟 عرض الكوبونات', callback_data: 'list_coupons' }],
+    [{ text: '👕 إضافة تيشيرت للطبعات', callback_data: 'add_tshirt' }],
+    [{ text: '🖼 إضافة طبعة للمكتبة', callback_data: 'add_design' }],
     [{ text: '📊 إحصائيات', callback_data: 'stats' }],
   ]
 };
@@ -172,6 +174,27 @@ const SIZES_KEYBOARD = {
       { text: 'XXL', callback_data: 'size_XXL' },
     ],
     [{ text: '✅ تم اختيار الأحجام', callback_data: 'sizes_done' }],
+  ]
+};
+
+const FABRIC_KEYBOARD = {
+  inline_keyboard: [
+    [{ text: 'قطني 100%', callback_data: 'fabric_قطني 100%' }],
+    [{ text: 'قماش أديداس', callback_data: 'fabric_قماش أديداس' }],
+    [{ text: 'قماش نايك', callback_data: 'fabric_قماش نايك' }],
+    [{ text: 'بوليستر', callback_data: 'fabric_بوليستر' }],
+    [{ text: 'قطني بوليستر', callback_data: 'fabric_قطني بوليستر' }],
+    [{ text: 'اوفر سايز', callback_data: 'fabric_اوفر سايز' }],
+  ]
+};
+
+const COLORS_KEYBOARD = {
+  inline_keyboard: [
+    [{ text: '⚫ أسود', callback_data: 'color_أسود' }, { text: '⚪ أبيض', callback_data: 'color_أبيض' }],
+    [{ text: '🔴 أحمر', callback_data: 'color_أحمر' }, { text: '🔵 أزرق داكن', callback_data: 'color_أزرق داكن' }],
+    [{ text: '🟢 أخضر', callback_data: 'color_أخضر' }, { text: '🟡 أصفر', callback_data: 'color_أصفر' }],
+    [{ text: '🟤 بني', callback_data: 'color_بني' }, { text: '🩶 رمادي', callback_data: 'color_رمادي' }],
+    [{ text: '✅ تم اختيار الألوان', callback_data: 'colors_done' }],
   ]
 };
 
@@ -253,6 +276,29 @@ async function getStats() {
     }
     return `📊 *إحصائيات باكي ستور*\n\n📦 المنتجات: ${prodCount}\n🎟 الكوبونات: ${couponCount}\n👁 زيارات اليوم: ${todayVisits}`;
   } catch { return '❌ خطأ في تحميل الإحصائيات'; }
+}
+
+// ============ دوال التيشيرتات والطبعات ============
+async function saveTshirt(t) {
+  await fsPost('custom_tshirts', {
+    id: { integerValue: Date.now() },
+    name: { stringValue: t.name },
+    fabric: { stringValue: t.fabric || '' },
+    price: { integerValue: parseInt(t.price) },
+    oldPrice: t.oldPrice ? { integerValue: parseInt(t.oldPrice) } : { nullValue: null },
+    desc: { stringValue: t.desc || '' },
+    sizes: { arrayValue: { values: (t.sizes || []).map(s => ({ stringValue: s })) } },
+    colors: { arrayValue: { values: (t.colors || []).map(c => ({ stringValue: c })) } },
+    images: { arrayValue: { values: [{ stringValue: t.image || '' }] } }
+  });
+}
+
+async function saveDesign(d) {
+  await fsPost('custom_designs', {
+    id: { integerValue: Date.now() },
+    name: { stringValue: d.name },
+    image: { stringValue: d.image || '' }
+  });
 }
 
 // ============ معالج الرسائل الرئيسي ============
@@ -400,6 +446,105 @@ async function handleMessage(msg) {
     return;
   }
 
+  // ============ خطوات إضافة تيشيرت للطبعات ============
+  if (step === 'await_tshirt_name') {
+    await setSession(chatId, { ...session, step: 'await_tshirt_price', tshirtName: text.trim() });
+    await sendMessage(chatId, '💰 أدخل *السعر* (بالدينار العراقي):');
+    return;
+  }
+
+  if (step === 'await_tshirt_price') {
+    if (isNaN(text.trim())) { await sendMessage(chatId, '❌ أدخل رقماً صحيحاً:'); return; }
+    await setSession(chatId, { ...session, step: 'await_tshirt_oldprice', tshirtPrice: text.trim() });
+    await sendMessage(chatId, '🏷 أدخل *السعر القديم* (أو أرسل 0 إذا ما في خصم):');
+    return;
+  }
+
+  if (step === 'await_tshirt_oldprice') {
+    const op = text.trim() === '0' ? '' : text.trim();
+    await setSession(chatId, { ...session, step: 'await_tshirt_desc', tshirtOldPrice: op });
+    await sendMessage(chatId, '📝 أدخل *وصف* التيشيرت (أو أرسل - للتخطي):');
+    return;
+  }
+
+  if (step === 'await_tshirt_desc') {
+    const desc = text.trim() === '-' ? '' : text.trim();
+    await setSession(chatId, { ...session, step: 'await_tshirt_fabric', tshirtDesc: desc });
+    await sendMessage(chatId, '🧵 اختر *نوع القماش*:', FABRIC_KEYBOARD);
+    return;
+  }
+
+  if (step === 'await_tshirt_image') {
+    if (photo && photo.length > 0) {
+      await sendMessage(chatId, '⏳ جاري رفع الصورة...');
+      try {
+        const fileId = photo[photo.length - 1].file_id;
+        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileData = await fileRes.json();
+        const filePath = fileData.result?.file_path;
+        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
+        const imageBuffer = await tgImageRes.arrayBuffer();
+        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        await setSession(chatId, { ...session, step: 'await_tshirt_save', tshirtImage: cloudUrl });
+        await sendMessage(chatId, '✅ تم رفع الصورة!
+
+اضغط *حفظ* للإضافة:', {
+          inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
+        });
+      } catch {
+        await sendMessage(chatId, '❌ فشل رفع الصورة، حاول مرة ثانية.');
+      }
+    } else if (text && text.startsWith('http')) {
+      await setSession(chatId, { ...session, step: 'await_tshirt_save', tshirtImage: text.trim() });
+      await sendMessage(chatId, '✅ تم!
+
+اضغط *حفظ* للإضافة:', {
+        inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
+      });
+    } else {
+      await sendMessage(chatId, '📸 أرسل صورة مباشرة أو رابط يبدأ بـ https://');
+    }
+    return;
+  }
+
+  // ============ خطوات إضافة طبعة للمكتبة ============
+  if (step === 'await_design_name') {
+    await setSession(chatId, { ...session, step: 'await_design_image', designName: text.trim() });
+    await sendMessage(chatId, '🖼 أرسل *صورة الطبعة* (PNG شفاف أفضل) أو رابط مباشر:');
+    return;
+  }
+
+  if (step === 'await_design_image') {
+    if (photo && photo.length > 0) {
+      await sendMessage(chatId, '⏳ جاري رفع الطبعة...');
+      try {
+        const fileId = photo[photo.length - 1].file_id;
+        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileData = await fileRes.json();
+        const filePath = fileData.result?.file_path;
+        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
+        const imageBuffer = await tgImageRes.arrayBuffer();
+        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        await saveDesign({ name: session.designName, image: cloudUrl });
+        await clearSession(chatId);
+        await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*
+
+🖼 الاسم: ${session.designName}`, MAIN_MENU);
+      } catch {
+        await sendMessage(chatId, '❌ فشل رفع الطبعة، حاول مرة ثانية.');
+      }
+    } else if (text && text.startsWith('http')) {
+      await saveDesign({ name: session.designName, image: text.trim() });
+      await clearSession(chatId);
+      await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*
+
+🖼 الاسم: ${session.designName}`, MAIN_MENU);
+    } else {
+      await sendMessage(chatId, '📸 أرسل صورة مباشرة أو رابط يبدأ بـ https://');
+    }
+    return;
+  }
+
   // fallback
   await sendMessage(chatId, '👇 استخدم /start للقائمة الرئيسية', MAIN_MENU);
 }
@@ -491,6 +636,117 @@ async function handleCallback(cb) {
     }
     await setSession(chatId, { ...session, step: 'await_image_file' });
     await sendMessage(chatId, `✅ الأحجام: *${sizes.join(', ')}*\n\n🖼 أرسل *صورة* المنتج مباشرةً، أو أرسل *رابط* صورة من imgbb.com:\n\nhttps://imgbb.com\n\n_(أرسل /cancel للإلغاء)_`);
+    return;
+  }
+
+  // ============ إضافة تيشيرت للطبعات ============
+  if (data === 'add_tshirt') {
+    await setSession(chatId, { step: 'await_tshirt_name' });
+    await sendMessage(chatId, '👕 *إضافة تيشيرت للطبعات*
+
+أدخل *اسم* التيشيرت:
+
+_(أرسل /cancel للإلغاء)_');
+    return;
+  }
+
+  if (data === 'add_design') {
+    await setSession(chatId, { step: 'await_design_name' });
+    await sendMessage(chatId, '🖼 *إضافة طبعة للمكتبة*
+
+أدخل *اسم* الطبعة:
+
+_(أرسل /cancel للإلغاء)_');
+    return;
+  }
+
+  // ============ اختيار القماش ============
+  if (data.startsWith('fabric_')) {
+    const fabric = data.replace('fabric_', '');
+    await setSession(chatId, { ...session, step: 'await_tshirt_colors', tshirtFabric: fabric, tshirtColors: '' });
+    await sendMessage(chatId, `✅ القماش: *${fabric}*
+
+🎨 اختر *ألوان* التيشيرت (اضغط واحد واحد ثم "تم"):`, COLORS_KEYBOARD);
+    return;
+  }
+
+  // ============ اختيار الألوان ============
+  if (data.startsWith('color_')) {
+    const color = data.replace('color_', '');
+    const currentColors = session.tshirtColors ? session.tshirtColors.split(',').filter(Boolean) : [];
+    let newColors;
+    if (currentColors.includes(color)) {
+      newColors = currentColors.filter(c => c !== color);
+      await sendMessage(chatId, `❌ تم إزالة لون *${color}*
+الألوان المختارة: ${newColors.join(', ') || 'لا شيء'}`, COLORS_KEYBOARD);
+    } else {
+      newColors = [...currentColors, color];
+      await sendMessage(chatId, `✅ تم إضافة لون *${color}*
+الألوان المختارة: ${newColors.join(', ')}`, COLORS_KEYBOARD);
+    }
+    await setSession(chatId, { ...session, tshirtColors: newColors.join(',') });
+    return;
+  }
+
+  if (data === 'colors_done') {
+    const colors = session.tshirtColors ? session.tshirtColors.split(',').filter(Boolean) : [];
+    if (colors.length === 0) {
+      await sendMessage(chatId, '❌ اختر لوناً واحداً على الأقل!', COLORS_KEYBOARD);
+      return;
+    }
+    await setSession(chatId, { ...session, step: 'await_tshirt_sizes', tshirtColors: colors.join(','), sizes: '' });
+    await sendMessage(chatId, `✅ الألوان: *${colors.join(', ')}*
+
+👟 اختر *الأحجام* المتوفرة:`, SIZES_KEYBOARD);
+    return;
+  }
+
+  if (data === 'sizes_done' && session.step === 'await_tshirt_sizes') {
+    const sizes = session.sizes ? session.sizes.split(',').filter(Boolean) : [];
+    if (sizes.length === 0) {
+      await sendMessage(chatId, '❌ اختر حجماً واحداً على الأقل!', SIZES_KEYBOARD);
+      return;
+    }
+    await setSession(chatId, { ...session, step: 'await_tshirt_image' });
+    await sendMessage(chatId, `✅ الأحجام: *${sizes.join(', ')}*
+
+📸 أرسل *صورة* التيشيرت أو رابط مباشر:`);
+    return;
+  }
+
+  if (data === 'save_tshirt') {
+    const sizes = session.sizes ? session.sizes.split(',').filter(Boolean) : [];
+    const colors = session.tshirtColors ? session.tshirtColors.split(',').filter(Boolean) : [];
+    try {
+      await saveTshirt({
+        name: session.tshirtName,
+        fabric: session.tshirtFabric,
+        price: session.tshirtPrice,
+        oldPrice: session.tshirtOldPrice || null,
+        desc: session.tshirtDesc || '',
+        sizes,
+        colors,
+        image: session.tshirtImage || ''
+      });
+      await clearSession(chatId);
+      await sendMessage(chatId,
+        `✅ *تمت إضافة التيشيرت بنجاح!*
+
+` +
+        `👕 الاسم: ${session.tshirtName}
+` +
+        `🧵 القماش: ${session.tshirtFabric}
+` +
+        `💰 السعر: ${Number(session.tshirtPrice).toLocaleString()} د.ع
+` +
+        `🎨 الألوان: ${colors.join(', ')}
+` +
+        `👟 الأحجام: ${sizes.join(', ')}`,
+        MAIN_MENU
+      );
+    } catch {
+      await sendMessage(chatId, '❌ خطأ في حفظ التيشيرت.', MAIN_MENU);
+    }
     return;
   }
 
