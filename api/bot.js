@@ -294,10 +294,9 @@ async function saveTshirt(t) {
 }
 
 async function saveDesign(d) {
-  await fsPost('designs', {
-    id: { integerValue: Date.now() },
+  await fsPost('printDesigns', {
     name: { stringValue: d.name },
-    image: { stringValue: d.image || '' }
+    url: { stringValue: d.image || '' }
   });
 }
 
