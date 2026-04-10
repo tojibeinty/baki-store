@@ -326,7 +326,7 @@ async function saveTshirt(t) {
     oldPrice: t.oldPrice ? { integerValue: parseInt(t.oldPrice) } : { nullValue: null },
     desc: { stringValue: t.desc || '' },
     sizes: { arrayValue: { values: (t.sizes || []).map(s => ({ stringValue: s })) } },
-    colors: { arrayValue: { values: (t.colors || []).map(c => ({ stringValue: c })) } },
+    printColors: { arrayValue: { values: [] } },
     images: { arrayValue: { values: [{ stringValue: t.image || '' }] } }
   });
 }
@@ -558,31 +558,47 @@ async function handleMessage(msg) {
 
   // ============ خطوات إضافة طبعة للمكتبة ============
   if (step === 'await_design_name') {
-    await setSession(chatId, { ...session, step: 'await_design_image', designName: text.trim() });
-    await sendMessage(chatId, '🖼 أرسل *صورة الطبعة* (PNG شفاف أفضل) أو رابط مباشر:');
+    await setSession(chatId, { ...session, step: 'await_design_images', designName: text.trim(), designCount: 0 });
+    await sendMessage(chatId, `🖼 *إضافة طبعات للمكتبة*\n\nأرسل الصور وحدة وحدة أو أكثر من صورة بنفس الوقت (Album)\nكل صورة = طبعة منفصلة باسم: *${text.trim()}*\n\nلما تخلص أرسل /done للحفظ أو /cancel للإلغاء`);
     return;
   }
 
-  if (step === 'await_design_image') {
+  if (step === 'await_design_images') {
+    // زر الإنهاء
+    if (text === '/done') {
+      const count = parseInt(session.designCount || 0);
+      if (count === 0) {
+        await sendMessage(chatId, '❌ ما أرسلت أي صورة! أرسل صورة واحدة على الأقل.');
+        return;
+      }
+      await clearSession(chatId);
+      await sendMessage(chatId, `✅ *تمت إضافة ${count} طبعة للمكتبة بنجاح!*`, MAIN_MENU);
+      return;
+    }
+
     const fileId = photo?.length > 0 ? photo[photo.length - 1].file_id
                   : document ? document.file_id
                   : null;
+
     if (fileId) {
-      await sendMessage(chatId, '⏳ جاري رفع الطبعة...');
       try {
         const cloudUrl = await uploadFromTelegram(fileId, document?.file_name || 'design.png');
-        await saveDesign({ name: session.designName, image: cloudUrl });
-        await clearSession(chatId);
-        await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
+        const count = parseInt(session.designCount || 0);
+        const designName = count === 0 ? session.designName : `${session.designName} ${count + 1}`;
+        await saveDesign({ name: designName, image: cloudUrl });
+        await setSession(chatId, { ...session, designCount: count + 1 });
+        await sendMessage(chatId, `✅ تمت إضافة الطبعة رقم *${count + 1}*\n\nأرسل صورة ثانية أو اكتب /done للإنهاء`);
       } catch {
-        await sendMessage(chatId, '❌ فشل رفع الطبعة، حاول مرة ثانية.');
+        await sendMessage(chatId, '❌ فشل رفع الصورة، حاول مرة ثانية.');
       }
     } else if (text && text.startsWith('http')) {
-      await saveDesign({ name: session.designName, image: text.trim() });
-      await clearSession(chatId);
-      await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
+      const count = parseInt(session.designCount || 0);
+      const designName = count === 0 ? session.designName : `${session.designName} ${count + 1}`;
+      await saveDesign({ name: designName, image: text.trim() });
+      await setSession(chatId, { ...session, designCount: count + 1 });
+      await sendMessage(chatId, `✅ تمت إضافة الطبعة رقم *${count + 1}*\n\nأرسل صورة ثانية أو اكتب /done للإنهاء`);
     } else {
-      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة، أو *document* (ملف صورة)، أو *رابط* يبدأ بـ https://');
+      await sendMessage(chatId, '📸 أرسل *صورة* أو *document* أو *رابط* يبدأ بـ https://\n\nأو اكتب /done لما تخلص');
     }
     return;
   }
@@ -711,39 +727,8 @@ async function handleCallback(cb) {
   // ============ اختيار القماش ============
   if (data.startsWith('fabric_')) {
     const fabric = data.replace('fabric_', '');
-    await setSession(chatId, { ...session, step: 'await_tshirt_colors', tshirtFabric: fabric, tshirtColors: '' });
+    await setSession(chatId, { ...session, step: 'await_tshirt_sizes', tshirtFabric: fabric, sizes: '' });
     await sendMessage(chatId, `✅ القماش: *${fabric}*
-
-🎨 اختر *ألوان* التيشيرت (اضغط واحد واحد ثم "تم"):`, COLORS_KEYBOARD);
-    return;
-  }
-
-  // ============ اختيار الألوان ============
-  if (data.startsWith('color_')) {
-    const color = data.replace('color_', '');
-    const currentColors = session.tshirtColors ? session.tshirtColors.split(',').filter(Boolean) : [];
-    let newColors;
-    if (currentColors.includes(color)) {
-      newColors = currentColors.filter(c => c !== color);
-      await sendMessage(chatId, `❌ تم إزالة لون *${color}*
-الألوان المختارة: ${newColors.join(', ') || 'لا شيء'}`, COLORS_KEYBOARD);
-    } else {
-      newColors = [...currentColors, color];
-      await sendMessage(chatId, `✅ تم إضافة لون *${color}*
-الألوان المختارة: ${newColors.join(', ')}`, COLORS_KEYBOARD);
-    }
-    await setSession(chatId, { ...session, tshirtColors: newColors.join(',') });
-    return;
-  }
-
-  if (data === 'colors_done') {
-    const colors = session.tshirtColors ? session.tshirtColors.split(',').filter(Boolean) : [];
-    if (colors.length === 0) {
-      await sendMessage(chatId, '❌ اختر لوناً واحداً على الأقل!', COLORS_KEYBOARD);
-      return;
-    }
-    await setSession(chatId, { ...session, step: 'await_tshirt_sizes', tshirtColors: colors.join(','), sizes: '' });
-    await sendMessage(chatId, `✅ الألوان: *${colors.join(', ')}*
 
 👟 اختر *الأحجام* المتوفرة:`, SIZES_KEYBOARD);
     return;
@@ -773,7 +758,7 @@ async function handleCallback(cb) {
         oldPrice: session.tshirtOldPrice || null,
         desc: session.tshirtDesc || '',
         sizes,
-        colors,
+
         image: session.tshirtImage || ''
       });
       await clearSession(chatId);
@@ -787,8 +772,7 @@ async function handleCallback(cb) {
 ` +
         `💰 السعر: ${Number(session.tshirtPrice).toLocaleString()} د.ع
 ` +
-        `🎨 الألوان: ${colors.join(', ')}
-` +
+        ` +
         `👟 الأحجام: ${sizes.join(', ')}`,
         MAIN_MENU
       );
