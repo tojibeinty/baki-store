@@ -772,7 +772,6 @@ async function handleCallback(cb) {
 ` +
         `💰 السعر: ${Number(session.tshirtPrice).toLocaleString()} د.ع
 ` +
-        ` +
         `👟 الأحجام: ${sizes.join(', ')}`,
         MAIN_MENU
       );
