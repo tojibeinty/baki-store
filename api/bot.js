@@ -294,7 +294,7 @@ async function saveTshirt(t) {
 }
 
 async function saveDesign(d) {
-  await fsPost('custom_designs', {
+  await fsPost('designs', {
     id: { integerValue: Date.now() },
     name: { stringValue: d.name },
     image: { stringValue: d.image || '' }
