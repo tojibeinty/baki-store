@@ -42,6 +42,15 @@ async function uploadToCloudinary(imageBuffer, filename) {
   return data.secure_url;
 }
 
+
+async function uploadFromTelegram(fileId, filename) {
+  const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+  const fileData = await fileRes.json();
+  const filePath = fileData.result?.file_path;
+  const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
+  const imageBuffer = await tgImageRes.arrayBuffer();
+  return await uploadToCloudinary(imageBuffer, filename || filePath.split('/').pop());
+}
 // ============ حالة المحادثة (في الذاكرة — Vercel serverless) ============
 // ملاحظة: Vercel serverless لا يحتفظ بالحالة بين الطلبات
 // لذا نستخدم Firebase لحفظ حالة المحادثة
@@ -148,7 +157,9 @@ const MAIN_MENU = {
     [{ text: '🎟 إضافة كوبون', callback_data: 'add_coupon' }],
     [{ text: '🎟 عرض الكوبونات', callback_data: 'list_coupons' }],
     [{ text: '👕 إضافة تيشيرت للطبعات', callback_data: 'add_tshirt' }],
+    [{ text: '🗑 حذف تيشيرت من الطبعات', callback_data: 'delete_tshirt' }],
     [{ text: '🖼 إضافة طبعة للمكتبة', callback_data: 'add_design' }],
+    [{ text: '🗑 حذف طبعة من المكتبة', callback_data: 'delete_design' }],
     [{ text: '📊 إحصائيات', callback_data: 'stats' }],
   ]
 };
@@ -279,8 +290,35 @@ async function getStats() {
 }
 
 // ============ دوال التيشيرتات والطبعات ============
+async function listTshirts() {
+  try {
+    const data = await fsGet('printProducts');
+    if (!data?.documents || data.documents.length === 0) return '👕 لا توجد تيشيرتات حالياً.';
+    return data.documents.map((d, i) => {
+      const f = d.fields || {};
+      const name = f.name?.stringValue || 'بدون اسم';
+      const price = f.price?.integerValue || f.price?.doubleValue || 0;
+      const docId = d.name.split('/').pop();
+      return `${i + 1}. *${name}* — ${Number(price).toLocaleString()} د.ع\n   ID: \`${docId}\``;
+    }).join('\n\n');
+  } catch { return '❌ خطأ في تحميل التيشيرتات'; }
+}
+
+async function listDesigns() {
+  try {
+    const data = await fsGet('printDesigns');
+    if (!data?.documents || data.documents.length === 0) return '🖼 لا توجد طبعات حالياً.';
+    return data.documents.map((d, i) => {
+      const f = d.fields || {};
+      const name = f.name?.stringValue || 'بدون اسم';
+      const docId = d.name.split('/').pop();
+      return `${i + 1}. *${name}*\n   ID: \`${docId}\``;
+    }).join('\n\n');
+  } catch { return '❌ خطأ في تحميل الطبعات'; }
+}
+
 async function saveTshirt(t) {
-  await fsPost('custom_tshirts', {
+  await fsPost('printProducts', {
     id: { integerValue: Date.now() },
     name: { stringValue: t.name },
     fabric: { stringValue: t.fabric || '' },
@@ -305,6 +343,7 @@ async function handleMessage(msg) {
   const chatId = String(msg.chat?.id);
   const text = msg.text || '';
   const photo = msg.photo;
+  const document = msg.document;
 
   // تحقق من الصلاحية
   if (chatId !== ADMIN_CHAT_ID) {
@@ -365,20 +404,13 @@ async function handleMessage(msg) {
   }
 
   if (step === 'await_image_file') {
-    // المستخدم أرسل صورة مباشرة
-    if (photo && photo.length > 0) {
+    const fileId = photo?.length > 0 ? photo[photo.length - 1].file_id
+                  : document ? document.file_id
+                  : null;
+    if (fileId) {
       await sendMessage(chatId, '⏳ جاري رفع الصورة على Cloudinary...');
       try {
-        const fileId = photo[photo.length - 1].file_id;
-        // احصل على مسار الملف من تيليغرام
-        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-        const fileData = await fileRes.json();
-        const filePath = fileData.result?.file_path;
-        // حمّل الصورة من تيليغرام
-        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
-        const imageBuffer = await tgImageRes.arrayBuffer();
-        // ارفعها على Cloudinary
-        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        const cloudUrl = await uploadFromTelegram(fileId, document?.file_name || 'product.jpg');
         await setSession(chatId, { ...session, step: 'await_badge', image: cloudUrl });
         await sendMessage(chatId, '✅ تم رفع الصورة بنجاح!\n\n🏅 اختر *الباج* (الشارة على المنتج):', BADGE_KEYBOARD);
       } catch (e) {
@@ -386,7 +418,6 @@ async function handleMessage(msg) {
         console.error('Cloudinary error:', e);
       }
     } else if (text && text.startsWith('http')) {
-      // المستخدم أرسل رابط — ارفعه على Cloudinary أيضاً
       await sendMessage(chatId, '⏳ جاري رفع الصورة...');
       try {
         const imgRes = await fetch(text.trim());
@@ -398,7 +429,7 @@ async function handleMessage(msg) {
         await sendMessage(chatId, '❌ فشل رفع الصورة، تأكد من الرابط وحاول مرة ثانية.');
       }
     } else {
-      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة من جهازك، أو أرسل *رابط* صورة يبدأ بـ https://');
+      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة، أو *document* (ملف صورة)، أو *رابط* يبدأ بـ https://');
     }
     return;
   }
@@ -410,6 +441,32 @@ async function handleMessage(msg) {
     await clearSession(chatId);
     if (ok) await sendMessage(chatId, '✅ تم حذف المنتج بنجاح!', MAIN_MENU);
     else await sendMessage(chatId, '❌ ما قدرت أحذف المنتج. تأكد من الـ ID.', MAIN_MENU);
+    return;
+  }
+
+  if (step === 'await_delete_tshirt_id') {
+    const docId = text.trim();
+    try {
+      await fsDelete('printProducts', docId);
+      await clearSession(chatId);
+      await sendMessage(chatId, '✅ تم حذف التيشيرت بنجاح!', MAIN_MENU);
+    } catch {
+      await clearSession(chatId);
+      await sendMessage(chatId, '❌ ما قدرت أحذف التيشيرت. تأكد من الـ ID.', MAIN_MENU);
+    }
+    return;
+  }
+
+  if (step === 'await_delete_design_id') {
+    const docId = text.trim();
+    try {
+      await fsDelete('printDesigns', docId);
+      await clearSession(chatId);
+      await sendMessage(chatId, '✅ تم حذف الطبعة بنجاح!', MAIN_MENU);
+    } catch {
+      await clearSession(chatId);
+      await sendMessage(chatId, '❌ ما قدرت أحذف الطبعة. تأكد من الـ ID.', MAIN_MENU);
+    }
     return;
   }
 
@@ -474,16 +531,13 @@ async function handleMessage(msg) {
   }
 
   if (step === 'await_tshirt_image') {
-    if (photo && photo.length > 0) {
+    const fileId = photo?.length > 0 ? photo[photo.length - 1].file_id
+                  : document ? document.file_id
+                  : null;
+    if (fileId) {
       await sendMessage(chatId, '⏳ جاري رفع الصورة...');
       try {
-        const fileId = photo[photo.length - 1].file_id;
-        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-        const fileData = await fileRes.json();
-        const filePath = fileData.result?.file_path;
-        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
-        const imageBuffer = await tgImageRes.arrayBuffer();
-        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        const cloudUrl = await uploadFromTelegram(fileId, document?.file_name || 'tshirt.jpg');
         await setSession(chatId, { ...session, step: 'await_tshirt_save', tshirtImage: cloudUrl });
         await sendMessage(chatId, '✅ تم رفع الصورة!\n\nاضغط *حفظ* للإضافة:', {
           inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
@@ -497,7 +551,7 @@ async function handleMessage(msg) {
         inline_keyboard: [[{ text: '💾 حفظ التيشيرت', callback_data: 'save_tshirt' }]]
       });
     } else {
-      await sendMessage(chatId, '📸 أرسل صورة مباشرة أو رابط يبدأ بـ https://');
+      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة، أو *document* (ملف صورة)، أو *رابط* يبدأ بـ https://');
     }
     return;
   }
@@ -510,16 +564,13 @@ async function handleMessage(msg) {
   }
 
   if (step === 'await_design_image') {
-    if (photo && photo.length > 0) {
+    const fileId = photo?.length > 0 ? photo[photo.length - 1].file_id
+                  : document ? document.file_id
+                  : null;
+    if (fileId) {
       await sendMessage(chatId, '⏳ جاري رفع الطبعة...');
       try {
-        const fileId = photo[photo.length - 1].file_id;
-        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-        const fileData = await fileRes.json();
-        const filePath = fileData.result?.file_path;
-        const tgImageRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
-        const imageBuffer = await tgImageRes.arrayBuffer();
-        const cloudUrl = await uploadToCloudinary(imageBuffer, filePath.split('/').pop());
+        const cloudUrl = await uploadFromTelegram(fileId, document?.file_name || 'design.png');
         await saveDesign({ name: session.designName, image: cloudUrl });
         await clearSession(chatId);
         await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
@@ -531,7 +582,7 @@ async function handleMessage(msg) {
       await clearSession(chatId);
       await sendMessage(chatId, `✅ *تمت إضافة الطبعة بنجاح!*\n\n🖼 الاسم: ${session.designName}`, MAIN_MENU);
     } else {
-      await sendMessage(chatId, '📸 أرسل صورة مباشرة أو رابط يبدأ بـ https://');
+      await sendMessage(chatId, '📸 أرسل *صورة* مباشرة، أو *document* (ملف صورة)، أو *رابط* يبدأ بـ https://');
     }
     return;
   }
@@ -592,6 +643,20 @@ async function handleCallback(cb) {
   if (data === 'stats') {
     const stats = await getStats();
     await sendMessage(chatId, stats, MAIN_MENU);
+    return;
+  }
+
+  if (data === 'delete_tshirt') {
+    const list = await listTshirts();
+    await setSession(chatId, { step: 'await_delete_tshirt_id' });
+    await sendMessage(chatId, `🗑 *حذف تيشيرت من الطبعات*\n\n${list}\n\nأرسل *ID* التيشيرت اللي تريد تحذفه:`);
+    return;
+  }
+
+  if (data === 'delete_design') {
+    const list = await listDesigns();
+    await setSession(chatId, { step: 'await_delete_design_id' });
+    await sendMessage(chatId, `🗑 *حذف طبعة من المكتبة*\n\n${list}\n\nأرسل *ID* الطبعة اللي تريد تحذفها:`);
     return;
   }
 
