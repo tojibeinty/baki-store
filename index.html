@@ -9,6 +9,11 @@
 <meta name="theme-color" content="#0c0a06">
 <link rel="preconnect" href="https://res.cloudinary.com">
 <link rel="dns-prefetch" href="https://res.cloudinary.com">
+<link rel="preconnect" href="https://raw.githubusercontent.com">
+<link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+<link rel="preconnect" href="https://fonts.cdnfonts.com">
+<!-- Preload hero logo (LCP element) -->
+<link rel="preload" as="image" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" fetchpriority="high">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,28 +22,22 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
 <link rel="apple-touch-icon" sizes="512x512" href="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG">
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
+<!-- Google Analytics (deferred - non-critical) -->
+<script defer src="https://www.googletagmanager.com/gtag/js?id=G-2G1RXP6MJS"></script>
+<script defer>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-2G1RXP6MJS');
-
-  // Track custom events
   function trackEvent(action, category, label, value) {
     if (typeof gtag !== 'undefined') {
-      gtag('event', action, {
-        event_category: category,
-        event_label: label,
-        value: value
-      });
+      gtag('event', action, { event_category: category, event_label: label, value: value });
     }
   }
 </script>
-<style>
-@import url('https://fonts.cdnfonts.com/css/bebas-neue');
-</style>
+<!-- Fonts via link tag (faster than @import) -->
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/bebas-neue" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.cdnfonts.com/css/bebas-neue"></noscript>
 <!-- Firebase REST API - no external SDK needed -->
 <script>
 const FIREBASE_PROJECT = 'baki-store-9bc21';
@@ -47,7 +46,7 @@ const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT
 
 async function loadProducts() {
   try {
-    const res = await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}`);
+    const res = await fetch(`${FS_BASE}/products?key=${FIREBASE_API_KEY}&pageSize=50`);
     const data = await res.json();
     if (data.documents) {
       products = data.documents.map(d => {
@@ -218,8 +217,10 @@ async function loadAnalytics() {
     --font-body: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
     --font-num: 'Oswald', 'Arial Black', Impact, sans-serif;
   }
+  @font-face { font-family: 'Bebas Neue'; font-display: swap; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  @keyframes skelPulse { 0%,100%{opacity:.4} 50%{opacity:.8} }
   body {
     background: var(--black);
     color: var(--white);
@@ -472,6 +473,7 @@ async function loadAnalytics() {
     background-repeat: no-repeat;
     background-position: center;
     filter: blur(2px);
+    content-visibility: auto;
   }
   .hero-content {
     position: relative;
@@ -1619,7 +1621,7 @@ async function loadAnalytics() {
 <!-- ======= NAV ======= -->
 <nav>
   <a class="nav-logo" href="#hero">
-    <img src="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" alt="Baki Store Logo">
+    <img src="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" alt="Baki Store Logo" loading="lazy">
     <div>
       <div class="nav-logo-text">BAKI <span>STORE</span></div>
       <div style="font-size:0.65rem;color:var(--muted);letter-spacing:2px">باكي ستور</div>
@@ -1652,7 +1654,7 @@ async function loadAnalytics() {
   <div class="hero-bg"></div>
   <div class="hero-logo-bg"></div>
   <div class="hero-content">
-    <img src="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" alt="Baki" class="hero-logo">
+    <img src="https://raw.githubusercontent.com/tojibeinty/baki-store/main/Logo.PNG" alt="Baki" class="hero-logo" fetchpriority="high" loading="eager">
     <div class="hero-title">BAKI <span>STORE</span></div>
     <div class="hero-sub">باكي ستور · ملابس الجيم الاحترافية</div>
     <div class="hero-cta">
@@ -1735,11 +1737,10 @@ async function loadAnalytics() {
   </div>
 
   <div class="products-grid" id="products-grid">
-    <div class="empty-state">
-      <div class="empty-icon">📦</div>
-      <h3>لا توجد منتجات بعد</h3>
-      <p>افتح لوحة التحكم وأضف أول منتج</p>
-    </div>
+    <!-- Skeleton loading -->
+    <div class="product-skeleton" style="background:var(--card);border-radius:12px;height:320px;animation:skelPulse 1.5s ease-in-out infinite;"></div>
+    <div class="product-skeleton" style="background:var(--card);border-radius:12px;height:320px;animation:skelPulse 1.5s ease-in-out infinite 0.2s;"></div>
+    <div class="product-skeleton" style="background:var(--card);border-radius:12px;height:320px;animation:skelPulse 1.5s ease-in-out infinite 0.4s;"></div>
   </div>
 </section>
 
