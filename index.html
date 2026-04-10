@@ -1793,33 +1793,37 @@ async function loadAnalytics() {
     <!-- Studio: shows after tshirt selected -->
     <div id="studio-main" style="display:none;">
       <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">02 — صمّم طبعتك</div>
-      <div style="display:grid;grid-template-columns:1fr 280px;gap:24px;" id="studio-grid">
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;" id="studio-grid">
 
-        <!-- Viewer -->
-        <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;min-height:480px;position:relative;">
-          <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
-            <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
-              style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
-            <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
-            <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
+        <!-- Viewer + Library below -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;position:relative;">
+            <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
+              <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
+                style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
+              <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
+              <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
+            </div>
+            <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ إعادة الموضع</button>
+              <button onclick="studioClear()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕ مسح</button>
+            </div>
           </div>
-          <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ إعادة الموضع</button>
-            <button onclick="studioClear()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕ مسح</button>
+
+          <!-- المكتبة تحت الصورة مباشرة -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;">
+            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">— اختر من المكتبة —</div>
+            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:8px;max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--red) var(--border);padding:2px;"></div>
           </div>
         </div>
 
         <!-- Controls -->
         <div style="display:flex;flex-direction:column;gap:12px;">
 
-          <!-- Print color -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">لون الطبعة</div>
-            <div id="studio-colors" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-          </div>
 
-          <!-- Upload or library -->
+
+          <!-- Upload -->
           <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
             <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">التصميم</div>
             <div onclick="document.getElementById('studio-file').click()"
@@ -1829,8 +1833,6 @@ async function loadAnalytics() {
               <div style="font-size:0.8rem;color:var(--muted);"><strong style="color:var(--white);">ارفع تصميمك</strong><br>PNG أو JPG</div>
             </div>
             <input type="file" id="studio-file" accept="image/*" style="display:none" onchange="studioOnFile(this)">
-            <div style="text-align:center;color:var(--muted);font-size:0.72rem;margin:10px 0;letter-spacing:2px;">— أو اختر من المكتبة —</div>
-            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:480px;overflow-y:auto;padding:4px;scrollbar-width:thin;scrollbar-color:var(--red) var(--border);"></div>
           </div>
 
           <!-- Position & Scale -->
@@ -1918,6 +1920,9 @@ async function loadAnalytics() {
 
         </div>
       </div>
+
+
+
     </div>
   </div>
 </section>
