@@ -68,6 +68,8 @@ async function loadProducts() {
     } else {
       products = [];
     }
+    // الأقدم فوق والأجدد تحت
+    products.sort((a, b) => a.id - b.id);
     renderProducts();
     renderAdminList();
     updateCartCount();
