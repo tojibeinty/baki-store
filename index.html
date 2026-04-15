@@ -233,6 +233,71 @@ async function loadAnalytics() {
   ::-webkit-scrollbar-track { background: var(--black); }
   ::-webkit-scrollbar-thumb { background: #c0392b; border-radius: 2px; }
 
+  /* ========= WELCOME MUSIC BUTTON ========= */
+  #music-welcome-btn {
+    position: fixed;
+    bottom: 90px;
+    left: 24px;
+    z-index: 8000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    animation: musicBtnIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes musicBtnIn {
+    from { opacity:0; transform:scale(0.4) translateY(30px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  #music-welcome-btn .music-ring {
+    width: 62px; height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c0392b 0%, #8b0000 100%);
+    box-shadow: 0 0 0 0 rgba(192,57,43,0.7);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: transform 0.2s;
+    animation: musicPulse 2s ease-in-out infinite;
+  }
+  @keyframes musicPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.55), 0 4px 20px rgba(192,57,43,0.4); }
+    50%      { box-shadow: 0 0 0 16px rgba(192,57,43,0), 0 4px 20px rgba(192,57,43,0.5); }
+  }
+  #music-welcome-btn:hover .music-ring {
+    transform: scale(1.1);
+    animation: none;
+    box-shadow: 0 0 0 14px rgba(192,57,43,0), 0 6px 28px rgba(192,57,43,0.6);
+  }
+  #music-welcome-btn .music-ring svg { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5)); }
+  #music-welcome-btn .music-label {
+    background: rgba(12,10,6,0.88);
+    border: 1px solid rgba(192,57,43,0.45);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.68rem;
+    font-family: var(--font-body);
+    color: var(--white);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+  }
+  #music-welcome-btn .music-bars {
+    display: flex; align-items: flex-end; gap: 2px; height: 16px;
+  }
+  #music-welcome-btn .music-bars span {
+    display: block; width: 3px; background: white; border-radius: 2px;
+    animation: musicBar 0.9s ease-in-out infinite;
+  }
+  #music-welcome-btn .music-bars span:nth-child(2) { animation-delay: 0.2s; }
+  #music-welcome-btn .music-bars span:nth-child(3) { animation-delay: 0.4s; }
+  #music-welcome-btn .music-bars span:nth-child(4) { animation-delay: 0.15s; }
+  @keyframes musicBar {
+    0%,100% { height: 4px; } 50% { height: 14px; }
+  }
+  #music-welcome-btn.paused .music-bars span { animation: none; height: 6px; }
+  #music-welcome-btn.paused .music-ring { animation: none; box-shadow: 0 4px 16px rgba(192,57,43,0.3); }
+
   /* ========= ADMIN PANEL ========= */
   #admin-overlay {
     display: none;
@@ -1353,6 +1418,45 @@ async function loadAnalytics() {
       </div>
       <div id="admin-reviews-list"></div>
     </div>
+
+    <!-- ======= MUSIC WELCOME SETTINGS ======= -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;" id="admin-music-section">
+      <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);margin-bottom:6px;">🎵 أغنية الترحيب</div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:20px;">بوتن يطلع للزبون عند دخوله الموقع — اضغط عليه يشغّل الأغنية</div>
+
+      <!-- Enable/Disable -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div>
+          <div style="font-weight:700;font-size:0.95rem;">تفعيل أغنية الترحيب</div>
+          <div style="color:var(--muted);font-size:0.8rem;margin-top:3px;">لو مطفي — ما يطلع البوتن للزبائن</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:52px;height:28px;cursor:pointer;">
+          <input type="checkbox" id="music-enabled-toggle" onchange="saveMusicSettings()" style="opacity:0;width:0;height:0;">
+          <span id="music-enabled-track" style="position:absolute;inset:0;background:#333;border-radius:14px;transition:0.3s;"></span>
+          <span id="music-enabled-thumb" style="position:absolute;left:4px;top:4px;width:20px;height:20px;background:white;border-radius:50%;transition:0.3s;"></span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>🔗 رابط الأغنية (YouTube / SoundCloud / رابط MP3 مباشر)</label>
+        <input type="text" id="music-url-input" placeholder="https://www.youtube.com/watch?v=..." dir="ltr"
+          style="direction:ltr;"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+        <div style="color:var(--muted);font-size:0.75rem;margin-top:6px;">
+          مثال: https://www.youtube.com/watch?v=xxxxx &nbsp;أو&nbsp; https://soundcloud.com/... &nbsp;أو&nbsp; رابط .mp3 مباشر
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>🎤 نص البوتن (يظهر للزبون)</label>
+        <input type="text" id="music-label-input" placeholder="مثال: 🎵 أغنية باكي" dir="rtl"
+          onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+
+      <button class="btn-primary" onclick="saveMusicSettings()" style="margin-top:0;">💾 حفظ الإعدادات</button>
+      <div id="music-save-status" style="color:#2ecc71;font-size:0.82rem;margin-top:8px;display:none;">✅ تم الحفظ بنجاح</div>
+    </div>
+
   </div>
 </div>
 
@@ -1617,6 +1721,23 @@ async function loadAnalytics() {
     ">إلغاء</button>
   </div>
 </div>
+
+<!-- ======= WELCOME MUSIC BUTTON ======= -->
+<div id="music-welcome-btn" onclick="toggleWelcomeMusic()" title="شغّل الأغنية">
+  <div class="music-ring">
+    <div class="music-bars">
+      <span style="height:6px"></span>
+      <span style="height:12px"></span>
+      <span style="height:8px"></span>
+      <span style="height:14px"></span>
+    </div>
+  </div>
+  <div class="music-label" id="music-btn-label">🎵 أغنية باكي</div>
+</div>
+
+<!-- Hidden audio / iframe for music -->
+<audio id="welcome-audio" style="display:none;" loop></audio>
+<iframe id="welcome-iframe" style="display:none;width:0;height:0;border:none;" allow="autoplay"></iframe>
 
 <!-- ======= NAV ======= -->
 <nav>
@@ -2265,6 +2386,7 @@ async function checkPassword() {
     closePasswordModal();
     document.getElementById('admin-overlay').classList.add('active');
     renderAdminList();
+    applyMusicSettingsUI();
   } else {
     document.getElementById('pass-error').style.display = 'block';
     document.getElementById('admin-password-input').value = '';
@@ -4849,8 +4971,153 @@ ${studioState.selectedDesignUrl}`,
   }
 }
 
-// Hook into renderProducts to also render studio list
-window.addEventListener('load', () => {
+// ============ WELCOME MUSIC ============
+let musicState = { enabled: false, url: '', label: '🎵 أغنية باكي', playing: false };
+
+async function loadMusicSettings() {
+  try {
+    const res = await fetch(`${FS_BASE}/settings/music?key=${FIREBASE_API_KEY}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    musicState.enabled = data.fields?.enabled?.booleanValue || false;
+    musicState.url     = data.fields?.url?.stringValue || '';
+    musicState.label   = data.fields?.label?.stringValue || '🎵 أغنية باكي';
+    applyMusicSettingsUI();
+    if (musicState.enabled && musicState.url) {
+      showMusicBtn();
+    }
+  } catch(e) {}
+}
+
+function applyMusicSettingsUI() {
+  const toggle = document.getElementById('music-enabled-toggle');
+  const urlInp = document.getElementById('music-url-input');
+  const lblInp = document.getElementById('music-label-input');
+  if (toggle) toggle.checked = musicState.enabled;
+  if (urlInp) urlInp.value   = musicState.url;
+  if (lblInp) lblInp.value   = musicState.label;
+  updateMusicToggleUI(musicState.enabled);
+}
+
+function updateMusicToggleUI(on) {
+  const track = document.getElementById('music-enabled-track');
+  const thumb = document.getElementById('music-enabled-thumb');
+  if (!track || !thumb) return;
+  track.style.background = on ? '#c0392b' : '#333';
+  thumb.style.left = on ? '28px' : '4px';
+}
+
+async function saveMusicSettings() {
+  const enabled = document.getElementById('music-enabled-toggle').checked;
+  const url     = document.getElementById('music-url-input').value.trim();
+  const label   = document.getElementById('music-label-input').value.trim() || '🎵 أغنية باكي';
+
+  musicState.enabled = enabled;
+  musicState.url     = url;
+  musicState.label   = label;
+  updateMusicToggleUI(enabled);
+
+  try {
+    await fetch(`${FS_BASE}/settings/music?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        enabled: { booleanValue: enabled },
+        url:     { stringValue: url },
+        label:   { stringValue: label }
+      }})
+    });
+    const st = document.getElementById('music-save-status');
+    if (st) { st.style.display = 'block'; setTimeout(() => st.style.display = 'none', 2500); }
+
+    // إذا تم التفعيل — أظهر البوتن فوراً
+    if (enabled && url) showMusicBtn();
+    else hideMusicBtn();
+  } catch(e) { showToast('❌ خطأ في حفظ إعدادات الأغنية'); }
+}
+
+function showMusicBtn() {
+  const btn = document.getElementById('music-welcome-btn');
+  const lbl = document.getElementById('music-btn-label');
+  if (!btn) return;
+  if (lbl) lbl.textContent = musicState.label || '🎵 أغنية باكي';
+  btn.style.display = 'flex';
+}
+
+function hideMusicBtn() {
+  const btn = document.getElementById('music-welcome-btn');
+  if (btn) btn.style.display = 'none';
+  stopWelcomeMusic();
+}
+
+function getYouTubeIdFromUrl(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&\n]+)/);
+  return m ? m[1] : null;
+}
+
+function getSoundCloudEmbedUrl(url) {
+  if (url.includes('soundcloud.com')) {
+    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&auto_play=true&color=%23c0392b&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false`;
+  }
+  return null;
+}
+
+function toggleWelcomeMusic() {
+  if (musicState.playing) {
+    stopWelcomeMusic();
+  } else {
+    playWelcomeMusic();
+  }
+}
+
+function playWelcomeMusic() {
+  const url = musicState.url;
+  if (!url) return;
+
+  const ytId   = getYouTubeIdFromUrl(url);
+  const scUrl  = getSoundCloudEmbedUrl(url);
+  const audio  = document.getElementById('welcome-audio');
+  const iframe = document.getElementById('welcome-iframe');
+
+  if (ytId) {
+    // YouTube embed autoplay
+    iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0`;
+    iframe.style.display = 'block';
+  } else if (scUrl) {
+    // SoundCloud
+    iframe.src = scUrl;
+    iframe.style.display = 'block';
+  } else if (url.match(/\.(mp3|ogg|wav|m4a)/i) || url.includes('cdn') || url.includes('audio')) {
+    // Direct audio link
+    audio.src = url;
+    audio.play().catch(() => {});
+    audio.style.display = 'none';
+  } else {
+    // Generic — try in iframe (SoundCloud, etc.)
+    iframe.src = url;
+    iframe.style.display = 'block';
+  }
+
+  musicState.playing = true;
+  const btn = document.getElementById('music-welcome-btn');
+  if (btn) btn.classList.remove('paused');
+}
+
+function stopWelcomeMusic() {
+  const audio  = document.getElementById('welcome-audio');
+  const iframe = document.getElementById('welcome-iframe');
+  if (audio)  { audio.pause(); audio.src = ''; }
+  if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+  musicState.playing = false;
+  const btn = document.getElementById('music-welcome-btn');
+  if (btn) btn.classList.add('paused');
+}
+
+// Load music on page load
+window.addEventListener('load', loadMusicSettings);
+// End Welcome Music
+
+
   // Patch renderProducts once to also update studio list (products tab changes)
   const origRender = window.renderProducts;
   window.renderProducts = function() {
