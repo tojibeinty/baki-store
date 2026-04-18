@@ -1336,61 +1336,53 @@ async function loadAnalytics() {
 
     <!-- MUSIC SETTINGS -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
-      <div style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:6px;">🎵 أغنية الخلفية</div>
-      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:20px;">تشتغل تلقائياً عند دخول الزائر للموقع</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:6px;">🎵 قائمة الأغاني</div>
+      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:20px;">تشتغل تلقائياً وتتغير بالترتيب عند دخول الزائر</div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;">
-
-        <!-- زر التفعيل -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-          <div>
-            <div style="font-weight:700;font-size:0.95rem;color:var(--white);">تفعيل أغنية الخلفية</div>
-            <div style="color:var(--muted);font-size:0.78rem;margin-top:3px;">لو مطفي — ما يظهر المشغل للزوار</div>
-          </div>
-          <div id="music-toggle-btn" onclick="toggleMusicEnabled()"
-            style="width:54px;height:28px;border-radius:14px;background:#333;cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0;">
-            <div id="music-toggle-thumb"
-              style="position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:white;transition:left 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>
-          </div>
+      <!-- زر التفعيل -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+        <div>
+          <div style="font-weight:700;font-size:0.95rem;color:var(--white);">تفعيل الموسيقى</div>
+          <div style="color:var(--muted);font-size:0.78rem;margin-top:2px;">لو مطفي — ما يظهر المشغل للزوار</div>
         </div>
-
-        <!-- رابط الأغنية -->
-        <div style="margin-bottom:14px;">
-          <label style="display:block;color:var(--muted);font-size:0.82rem;font-weight:600;margin-bottom:7px;">🔗 رابط الأغنية (MP3 مباشر)</label>
-          <input type="text" id="music-url"
-            placeholder="https://example.com/song.mp3"
-            style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.88rem;direction:ltr;text-align:left;">
-          <div style="color:var(--muted);font-size:0.75rem;margin-top:5px;">الرابط لازم ينتهي بـ .mp3 أو يكون رابط مباشر قابل للتشغيل</div>
-        </div>
-
-        <!-- اسم الأغنية -->
-        <div style="margin-bottom:14px;">
-          <label style="display:block;color:var(--muted);font-size:0.82rem;font-weight:600;margin-bottom:7px;">✏️ اسم الأغنية (يظهر بالمشغل)</label>
-          <input type="text" id="music-name"
-            placeholder="مثال: Baki Vibes 🔥"
-            style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.88rem;">
-        </div>
-
-        <!-- مستوى الصوت -->
-        <div style="display:flex;align-items:center;gap:12px;">
-          <label style="color:var(--muted);font-size:0.82rem;font-weight:600;flex-shrink:0;">🔊 الصوت:</label>
-          <input type="range" id="music-volume" min="0" max="100" value="40"
-            style="flex:1;accent-color:var(--red);cursor:pointer;"
-            oninput="document.getElementById('music-vol-display').textContent=this.value+'%'">
-          <span id="music-vol-display" style="color:var(--muted);font-size:0.82rem;min-width:34px;text-align:right;">40%</span>
+        <div id="music-toggle-btn" onclick="toggleMusicEnabled()"
+          style="width:54px;height:28px;border-radius:14px;background:#333;cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0;">
+          <div id="music-toggle-thumb"
+            style="position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:white;transition:left 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>
         </div>
       </div>
 
-      <!-- أزرار -->
+      <!-- مستوى الصوت -->
+      <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+        <label style="color:var(--muted);font-size:0.82rem;font-weight:600;flex-shrink:0;">🔊 الصوت:</label>
+        <input type="range" id="music-volume" min="0" max="100" value="40"
+          style="flex:1;accent-color:var(--red);cursor:pointer;"
+          oninput="document.getElementById('music-vol-display').textContent=this.value+'%'">
+        <span id="music-vol-display" style="color:var(--muted);font-size:0.82rem;min-width:34px;">40%</span>
+      </div>
+
+      <!-- إضافة أغنية -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="font-weight:700;font-size:0.9rem;color:var(--white);margin-bottom:12px;">➕ إضافة أغنية</div>
+        <input type="text" id="new-music-url" placeholder="رابط MP3 المباشر"
+          style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;direction:ltr;text-align:left;margin-bottom:8px;">
+        <input type="text" id="new-music-name" placeholder="اسم الأغنية (اختياري)"
+          style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;margin-bottom:10px;">
+        <button onclick="addMusicTrack()"
+          style="width:100%;background:var(--card);border:1px solid var(--red);color:var(--red);border-radius:8px;padding:10px;font-family:var(--font-body);font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;"
+          onmouseover="this.style.background='var(--red)';this.style.color='white'" onmouseout="this.style.background='var(--card)';this.style.color='var(--red)'">
+          ➕ إضافة للقائمة
+        </button>
+      </div>
+
+      <!-- قائمة الأغاني الحالية -->
+      <div id="music-tracks-list" style="margin-bottom:14px;"></div>
+
+      <!-- حفظ -->
       <button onclick="saveMusicSettings()"
-        style="width:100%;background:var(--red);color:white;border:none;border-radius:8px;padding:14px;font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;transition:background 0.2s;margin-bottom:8px;"
+        style="width:100%;background:var(--red);color:white;border:none;border-radius:8px;padding:14px;font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;transition:background 0.2s;"
         onmouseover="this.style.background='var(--red-hot)'" onmouseout="this.style.background='var(--red)'">
-        💾 حفظ الإعدادات
-      </button>
-      <button onclick="testMusicPreview()"
-        style="width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--font-body);font-size:0.9rem;cursor:pointer;transition:all 0.2s;"
-        onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-        ▶ معاينة الأغنية
+        💾 حفظ القائمة
       </button>
     </div>
 
@@ -5084,18 +5076,18 @@ window.addEventListener('resize', () => {
 
 <script>
 // ══════════════════════════════════════════
-//  MUSIC SYSTEM — نظيف بدون تكرار
+//  MUSIC SYSTEM — Playlist (تعدد الأغاني)
 // ══════════════════════════════════════════
 (function() {
 
   // ── الحالة ──
-  var ms = { enabled: false, url: '', name: '', volume: 40 };
-  var musicOn   = false;   // هل الأغنية شغالة
-  var attempted = false;   // هل جربنا التشغيل
+  var ms = { enabled: false, tracks: [], volume: 40 };
   var enabledState = false;
-
-  var audio  = null;
-  var player = null;
+  var currentIdx   = 0;
+  var musicOn      = false;
+  var attempted    = false;
+  var audio        = null;
+  var player       = null;
 
   // ── تحميل الإعدادات من Firebase ──
   async function loadMusicSettings() {
@@ -5105,35 +5097,47 @@ window.addEventListener('resize', () => {
         var d = await res.json();
         var f = d.fields || {};
         ms.enabled = f.enabled && f.enabled.booleanValue === true;
-        ms.url     = (f.url  && f.url.stringValue)  || '';
-        ms.name    = (f.name && f.name.stringValue)  || '';
         ms.volume  = parseInt((f.volume && (f.volume.integerValue || f.volume.doubleValue)) || 40);
+        // قائمة الأغاني
+        if (f.tracks && f.tracks.arrayValue && f.tracks.arrayValue.values) {
+          ms.tracks = f.tracks.arrayValue.values.map(function(v) {
+            var mv = v.mapValue && v.mapValue.fields || {};
+            return {
+              url:  (mv.url  && mv.url.stringValue)  || '',
+              name: (mv.name && mv.name.stringValue)  || '🎵 أغنية'
+            };
+          }).filter(function(t) { return t.url; });
+        } else {
+          // توافق مع الإعدادات القديمة (أغنية وحدة)
+          var oldUrl  = (f.url  && f.url.stringValue)  || '';
+          var oldName = (f.name && f.name.stringValue)  || '🎵 أغنية';
+          if (oldUrl) ms.tracks = [{ url: oldUrl, name: oldName }];
+        }
       }
     } catch(e) {}
 
     enabledState = ms.enabled;
     applyToAdmin();
 
-    if (ms.enabled && ms.url) {
+    if (ms.enabled && ms.tracks.length > 0) {
       showPlayer();
       listenForInteraction();
     }
   }
 
-  // ── إظهار المشغل ──
+  // ── إظهار المشغل وتهيئة الصوت ──
   function showPlayer() {
     player = document.getElementById('music-player');
     audio  = document.getElementById('bg-music');
     if (!player || !audio) return;
 
-    audio.src    = ms.url;
-    audio.volume = ms.volume / 100;
-    audio.loop   = true;
+    loadTrack(currentIdx);
+    player.style.display = 'flex';
 
-    var nameEl = document.getElementById('music-label');
-    if (nameEl) nameEl.textContent = ms.name || '🎵 موسيقى';
-
-    player.style.display = 'block';
+    // عند انتهاء الأغنية — شغّل التالية
+    audio.addEventListener('ended', function() {
+      nextTrack();
+    });
 
     // شريط التقدم
     audio.addEventListener('timeupdate', function() {
@@ -5144,16 +5148,33 @@ window.addEventListener('resize', () => {
     });
   }
 
-  // ── انتظر أول تفاعل من الزائر ثم شغّل ──
+  // ── تحميل أغنية معينة ──
+  function loadTrack(idx) {
+    if (!ms.tracks.length) return;
+    if (idx >= ms.tracks.length) idx = 0;
+    currentIdx = idx;
+    var t = ms.tracks[idx];
+    audio.src    = t.url;
+    audio.volume = ms.volume / 100;
+    audio.load();
+    if (musicOn) audio.play().catch(function(){});
+  }
+
+  // ── الأغنية التالية ──
+  function nextTrack() {
+    var next = (currentIdx + 1) % ms.tracks.length;
+    loadTrack(next);
+    if (musicOn) audio.play().catch(function(){});
+  }
+
+  // ── انتظر أول تفاعل ──
   function listenForInteraction() {
     function tryPlay() {
       if (attempted) return;
       attempted = true;
-      audio = document.getElementById('bg-music');
       if (!audio || !audio.src) return;
       audio.play().then(function() {
         musicOn = true;
-        /* btn handled by class */
         var p = document.getElementById('music-player');
         if (p) p.classList.remove('is-paused');
       }).catch(function() { attempted = false; });
@@ -5180,7 +5201,7 @@ window.addEventListener('resize', () => {
     }
   };
 
-  // ── إغلاق المشغل ──
+  // ── إغلاق ──
   window.musicClose = function() {
     audio  = document.getElementById('bg-music');
     player = document.getElementById('music-player');
@@ -5189,7 +5210,7 @@ window.addEventListener('resize', () => {
     musicOn = false;
   };
 
-  // ── زر التفعيل في الإدارة ──
+  // ── زر التفعيل ──
   window.toggleMusicEnabled = function() {
     enabledState = !enabledState;
     var btn   = document.getElementById('music-toggle-btn');
@@ -5198,70 +5219,83 @@ window.addEventListener('resize', () => {
     if (thumb) thumb.style.left     = enabledState ? '30px' : '4px';
   };
 
+  // ── إضافة أغنية للقائمة ──
+  window.addMusicTrack = function() {
+    var url  = ((document.getElementById('new-music-url')  || {}).value || '').trim();
+    var name = ((document.getElementById('new-music-name') || {}).value || '').trim();
+    if (!url) { if (typeof showToast==='function') showToast('أدخل رابط الأغنية'); return; }
+    ms.tracks.push({ url: url, name: name || '🎵 أغنية' });
+    document.getElementById('new-music-url').value  = '';
+    document.getElementById('new-music-name').value = '';
+    renderTracksList();
+    if (typeof showToast==='function') showToast('✅ تمت الإضافة — اضغط حفظ');
+  };
+
+  // ── حذف أغنية ──
+  window.removeMusicTrack = function(idx) {
+    ms.tracks.splice(idx, 1);
+    renderTracksList();
+  };
+
+  // ── عرض القائمة في الإدارة ──
+  function renderTracksList() {
+    var el = document.getElementById('music-tracks-list');
+    if (!el) return;
+    if (!ms.tracks.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:12px;">لا توجد أغاني — أضف أغنية من الأعلى</div>';
+      return;
+    }
+    el.innerHTML = ms.tracks.map(function(t, i) {
+      return '<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">' +
+        '<div style="width:24px;height:24px;border-radius:50%;background:var(--red);color:white;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</div>' +
+        '<div style="flex:1;overflow:hidden;">' +
+          '<div style="color:var(--white);font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (t.name || '🎵 أغنية') + '</div>' +
+          '<div style="color:var(--muted);font-size:0.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;">' + t.url + '</div>' +
+        '</div>' +
+        '<button onclick="removeMusicTrack(' + i + ')" style="background:transparent;border:1px solid #555;color:#888;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.75rem;flex-shrink:0;transition:all 0.2s;" onmouseover="this.style.borderColor='#c0392b';this.style.color='#c0392b'" onmouseout="this.style.borderColor='#555';this.style.color='#888'">🗑</button>' +
+      '</div>';
+    }).join('');
+  }
+
   // ── حفظ الإعدادات ──
   window.saveMusicSettings = async function() {
-    var url  = (document.getElementById('music-url')  || {}).value || '';
-    var name = (document.getElementById('music-name') || {}).value || '';
-    var vol  = parseInt((document.getElementById('music-volume') || {}).value || 40);
-    ms = { enabled: enabledState, url: url.trim(), name: name.trim(), volume: vol };
+    var vol = parseInt((document.getElementById('music-volume') || {}).value || 40);
+    ms.volume  = vol;
+    ms.enabled = enabledState;
     try {
       await fetch(FS_BASE + '/settings/music?key=' + FIREBASE_API_KEY, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
           enabled: { booleanValue: enabledState },
-          url:     { stringValue: ms.url },
-          name:    { stringValue: ms.name },
-          volume:  { integerValue: vol }
+          volume:  { integerValue: vol },
+          tracks:  { arrayValue: { values: ms.tracks.map(function(t) {
+            return { mapValue: { fields: {
+              url:  { stringValue: t.url },
+              name: { stringValue: t.name }
+            }}};
+          })}}
         }})
       });
-      if (typeof showToast === 'function') showToast('✅ تم حفظ إعدادات الأغنية');
+      if (typeof showToast==='function') showToast('✅ تم حفظ قائمة الأغاني');
     } catch(e) {
-      if (typeof showToast === 'function') showToast('❌ خطأ في الحفظ');
+      if (typeof showToast==='function') showToast('❌ خطأ في الحفظ');
     }
   };
 
-  // ── معاينة من الإدارة ──
-  window.testMusicPreview = function() {
-    var url  = ((document.getElementById('music-url')  || {}).value || '').trim();
-    var name = ((document.getElementById('music-name') || {}).value || '').trim();
-    var vol  = parseInt((document.getElementById('music-volume') || {}).value || 40);
-    if (!url) { if (typeof showToast==='function') showToast('أدخل رابط الأغنية أولاً'); return; }
-    audio = document.getElementById('bg-music');
-    if (!audio) return;
-    audio.src    = url;
-    audio.volume = vol / 100;
-    audio.play().then(function() {
-      musicOn = true; attempted = true;
-      var nameEl = document.getElementById('music-label');
-      if (nameEl) nameEl.textContent = name || '🎵 معاينة';
-      var btn = document.getElementById('music-play-btn');
-      if (btn) btn.innerHTML = '⏸';
-      var p = document.getElementById('music-player');
-      if (p) { p.style.display = 'block'; p.classList.remove('is-paused'); }
-      if (typeof showToast==='function') showToast('▶ تشغيل المعاينة...');
-    }).catch(function() {
-      if (typeof showToast==='function') showToast('❌ تعذر تشغيل الرابط — تأكد أنه MP3 مباشر');
-    });
-  };
-
-  // ── تطبيق الإعدادات على واجهة الإدارة ──
+  // ── تطبيق على واجهة الإدارة ──
   function applyToAdmin() {
-    var urlEl  = document.getElementById('music-url');
-    var nameEl = document.getElementById('music-name');
-    var volEl  = document.getElementById('music-volume');
-    var volD   = document.getElementById('music-vol-display');
-    var btn    = document.getElementById('music-toggle-btn');
-    var thumb  = document.getElementById('music-toggle-thumb');
-    if (urlEl)  urlEl.value  = ms.url;
-    if (nameEl) nameEl.value = ms.name;
-    if (volEl)  volEl.value  = ms.volume;
-    if (volD)   volD.textContent = ms.volume + '%';
+    var volEl = document.getElementById('music-volume');
+    var volD  = document.getElementById('music-vol-display');
+    var btn   = document.getElementById('music-toggle-btn');
+    var thumb = document.getElementById('music-toggle-thumb');
+    if (volEl) volEl.value = ms.volume;
+    if (volD)  volD.textContent = ms.volume + '%';
     if (btn)   btn.style.background = ms.enabled ? '#c0392b' : '#333';
     if (thumb) thumb.style.left     = ms.enabled ? '30px' : '4px';
+    renderTracksList();
   }
 
-  // ── تشغيل عند تحميل الصفحة ──
   window.addEventListener('load', loadMusicSettings);
 
 })();
