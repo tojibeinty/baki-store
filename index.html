@@ -1334,7 +1334,67 @@ async function loadAnalytics() {
 
     <div class="admin-product-list" id="admin-list"></div>
 
-    <!-- REVIEWS MANAGEMENT -->
+    <!-- MUSIC SETTINGS -->
+    <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
+      <div style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:6px;">🎵 أغنية الخلفية</div>
+      <div style="color:var(--muted);font-size:0.82rem;margin-bottom:20px;">تشتغل تلقائياً عند دخول الزائر للموقع</div>
+
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;">
+
+        <!-- زر التفعيل -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div style="font-weight:700;font-size:0.95rem;color:var(--white);">تفعيل أغنية الخلفية</div>
+            <div style="color:var(--muted);font-size:0.78rem;margin-top:3px;">لو مطفي — ما يظهر المشغل للزوار</div>
+          </div>
+          <div id="music-toggle-btn" onclick="toggleMusicEnabled()"
+            style="width:54px;height:28px;border-radius:14px;background:#333;cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0;">
+            <div id="music-toggle-thumb"
+              style="position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:white;transition:left 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>
+          </div>
+        </div>
+
+        <!-- رابط الأغنية -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;color:var(--muted);font-size:0.82rem;font-weight:600;margin-bottom:7px;">🔗 رابط الأغنية (MP3 مباشر)</label>
+          <input type="text" id="music-url"
+            placeholder="https://example.com/song.mp3"
+            style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.88rem;direction:ltr;text-align:left;">
+          <div style="color:var(--muted);font-size:0.75rem;margin-top:5px;">الرابط لازم ينتهي بـ .mp3 أو يكون رابط مباشر قابل للتشغيل</div>
+        </div>
+
+        <!-- اسم الأغنية -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;color:var(--muted);font-size:0.82rem;font-weight:600;margin-bottom:7px;">✏️ اسم الأغنية (يظهر بالمشغل)</label>
+          <input type="text" id="music-name"
+            placeholder="مثال: Baki Vibes 🔥"
+            style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.88rem;">
+        </div>
+
+        <!-- مستوى الصوت -->
+        <div style="display:flex;align-items:center;gap:12px;">
+          <label style="color:var(--muted);font-size:0.82rem;font-weight:600;flex-shrink:0;">🔊 الصوت:</label>
+          <input type="range" id="music-volume" min="0" max="100" value="40"
+            style="flex:1;accent-color:var(--red);cursor:pointer;"
+            oninput="document.getElementById('music-vol-display').textContent=this.value+'%'">
+          <span id="music-vol-display" style="color:var(--muted);font-size:0.82rem;min-width:34px;text-align:right;">40%</span>
+        </div>
+      </div>
+
+      <!-- أزرار -->
+      <button onclick="saveMusicSettings()"
+        style="width:100%;background:var(--red);color:white;border:none;border-radius:8px;padding:14px;font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;transition:background 0.2s;margin-bottom:8px;"
+        onmouseover="this.style.background='var(--red-hot)'" onmouseout="this.style.background='var(--red)'">
+        💾 حفظ الإعدادات
+      </button>
+      <button onclick="testMusicPreview()"
+        style="width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--font-body);font-size:0.9rem;cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        ▶ معاينة الأغنية
+      </button>
+    </div>
+
+        <!-- REVIEWS MANAGEMENT -->
     <div style="border-top:1px solid var(--border);margin-top:30px;padding-top:30px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
         <div style="font-family:var(--font-display);font-size:1.6rem;letter-spacing:3px;color:var(--red);">💬 آراء الزبائن</div>
@@ -4877,5 +4937,288 @@ window.addEventListener('resize', () => {
 });
 // End Print Studio
 </script>
+<!-- ══════════════════════════════════════════
+     MUSIC PLAYER — يظهر بالكورنر يسار أسفل
+══════════════════════════════════════════ -->
+<style>
+@keyframes mBarAnim {
+  0%,100% { height: 3px; }
+  50%      { height: 16px; }
+}
+@keyframes mGlow {
+  0%,100% { box-shadow: 0 6px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(192,57,43,0.2); }
+  50%      { box-shadow: 0 6px 32px rgba(0,0,0,0.8), 0 0 0 1px rgba(192,57,43,0.5); }
+}
+@keyframes mSlideUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+#music-player {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 8000;
+  direction: ltr;
+  display: none;
+  animation: mSlideUp 0.5s cubic-bezier(.34,1.4,.64,1) forwards;
+}
+#music-card {
+  background: linear-gradient(145deg, #1c0808, #2a0d0a, #160504);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 18px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 230px;
+  animation: mGlow 2.5s ease-in-out infinite;
+}
+.mbar {
+  width: 2.5px;
+  background: #c0392b;
+  border-radius: 2px;
+  min-height: 3px;
+  animation: mBarAnim 0.75s ease-in-out infinite;
+}
+#music-player.is-paused .mbar {
+  animation-play-state: paused;
+}
+</style>
+
+<div id="music-player">
+  <div id="music-card">
+
+    <!-- زر تشغيل / إيقاف -->
+    <button id="music-play-btn" onclick="musicTogglePlay()"
+      style="width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e74c3c,#922b21);border:none;color:white;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.2s;box-shadow:0 3px 10px rgba(192,57,43,0.55),inset 0 1px 0 rgba(255,255,255,0.15);"
+      onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+      ▶
+    </button>
+
+    <!-- معلومات + شريط -->
+    <div style="flex:1;overflow:hidden;min-width:0;">
+      <!-- أعمدة متحركة + اسم -->
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+        <div style="display:flex;align-items:flex-end;gap:2px;height:16px;flex-shrink:0;">
+          <div class="mbar" style="animation-delay:0s;"></div>
+          <div class="mbar" style="animation-delay:0.18s;background:#e74c3c;"></div>
+          <div class="mbar" style="animation-delay:0.34s;"></div>
+          <div class="mbar" style="animation-delay:0.5s;background:#e74c3c;"></div>
+        </div>
+        <div id="music-track-name"
+          style="color:#f5f0e8;font-size:0.74rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-body);">
+          🎵 موسيقى الخلفية
+        </div>
+      </div>
+      <!-- شريط التقدم -->
+      <div style="height:2px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+        <div id="music-prog-bar"
+          style="height:100%;width:0%;background:linear-gradient(90deg,#922b21,#e74c3c);border-radius:2px;transition:width 0.6s linear;">
+        </div>
+      </div>
+    </div>
+
+    <!-- زر الإغلاق -->
+    <button onclick="musicClose()"
+      style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;"
+      onmouseover="this.style.background='rgba(192,57,43,0.45)';this.style.color='white'"
+      onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.color='rgba(255,255,255,0.4)'">
+      ✕
+    </button>
+
+  </div>
+</div>
+
+<audio id="bg-music" loop preload="none"></audio>
+
+<script>
+// ══════════════════════════════════════════
+//  MUSIC SYSTEM — نظيف بدون تكرار
+// ══════════════════════════════════════════
+(function() {
+
+  // ── الحالة ──
+  var ms = { enabled: false, url: '', name: '', volume: 40 };
+  var musicOn   = false;   // هل الأغنية شغالة
+  var attempted = false;   // هل جربنا التشغيل
+  var enabledState = false;
+
+  var audio  = null;
+  var player = null;
+
+  // ── تحميل الإعدادات من Firebase ──
+  async function loadMusicSettings() {
+    try {
+      var res = await fetch(FS_BASE + '/settings/music?key=' + FIREBASE_API_KEY);
+      if (res.ok) {
+        var d = await res.json();
+        var f = d.fields || {};
+        ms.enabled = f.enabled && f.enabled.booleanValue === true;
+        ms.url     = (f.url  && f.url.stringValue)  || '';
+        ms.name    = (f.name && f.name.stringValue)  || '';
+        ms.volume  = parseInt((f.volume && (f.volume.integerValue || f.volume.doubleValue)) || 40);
+      }
+    } catch(e) {}
+
+    enabledState = ms.enabled;
+    applyToAdmin();
+
+    if (ms.enabled && ms.url) {
+      showPlayer();
+      listenForInteraction();
+    }
+  }
+
+  // ── إظهار المشغل ──
+  function showPlayer() {
+    player = document.getElementById('music-player');
+    audio  = document.getElementById('bg-music');
+    if (!player || !audio) return;
+
+    audio.src    = ms.url;
+    audio.volume = ms.volume / 100;
+    audio.loop   = true;
+
+    var nameEl = document.getElementById('music-track-name');
+    if (nameEl) nameEl.textContent = ms.name || '🎵 موسيقى الخلفية';
+
+    player.style.display = 'block';
+
+    // شريط التقدم
+    audio.addEventListener('timeupdate', function() {
+      if (audio.duration) {
+        var bar = document.getElementById('music-prog-bar');
+        if (bar) bar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      }
+    });
+  }
+
+  // ── انتظر أول تفاعل من الزائر ثم شغّل ──
+  function listenForInteraction() {
+    function tryPlay() {
+      if (attempted) return;
+      attempted = true;
+      audio = document.getElementById('bg-music');
+      if (!audio || !audio.src) return;
+      audio.play().then(function() {
+        musicOn = true;
+        var btn = document.getElementById('music-play-btn');
+        if (btn) btn.innerHTML = '⏸';
+        var p = document.getElementById('music-player');
+        if (p) p.classList.remove('is-paused');
+      }).catch(function() { attempted = false; });
+    }
+    ['click','touchstart','scroll','keydown'].forEach(function(ev) {
+      document.addEventListener(ev, tryPlay, { once: true, passive: true });
+    });
+  }
+
+  // ── تشغيل / إيقاف ──
+  window.musicTogglePlay = function() {
+    audio = document.getElementById('bg-music');
+    var btn = document.getElementById('music-play-btn');
+    var p   = document.getElementById('music-player');
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play().then(function() {
+        musicOn = true; attempted = true;
+        if (btn) btn.innerHTML = '⏸';
+        if (p) p.classList.remove('is-paused');
+      });
+    } else {
+      audio.pause();
+      musicOn = false;
+      if (btn) btn.innerHTML = '▶';
+      if (p) p.classList.add('is-paused');
+    }
+  };
+
+  // ── إغلاق المشغل ──
+  window.musicClose = function() {
+    audio  = document.getElementById('bg-music');
+    player = document.getElementById('music-player');
+    if (audio)  audio.pause();
+    if (player) player.style.display = 'none';
+    musicOn = false;
+  };
+
+  // ── زر التفعيل في الإدارة ──
+  window.toggleMusicEnabled = function() {
+    enabledState = !enabledState;
+    var btn   = document.getElementById('music-toggle-btn');
+    var thumb = document.getElementById('music-toggle-thumb');
+    if (btn)   btn.style.background = enabledState ? '#c0392b' : '#333';
+    if (thumb) thumb.style.left     = enabledState ? '30px' : '4px';
+  };
+
+  // ── حفظ الإعدادات ──
+  window.saveMusicSettings = async function() {
+    var url  = (document.getElementById('music-url')  || {}).value || '';
+    var name = (document.getElementById('music-name') || {}).value || '';
+    var vol  = parseInt((document.getElementById('music-volume') || {}).value || 40);
+    ms = { enabled: enabledState, url: url.trim(), name: name.trim(), volume: vol };
+    try {
+      await fetch(FS_BASE + '/settings/music?key=' + FIREBASE_API_KEY, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: {
+          enabled: { booleanValue: enabledState },
+          url:     { stringValue: ms.url },
+          name:    { stringValue: ms.name },
+          volume:  { integerValue: vol }
+        }})
+      });
+      if (typeof showToast === 'function') showToast('✅ تم حفظ إعدادات الأغنية');
+    } catch(e) {
+      if (typeof showToast === 'function') showToast('❌ خطأ في الحفظ');
+    }
+  };
+
+  // ── معاينة من الإدارة ──
+  window.testMusicPreview = function() {
+    var url  = ((document.getElementById('music-url')  || {}).value || '').trim();
+    var name = ((document.getElementById('music-name') || {}).value || '').trim();
+    var vol  = parseInt((document.getElementById('music-volume') || {}).value || 40);
+    if (!url) { if (typeof showToast==='function') showToast('أدخل رابط الأغنية أولاً'); return; }
+    audio = document.getElementById('bg-music');
+    if (!audio) return;
+    audio.src    = url;
+    audio.volume = vol / 100;
+    audio.play().then(function() {
+      musicOn = true; attempted = true;
+      var nameEl = document.getElementById('music-track-name');
+      if (nameEl) nameEl.textContent = name || '🎵 معاينة';
+      var btn = document.getElementById('music-play-btn');
+      if (btn) btn.innerHTML = '⏸';
+      var p = document.getElementById('music-player');
+      if (p) { p.style.display = 'block'; p.classList.remove('is-paused'); }
+      if (typeof showToast==='function') showToast('▶ تشغيل المعاينة...');
+    }).catch(function() {
+      if (typeof showToast==='function') showToast('❌ تعذر تشغيل الرابط — تأكد أنه MP3 مباشر');
+    });
+  };
+
+  // ── تطبيق الإعدادات على واجهة الإدارة ──
+  function applyToAdmin() {
+    var urlEl  = document.getElementById('music-url');
+    var nameEl = document.getElementById('music-name');
+    var volEl  = document.getElementById('music-volume');
+    var volD   = document.getElementById('music-vol-display');
+    var btn    = document.getElementById('music-toggle-btn');
+    var thumb  = document.getElementById('music-toggle-thumb');
+    if (urlEl)  urlEl.value  = ms.url;
+    if (nameEl) nameEl.value = ms.name;
+    if (volEl)  volEl.value  = ms.volume;
+    if (volD)   volD.textContent = ms.volume + '%';
+    if (btn)   btn.style.background = ms.enabled ? '#c0392b' : '#333';
+    if (thumb) thumb.style.left     = ms.enabled ? '30px' : '4px';
+  }
+
+  // ── تشغيل عند تحميل الصفحة ──
+  window.addEventListener('load', loadMusicSettings);
+
+})();
+</script>
+
 </body>
 </html>
