@@ -8591,26 +8591,6 @@ async function sendOrderWithPhoto(text, photoUrl) {
     });
   }
 }
-// اضغط على اللوغو 5 مرات متتالية لإظهار زر الإدارة
-let logoTaps = 0;
-let logoTimer = null;
-document.addEventListener('DOMContentLoaded', () => {
-  const logo = document.querySelector('.nav-logo');
-  if (logo) {
-    logo.addEventListener('click', (e) => {
-      e.preventDefault();
-      logoTaps++;
-      clearTimeout(logoTimer);
-      if (logoTaps >= 5) {
-        logoTaps = 0;
-        document.getElementById('admin-nav-btn').style.display = 'inline-block';
-        showToast('🔓 تم فتح لوحة التحكم');
-      }
-      logoTimer = setTimeout(() => { logoTaps = 0; }, 2000);
-    });
-  }
-});
-
 // ============ REVIEWS ============
 let selectedRating = 0;
 
@@ -10055,24 +10035,6 @@ window.addEventListener('resize', () => {
 // End Print Studio
 </script>
 
-<!-- ===== MUSIC PLAYER ===== -->
-<div id="music-player" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:8000;background:rgba(26,26,26,0.92);backdrop-filter:blur(16px);border-radius:50px;padding:10px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,0.18);min-width:220px;max-width:340px;border:1px solid rgba(255,255,255,0.1);">
-  <button id="music-play-btn" onclick="toggleMusic()" style="background:white;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.2s;" title="تشغيل/إيقاف">&#9654;</button>
-  <div style="flex:1;overflow:hidden;">
-    <div id="music-track-name" style="color:white;font-size:0.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-body);">موسيقى الخلفية</div>
-    <div id="music-bar-wrap" style="margin-top:4px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;">
-      <div id="music-bar" style="height:100%;width:0%;background:white;border-radius:2px;transition:width 0.5s linear;"></div>
-    </div>
-  </div>
-  <button onclick="closeMusicPlayer()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:1rem;padding:0;line-height:1;" title="اخفاء">&#10005;</button>
-</div>
 
-<audio id="bg-music" loop preload="none"></audio>
-
-<script>
-// ===== MUSIC SYSTEM =====
-const MUSIC_KEY = 'baki_music_settings';
-let musicSettings = { enabled: false, url: '', name: '', volume: 40 };
-let musicStarted = false;
-let musicPlayerHidden = false;
-
+</body>
+</html>
