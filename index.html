@@ -5010,22 +5010,7 @@ window.addEventListener('resize', () => {
 #music-icon-pause { display: flex; }
 #music-icon-play  { display: none; font-size: 1.2rem; color: white; }
 
-/* اسم الأغنية تحت الدائرة */
-#music-label {
-  background: rgba(20,5,5,0.88);
-  border: 1px solid rgba(192,57,43,0.25);
-  border-radius: 20px;
-  padding: 4px 10px;
-  color: #f5f0e8;
-  font-size: 0.68rem;
-  font-weight: 700;
-  font-family: var(--font-body);
-  white-space: nowrap;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-}
+/* music-label hidden */
 /* زر إغلاق صغير فوق الدائرة */
 #music-close-btn {
   position: absolute;
@@ -5090,8 +5075,8 @@ window.addEventListener('resize', () => {
     <div id="music-prog-bar"></div>
   </div>
 
-  <!-- اسم الأغنية -->
-  <div id="music-label" id="music-track-name">🎵 موسيقى</div>
+  <!-- اسم الأغنية مخفي — للاستخدام الداخلي فقط -->
+  <div id="music-label" style="display:none;"></div>
 
 </div>
 
