@@ -1021,6 +1021,8 @@ async function loadAnalytics() {
         <label><input type="checkbox" value="L" checked> L</label>
         <label><input type="checkbox" value="XL"> XL</label>
         <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="3XL"> 3XL</label>
+        <label><input type="checkbox" value="4XL"> 4XL</label>
         <label><input type="checkbox" value="Free Size"> Free</label>
       </div>
     </div>
@@ -1116,6 +1118,8 @@ async function loadAnalytics() {
           <label><input type="checkbox" value="L" checked> L</label>
           <label><input type="checkbox" value="XL"> XL</label>
           <label><input type="checkbox" value="XXL"> XXL</label>
+          <label><input type="checkbox" value="3XL"> 3XL</label>
+          <label><input type="checkbox" value="4XL"> 4XL</label>
           <label><input type="checkbox" value="Free Size"> Free</label>
         </div>
       </div>
@@ -1561,6 +1565,8 @@ async function loadAnalytics() {
         <label><input type="checkbox" value="L"> L</label>
         <label><input type="checkbox" value="XL"> XL</label>
         <label><input type="checkbox" value="XXL"> XXL</label>
+        <label><input type="checkbox" value="3XL"> 3XL</label>
+        <label><input type="checkbox" value="4XL"> 4XL</label>
         <label><input type="checkbox" value="Free Size"> Free</label>
       </div>
     </div>
@@ -4201,21 +4207,98 @@ async function deletePrintDesign(docId) {
   await loadPrintDesigns();
 }
 
+async function deleteSelectedDesigns() {
+  const checked = document.querySelectorAll('#pd-admin-list input[type=checkbox]:checked');
+  if (checked.length === 0) { showToast('❌ ما اخترت أي طبعة'); return; }
+  if (!confirm(`هل تريد حذف ${checked.length} طبعة؟`)) return;
+
+  const btn = document.getElementById('pd-delete-selected-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحذف...'; }
+
+  const docIds = Array.from(checked).map(cb => cb.dataset.docid);
+  try {
+    await Promise.all(docIds.map(docId =>
+      fetch(`${FS_BASE}/printDesigns/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' })
+    ));
+    showToast(`🗑 تم حذف ${docIds.length} طبعة`);
+    await loadPrintDesigns();
+  } catch(e) {
+    showToast('❌ خطأ في الحذف');
+  } finally {
+    if (btn) { btn.disabled = false; }
+  }
+}
+
+function toggleSelectAllDesigns(checked) {
+  document.querySelectorAll('#pd-admin-list input[type=checkbox]').forEach(cb => cb.checked = checked);
+  updatePdDeleteBtn();
+}
+
+function updatePdDeleteBtn() {
+  const checked = document.querySelectorAll('#pd-admin-list input[type=checkbox]:checked');
+  const btn = document.getElementById('pd-delete-selected-btn');
+  const countEl = document.getElementById('pd-selected-count');
+  if (btn) btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+  if (countEl) countEl.textContent = checked.length;
+  // sync select-all checkbox
+  const all = document.querySelectorAll('#pd-admin-list input[type=checkbox]');
+  const selAll = document.getElementById('pd-select-all');
+  if (selAll) {
+    selAll.checked = all.length > 0 && checked.length === all.length;
+    selAll.indeterminate = checked.length > 0 && checked.length < all.length;
+  }
+}
+
 function renderPdAdminList() {
   const list = document.getElementById('pd-admin-list');
   if (!list) return;
+
+  // Header controls — select all + delete button
+  let headerEl = document.getElementById('pd-admin-header');
+  if (!headerEl) {
+    headerEl = document.createElement('div');
+    headerEl.id = 'pd-admin-header';
+    headerEl.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;grid-column:1/-1;';
+    list.parentNode.insertBefore(headerEl, list);
+  }
+
   if (!printDesigns || printDesigns.length === 0) {
+    headerEl.innerHTML = '';
     list.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;grid-column:1/-1;">لا توجد طبعات بعد</p>';
     return;
   }
+
+  headerEl.innerHTML = `
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--muted);font-size:0.82rem;font-weight:600;">
+      <input type="checkbox" id="pd-select-all" onchange="toggleSelectAllDesigns(this.checked)"
+        style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;">
+      تحديد الكل
+    </label>
+    <button id="pd-delete-selected-btn" onclick="deleteSelectedDesigns()"
+      style="display:none;align-items:center;gap:6px;background:#c0392b;color:white;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.82rem;font-weight:700;transition:all 0.2s;"
+      onmouseover="this.style.background='#e74c3c'" onmouseout="this.style.background='#c0392b'">
+      🗑 حذف المحدد (<span id="pd-selected-count">0</span>)
+    </button>
+    <span style="color:var(--muted);font-size:0.75rem;margin-right:auto;">${printDesigns.length} طبعة</span>
+  `;
+
   list.innerHTML = printDesigns.map(d => `
-    <div style="position:relative;background:var(--deep);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+    <div id="pd-item-${d._docId}"
+      style="position:relative;background:var(--deep);border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color 0.2s;">
+      <!-- Checkbox overlay -->
+      <label style="position:absolute;top:5px;right:5px;z-index:5;cursor:pointer;">
+        <input type="checkbox" data-docid="${d._docId}"
+          onchange="updatePdDeleteBtn();this.closest('[id^=pd-item-]').style.borderColor=this.checked?'var(--red)':'var(--border)'"
+          style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;background:rgba(0,0,0,0.7);border-radius:3px;">
+      </label>
       <img src="${d.url}" alt="${d.name}"
         style="width:100%;aspect-ratio:1;object-fit:contain;background:#111;display:block;"
         onerror="this.style.opacity='0.3'">
       <div style="padding:5px 8px;font-size:0.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
+      <!-- Delete single -->
       <button onclick="deletePrintDesign('${d._docId}')"
-        style="position:absolute;top:5px;right:5px;background:rgba(192,57,43,0.9);border:none;color:white;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.65rem;line-height:1;">✕</button>
+        style="position:absolute;bottom:24px;left:5px;background:rgba(192,57,43,0.85);border:none;color:white;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:0.6rem;line-height:1;display:flex;align-items:center;justify-content:center;"
+        title="حذف">✕</button>
     </div>
   `).join('');
 }
