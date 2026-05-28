@@ -60,6 +60,7 @@ async function loadProducts() {
           desc: fields.desc?.stringValue || '',
           badge: fields.badge?.stringValue || '',
           fabric: fields.fabric?.stringValue || '',
+          subcat: fields.subcat?.stringValue || '',
           printColors: fields.printColors?.arrayValue?.values?.map(v => v.stringValue) || [],
           sizes: fields.sizes?.arrayValue?.values?.map(v => v.stringValue) || [],
           images: fields.images?.arrayValue?.values?.map(v => v.stringValue) || ['']
@@ -91,6 +92,7 @@ async function saveProductToFirebase(product) {
       desc: { stringValue: product.desc || '' },
       badge: { stringValue: product.badge || '' },
       fabric: { stringValue: product.fabric || '' },
+      subcat: { stringValue: product.subcat || '' },
       printColors: { arrayValue: { values: (product.printColors || []).map(c => ({ stringValue: c })) } },
       sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
       images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
@@ -1000,10 +1002,22 @@ async function loadAnalytics() {
 
     <div class="form-group">
       <label>القسم</label>
-      <select id="p-cat">
+      <select id="p-cat" onchange="updateSubcatOptions()">
         <option value="men">رجالي 👨</option>
         <option value="women">نسائي 👩</option>
         <option value="accessories">اكسسوارات 💎</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="p-subcat-group">
+      <label>القسم الفرعي</label>
+      <select id="p-subcat">
+        <option value="">— بدون تصنيف فرعي —</option>
+        <option value="polyester">بولستر</option>
+        <option value="hoodies">هوديات</option>
+        <option value="cotton">قطني</option>
+        <option value="shorts">شورتات</option>
+        <option value="pants">بناطيل</option>
       </select>
     </div>
 
@@ -1529,10 +1543,16 @@ async function loadAnalytics() {
     </div>
     <div class="form-group">
       <label>القسم</label>
-      <select id="edit-cat">
+      <select id="edit-cat" onchange="updateEditSubcatOptions()">
         <option value="men">رجالي 👨</option>
         <option value="women">نسائي 👩</option>
         <option value="accessories">اكسسوارات 💎</option>
+      </select>
+    </div>
+    <div class="form-group" id="edit-subcat-group">
+      <label>القسم الفرعي</label>
+      <select id="edit-subcat">
+        <option value="">— بدون تصنيف فرعي —</option>
       </select>
     </div>
     <div class="form-group">
@@ -1681,7 +1701,7 @@ async function loadAnalytics() {
     <div class="section-title">اختر <span>قسمك</span></div>
   </div>
   <div class="cat-grid">
-    <div class="cat-card" onclick="filterCat('men')" id="cat-men">
+    <div class="cat-card" onclick="toggleSubcats('men')" id="cat-men">
       <div class="cat-icon">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="4" r="2"/>
@@ -1692,8 +1712,9 @@ async function loadAnalytics() {
       </div>
       <div class="cat-title">رجالي</div>
       <div class="cat-sub">Men's Collection</div>
+      <div style="margin-top:10px;font-size:0.7rem;color:var(--red);letter-spacing:1px;opacity:0.8;">اضغط لعرض الأقسام ▾</div>
     </div>
-    <div class="cat-card" onclick="filterCat('women')" id="cat-women">
+    <div class="cat-card" onclick="toggleSubcats('women')" id="cat-women">
       <div class="cat-icon">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="4" r="2"/>
@@ -1705,6 +1726,7 @@ async function loadAnalytics() {
       </div>
       <div class="cat-title">نسائي</div>
       <div class="cat-sub">Women's Collection</div>
+      <div style="margin-top:10px;font-size:0.7rem;color:var(--red);letter-spacing:1px;opacity:0.8;">اضغط لعرض الأقسام ▾</div>
     </div>
     <div class="cat-card" onclick="filterCat('accessories')" id="cat-accessories">
       <div class="cat-icon">
@@ -1717,6 +1739,22 @@ async function loadAnalytics() {
       </div>
       <div class="cat-title">اكسسوارات</div>
       <div class="cat-sub">Accessories</div>
+    </div>
+  </div>
+
+  <!-- Subcategories Panel -->
+  <div id="subcats-panel" style="display:none;max-width:1200px;margin:30px auto 0;animation:fadeUp 0.4s ease;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <span id="subcats-parent-label" style="font-family:var(--font-display);font-size:1.2rem;letter-spacing:3px;color:var(--muted);"></span>
+    </div>
+    <div id="subcats-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;"></div>
+    <div style="text-align:center;margin-top:20px;">
+      <button onclick="filterCat(currentSubcatParent);document.getElementById('subcats-panel').style.display='none';"
+        style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:9px 22px;cursor:pointer;font-family:var(--font-body);font-size:0.82rem;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        عرض الكل ←
+      </button>
     </div>
   </div>
 </section>
@@ -1739,6 +1777,14 @@ async function loadAnalytics() {
       <input type="text" id="search-input" placeholder="🔍 ابحث عن منتج..." oninput="renderProducts()"
         style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--white);font-family:var(--font-body);font-size:0.85rem;direction:rtl;width:180px;">
       <div class="products-count" id="products-count">0 منتج</div>
+    </div>
+  </div>
+
+  <!-- Subcat filter row -->
+  <div id="subcat-filter-bar" style="display:none;max-width:1200px;margin:-20px auto 30px;padding:0 0 0;animation:fadeUp 0.3s ease;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span style="color:var(--muted);font-size:0.75rem;letter-spacing:1px;font-weight:600;">الفئة:</span>
+      <div id="subcat-tabs" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
   </div>
 
@@ -2196,9 +2242,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 // ============ STATE ============
 let products = [];
 let currentFilter = 'all';
+let currentSubcat = '';
+let currentSubcatParent = '';
 let selectedProduct = null;
 let selectedSize = null;
 let productImagesData = {};
+
+// ============ SUBCATEGORIES CONFIG ============
+const SUBCATS = {
+  men: [
+    { value: 'polyester', label: 'بولستر', icon: '⚡' },
+    { value: 'hoodies',   label: 'هوديات',  icon: '🧥' },
+    { value: 'cotton',    label: 'قطني',    icon: '🌿' },
+    { value: 'shorts',    label: 'شورتات',  icon: '🩳' },
+    { value: 'pants',     label: 'بناطيل',  icon: '👖' },
+  ],
+  women: [
+    { value: 'polyester', label: 'بولستر', icon: '⚡' },
+    { value: 'hoodies',   label: 'هوديات',  icon: '🧥' },
+    { value: 'cotton',    label: 'قطني',    icon: '🌿' },
+    { value: 'shorts',    label: 'شورتات',  icon: '🩳' },
+    { value: 'leggings',  label: 'لكنجات',  icon: '🩱' },
+  ]
+};
 
 
 // ============ CLOUDINARY CONFIG ============
@@ -2271,6 +2337,8 @@ async function checkPassword() {
     closePasswordModal();
     document.getElementById('admin-overlay').classList.add('active');
     renderAdminList();
+    updateSubcatOptions();
+    renderCouponsList();
   } else {
     document.getElementById('pass-error').style.display = 'block';
     document.getElementById('admin-password-input').value = '';
@@ -2608,6 +2676,7 @@ async function addProduct() {
   const price = document.getElementById('p-price').value;
   const desc = document.getElementById('p-desc').value.trim();
   const badge = document.getElementById('p-badge').value;
+  const subcat = document.getElementById('p-subcat')?.value || '';
   const fabric = document.getElementById('p-fabric') ? document.getElementById('p-fabric').value : '';
   const printColorBoxes = document.querySelectorAll('#print-black, #print-red, #print-navy');
   const printColors = Array.from(printColorBoxes).filter(c => c.checked).map(c => c.value);
@@ -2644,7 +2713,7 @@ async function addProduct() {
   const oldPriceVal = document.getElementById('p-old-price').value;
   const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
   const id = Date.now();
-  const product = { id, name, cat, price: parseInt(price), oldPrice, desc, badge, sizes, images, fabric: fabric || '', printColors: printColors.length ? printColors : ['أسود','أحمر','أزرق داكن'] };
+  const product = { id, name, cat, price: parseInt(price), oldPrice, desc, badge, subcat, sizes, images, fabric: fabric || '', printColors: printColors.length ? printColors : ['أسود','أحمر','أزرق داكن'] };
 
   showToast('⏳ جاري الحفظ...');
   try {
@@ -2663,9 +2732,25 @@ async function addProduct() {
   document.getElementById('p-badge').value = '';
   document.getElementById('p-images').value = '';
   document.getElementById('img-preview').innerHTML = '';
+  if (document.getElementById('p-subcat')) document.getElementById('p-subcat').value = '';
   if (document.getElementById('p-fabric')) document.getElementById('p-fabric').value = '';
   document.querySelectorAll('#print-black,#print-red,#print-navy').forEach(c => c.checked = false);
   tempImages = [];
+}
+
+function updateSubcatOptions() {
+  const cat = document.getElementById('p-cat').value;
+  const sel = document.getElementById('p-subcat');
+  const group = document.getElementById('p-subcat-group');
+  if (!sel || !group) return;
+  const subcats = SUBCATS[cat] || [];
+  if (subcats.length === 0) {
+    group.style.display = 'none';
+    return;
+  }
+  group.style.display = 'block';
+  sel.innerHTML = '<option value="">— بدون تصنيف فرعي —</option>' +
+    subcats.map(s => `<option value="${s.value}">${s.icon} ${s.label}</option>`).join('');
 }
 
 async function deleteProduct(docId) {
@@ -2707,25 +2792,153 @@ function catLabel(cat) {
 }
 
 // ============ PRODUCTS ============
+// ============ SUBCATEGORIES UI ============
+function toggleSubcats(cat) {
+  const panel = document.getElementById('subcats-panel');
+  const subcats = SUBCATS[cat] || [];
+
+  // لو ما في أقسام فرعية — روح مباشرة للمنتجات
+  const hasProducts = products.some(p => p.cat === cat && p.subcat);
+  if (!hasProducts || subcats.length === 0) {
+    filterCat(cat);
+    return;
+  }
+
+  // لو نفس القسم مفتوح — اغلق
+  if (currentSubcatParent === cat && panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    currentSubcatParent = '';
+    return;
+  }
+
+  currentSubcatParent = cat;
+
+  // Label
+  document.getElementById('subcats-parent-label').textContent =
+    { men: 'رجالي — اختر الفئة', women: 'نسائي — اختر الفئة' }[cat] || '';
+
+  // حدد الأقسام الفرعية اللي فيها منتجات فعلاً
+  const activeSubcats = subcats.filter(s =>
+    products.some(p => p.cat === cat && p.subcat === s.value)
+  );
+
+  const grid = document.getElementById('subcats-grid');
+  grid.innerHTML = activeSubcats.map(s => `
+    <div onclick="filterSubcat('${cat}','${s.value}')"
+      style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;"
+      onmouseover="this.style.borderColor='var(--red)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 14px 40px rgba(192,57,43,0.2)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
+      <div style="font-size:2.2rem;margin-bottom:10px;">${s.icon}</div>
+      <div style="font-family:var(--font-display);font-size:1.3rem;letter-spacing:3px;margin-bottom:4px;">${s.label}</div>
+      <div style="color:var(--muted);font-size:0.72rem;letter-spacing:1px;">
+        ${products.filter(p=>p.cat===cat&&p.subcat===s.value).length} منتج
+      </div>
+    </div>
+  `).join('');
+
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Highlight cat card
+  ['men','women','accessories'].forEach(c => document.getElementById('cat-'+c).classList.remove('cat-active'));
+  document.getElementById('cat-'+cat).classList.add('cat-active');
+}
+
+function filterSubcat(cat, subcat) {
+  currentFilter = cat;
+  currentSubcat = subcat;
+  currentSubcatParent = cat;
+
+  // Hide subcats panel
+  document.getElementById('subcats-panel').style.display = 'none';
+
+  // Sync filter tabs
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    const map = { men:'رجالي', women:'نسائي', accessories:'اكسسوارات' };
+    t.classList.toggle('active', t.textContent.trim() === map[cat]);
+  });
+
+  // Show subcat filter bar
+  renderSubcatTabs(cat);
+
+  scrollToSection('shop');
+  renderProducts();
+}
+
+function renderSubcatTabs(cat) {
+  const bar = document.getElementById('subcat-filter-bar');
+  const tabs = document.getElementById('subcat-tabs');
+  if (!bar || !tabs) return;
+
+  const subcats = SUBCATS[cat] || [];
+  const available = subcats.filter(s => products.some(p => p.cat === cat && p.subcat === s.value));
+
+  if (available.length === 0) { bar.style.display = 'none'; return; }
+
+  bar.style.display = 'block';
+  tabs.innerHTML = `
+    <button onclick="setSubcatFilter('')" id="subcat-tab-all"
+      style="background:${currentSubcat===''?'var(--red)':'var(--card)'};border:1px solid ${currentSubcat===''?'var(--red)':'var(--border)'};color:${currentSubcat===''?'white':'var(--muted)'};border-radius:6px;padding:6px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.8rem;font-weight:700;transition:all 0.2s;">
+      الكل
+    </button>
+    ${available.map(s => `
+      <button onclick="setSubcatFilter('${s.value}')"
+        style="background:${currentSubcat===s.value?'var(--red)':'var(--card)'};border:1px solid ${currentSubcat===s.value?'var(--red)':'var(--border)'};color:${currentSubcat===s.value?'white':'var(--muted)'};border-radius:6px;padding:6px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.8rem;font-weight:700;transition:all 0.2s;">
+        ${s.icon} ${s.label}
+      </button>
+    `).join('')}
+  `;
+}
+
+function setSubcatFilter(subcat) {
+  currentSubcat = subcat;
+  if (currentSubcatParent) renderSubcatTabs(currentSubcatParent);
+  renderProducts();
+}
+
 function filterCat(cat) {
-  // remove active
+  currentSubcat = '';
+  currentSubcatParent = cat !== 'all' ? cat : '';
   ['men','women','accessories'].forEach(c => {
     document.getElementById('cat-'+c).classList.remove('cat-active');
   });
-  document.getElementById('cat-'+cat).classList.add('cat-active');
+  if (cat !== 'all') document.getElementById('cat-'+cat).classList.add('cat-active');
+
+  // Hide subcat panel
+  document.getElementById('subcats-panel').style.display = 'none';
+
+  // Show or hide subcat tab bar
+  if (cat !== 'all' && cat !== 'accessories') {
+    renderSubcatTabs(cat);
+  } else {
+    const bar = document.getElementById('subcat-filter-bar');
+    if (bar) bar.style.display = 'none';
+  }
+
   filterProducts(cat);
   scrollToSection('shop');
-  // sync filter tab
   document.querySelectorAll('.filter-tab').forEach(t => {
-    t.classList.toggle('active', t.textContent.includes({ men:'رجالي', women:'نسائي', accessories:'اكسسوارات' }[cat]));
+    const map = { men:'رجالي', women:'نسائي', accessories:'اكسسوارات' };
+    t.classList.toggle('active', t.textContent.trim() === (map[cat] || (cat==='all'?'الكل':'')));
   });
 }
 
 function filterProducts(cat, btn) {
   currentFilter = cat;
+  if (cat !== 'men' && cat !== 'women') currentSubcat = '';
   if (btn) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
+    // Handle subcat bar visibility on tab click
+    if (cat === 'men' || cat === 'women') {
+      currentSubcatParent = cat;
+      renderSubcatTabs(cat);
+    } else {
+      currentSubcat = '';
+      currentSubcatParent = '';
+      const bar = document.getElementById('subcat-filter-bar');
+      if (bar) bar.style.display = 'none';
+    }
   }
   renderProducts();
 }
@@ -2743,10 +2956,10 @@ function renderProducts() {
   const grid = document.getElementById('products-grid');
   const searchVal = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
   let filtered = currentFilter === 'all' ? products : products.filter(p => p.cat === currentFilter);
+  if (currentSubcat) filtered = filtered.filter(p => p.subcat === currentSubcat);
   if (searchVal) filtered = filtered.filter(p => p.name.toLowerCase().includes(searchVal) || (p.desc||'').toLowerCase().includes(searchVal));
   document.getElementById('products-count').textContent = filtered.length + ' منتج';
   updateCartCount();
-  // Observe lazy images after render
   setTimeout(observeLazyImgs, 50);
 
   if (filtered.length === 0) {
@@ -2758,14 +2971,15 @@ function renderProducts() {
     return;
   }
 
-  // Track current image index per product
   if (!window.productImgIndex) window.productImgIndex = {};
   filtered.forEach(p => { if (window.productImgIndex[p.id] === undefined) window.productImgIndex[p.id] = 0; });
+
+  const subcatLabels = { polyester:'بولستر', hoodies:'هوديات', cotton:'قطني', shorts:'شورتات', pants:'بناطيل', leggings:'لكنجات' };
+  const subcatIcons  = { polyester:'⚡', hoodies:'🧥', cotton:'🌿', shorts:'🩳', pants:'👖', leggings:'🩱' };
 
   grid.innerHTML = filtered.map(p => `
     <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
       <div class="product-img-wrap" style="position:relative;">
-        <!-- scroll container -->
         <div id="pimg-track-${p.id}"
              style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:220px;min-height:220px;direction:ltr;-webkit-transform:translateZ(0);"
              onscroll="event.stopPropagation();onProductScroll(event,${p.id},${p.images.length})">
@@ -2781,6 +2995,7 @@ function renderProducts() {
         </div>
         ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
         ${p.oldPrice ? `<div class="product-badge" style="top:auto;bottom:${p.images.length>1?'40px':'14px'};background:#c0392b">-${Math.round((1-p.price/p.oldPrice)*100)}%</div>` : ''}
+        ${p.subcat && subcatLabels[p.subcat] ? `<div style="position:absolute;top:14px;left:14px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);color:var(--white);font-size:0.65rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:1px;border:1px solid rgba(255,255,255,0.1);">${subcatIcons[p.subcat]} ${subcatLabels[p.subcat]}</div>` : ''}
         ${p.images.length > 1 ? `
           <button onclick="event.stopPropagation();slideProductImg(${p.id},-1)" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10094;</button>
           <button onclick="event.stopPropagation();slideProductImg(${p.id},1)" style="position:absolute;top:50%;left:8px;transform:translateY(-50%);background:rgba(0,0,0,0.6);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;z-index:3;transition:all 0.2s;backdrop-filter:blur(4px);" onmouseover="this.style.background='var(--red)';this.style.transform='translateY(-50%) scale(1.1)'" onmouseout="this.style.background='rgba(0,0,0,0.6)';this.style.transform='translateY(-50%) scale(1)'">&#10095;</button>
@@ -2790,7 +3005,7 @@ function renderProducts() {
         ` : ''}
       </div>
       <div class="product-body">
-        <div class="product-category">${catLabel(p.cat)}</div>
+        <div class="product-category">${catLabel(p.cat)}${p.subcat && subcatLabels[p.subcat] ? ` · ${subcatLabels[p.subcat]}` : ''}</div>
         <div class="product-name">${p.name}</div>
         ${p.desc ? `<div style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">${p.desc}</div>` : ''}
         <div class="product-sizes">
@@ -2838,7 +3053,27 @@ function openEdit(docId) {
   document.querySelectorAll('#edit-sizes input[type=checkbox]').forEach(cb => {
     cb.checked = p.sizes.includes(cb.value);
   });
+  // Subcat
+  updateEditSubcatOptions();
+  setTimeout(() => {
+    const sel = document.getElementById('edit-subcat');
+    if (sel) sel.value = p.subcat || '';
+  }, 50);
   document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function updateEditSubcatOptions() {
+  const cat = document.getElementById('edit-cat').value;
+  const sel = document.getElementById('edit-subcat');
+  const group = document.getElementById('edit-subcat-group');
+  if (!sel || !group) return;
+  const subcats = SUBCATS[cat] || [];
+  if (subcats.length === 0) { group.style.display = 'none'; return; }
+  group.style.display = 'block';
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— بدون تصنيف فرعي —</option>' +
+    subcats.map(s => `<option value="${s.value}">${s.icon} ${s.label}</option>`).join('');
+  sel.value = current;
 }
 
 function closeEdit() {
@@ -2854,13 +3089,14 @@ async function saveEdit() {
   const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
   const desc = document.getElementById('edit-desc').value.trim();
   const badge = document.getElementById('edit-badge').value;
+  const subcat = document.getElementById('edit-subcat')?.value || '';
   const sizes = Array.from(document.querySelectorAll('#edit-sizes input[type=checkbox]')).filter(c => c.checked).map(c => c.value);
 
   if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً'); return; }
 
   const p = products.find(x => x._docId === docId);
-  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, sizes };
+  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, subcat, sizes };
   delete updatedProduct._docId;
 
   showToast('⏳ جاري الحفظ...');
@@ -2883,11 +3119,12 @@ async function updateProductInFirebase(docId, product) {
     desc: { stringValue: product.desc || '' },
     badge: { stringValue: product.badge || '' },
     fabric: { stringValue: product.fabric || '' },
+    subcat: { stringValue: product.subcat || '' },
     printColors: { arrayValue: { values: (product.printColors || []).map(c => ({ stringValue: c })) } },
     sizes: { arrayValue: { values: product.sizes.map(s => ({ stringValue: s })) } },
     images: { arrayValue: { values: product.images.map(i => ({ stringValue: i })) } }
   };
-  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=cat&updateMask.fieldPaths=price&updateMask.fieldPaths=oldPrice&updateMask.fieldPaths=desc&updateMask.fieldPaths=badge&updateMask.fieldPaths=fabric&updateMask.fieldPaths=printColors&updateMask.fieldPaths=sizes&updateMask.fieldPaths=images`, {
+  await fetch(`${FS_BASE}/products/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=cat&updateMask.fieldPaths=price&updateMask.fieldPaths=oldPrice&updateMask.fieldPaths=desc&updateMask.fieldPaths=badge&updateMask.fieldPaths=fabric&updateMask.fieldPaths=subcat&updateMask.fieldPaths=printColors&updateMask.fieldPaths=sizes&updateMask.fieldPaths=images`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fields })
