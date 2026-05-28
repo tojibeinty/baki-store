@@ -184,6 +184,10 @@ const SIZES_KEYBOARD = {
       { text: 'XL', callback_data: 'size_XL' },
       { text: 'XXL', callback_data: 'size_XXL' },
     ],
+    [
+      { text: '3XL', callback_data: 'size_3XL' },
+      { text: '4XL', callback_data: 'size_4XL' },
+    ],
     [{ text: '✅ تم اختيار الأحجام', callback_data: 'sizes_done' }],
   ]
 };
@@ -216,6 +220,34 @@ const BADGE_KEYBOARD = {
   ]
 };
 
+// ============ جلب الأقسام الفرعية من Firebase ============
+async function getSubCategories(mainCat) {
+  try {
+    const data = await fsGet('categories');
+    if (!data?.documents) return [];
+    const subs = [];
+    for (const doc of data.documents) {
+      const f = doc.fields || {};
+      // يدعم أسماء حقول مختلفة: parent أو mainCat أو category
+      const parent = f.parent?.stringValue || f.mainCat?.stringValue || f.category?.stringValue || '';
+      const name = f.name?.stringValue || f.subName?.stringValue || '';
+      const id = f.id?.stringValue || doc.name.split('/').pop();
+      if (parent === mainCat && name) {
+        subs.push({ name, id });
+      }
+    }
+    return subs;
+  } catch { return []; }
+}
+
+async function buildSubCatKeyboard(mainCat) {
+  const subs = await getSubCategories(mainCat);
+  if (subs.length === 0) return null;
+  const rows = subs.map(s => [{ text: s.name, callback_data: `subcat_${s.id}` }]);
+  rows.push([{ text: '📦 بدون قسم فرعي', callback_data: 'subcat_none' }]);
+  return { inline_keyboard: rows };
+}
+
 // ============ منطق المنتجات ============
 async function listProducts() {
   try {
@@ -245,6 +277,7 @@ async function saveProduct(product) {
     id: { integerValue: Date.now() },
     name: { stringValue: product.name },
     cat: { stringValue: product.cat },
+    subCat: { stringValue: product.subCat || '' },
     price: { integerValue: parseInt(product.price) },
     oldPrice: product.oldPrice ? { integerValue: parseInt(product.oldPrice) } : { nullValue: null },
     desc: { stringValue: product.desc || '' },
@@ -676,11 +709,28 @@ async function handleCallback(cb) {
     return;
   }
 
-  // ============ اختيار القسم ============
+  // ============ اختيار القسم الرئيسي ============
   if (data.startsWith('cat_')) {
     const cat = data.replace('cat_', '');
-    await setSession(chatId, { ...session, step: 'await_sizes', cat, sizes: '' });
-    await sendMessage(chatId, '👟 اختر *الأحجام* المتوفرة (اضغط واحد واحد ثم اضغط "تم"):', SIZES_KEYBOARD);
+    await setSession(chatId, { ...session, step: 'await_subcat', cat, sizes: '' });
+    // جلب الأقسام الفرعية من Firebase
+    const subKeyboard = await buildSubCatKeyboard(cat);
+    if (subKeyboard) {
+      await sendMessage(chatId, `✅ القسم: *${cat === 'men' ? 'رجالي' : cat === 'women' ? 'نسائي' : 'اكسسوارات'}*\n\n📂 اختر *القسم الفرعي*:`, subKeyboard);
+    } else {
+      // ما في أقسام فرعية، انتقل مباشرة للأحجام
+      await setSession(chatId, { ...session, step: 'await_sizes', cat, subCat: '', sizes: '' });
+      await sendMessage(chatId, '👟 اختر *الأحجام* المتوفرة (اضغط واحد واحد ثم اضغط "تم"):', SIZES_KEYBOARD);
+    }
+    return;
+  }
+
+  // ============ اختيار القسم الفرعي ============
+  if (data.startsWith('subcat_')) {
+    const subCat = data === 'subcat_none' ? '' : data.replace('subcat_', '');
+    await setSession(chatId, { ...session, step: 'await_sizes', subCat, sizes: '' });
+    const subMsg = subCat ? `✅ القسم الفرعي: *${subCat}*\n\n` : '';
+    await sendMessage(chatId, `${subMsg}👟 اختر *الأحجام* المتوفرة (اضغط واحد واحد ثم اضغط "تم"):`, SIZES_KEYBOARD);
     return;
   }
 
@@ -788,6 +838,7 @@ async function handleCallback(cb) {
     const product = {
       name: session.name,
       cat: session.cat,
+      subCat: session.subCat || '',
       price: session.price,
       oldPrice: session.oldPrice || null,
       desc: session.desc || '',
@@ -802,7 +853,7 @@ async function handleCallback(cb) {
         `✅ *تم إضافة المنتج بنجاح!*\n\n` +
         `📦 الاسم: ${product.name}\n` +
         `💰 السعر: ${Number(product.price).toLocaleString()} د.ع\n` +
-        `📂 القسم: ${product.cat}\n` +
+        `📂 القسم: ${product.cat}${product.subCat ? ` ← ${product.subCat}` : ''}\n` +
         `👟 الأحجام: ${sizes.join(', ')}\n` +
         `🏅 الباج: ${badge || 'بدون'}`,
         MAIN_MENU
