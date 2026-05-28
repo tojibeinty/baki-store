@@ -223,19 +223,21 @@ const BADGE_KEYBOARD = {
 // ============ جلب الأقسام الفرعية من Firebase ============
 async function getSubCategories(mainCat) {
   try {
-    const data = await fsGet('categories');
+    const data = await fsGet('subcats');
     if (!data?.documents) return [];
     const subs = [];
     for (const doc of data.documents) {
       const f = doc.fields || {};
-      // يدعم أسماء حقول مختلفة: parent أو mainCat أو category
-      const parent = f.parent?.stringValue || f.mainCat?.stringValue || f.category?.stringValue || '';
-      const name = f.name?.stringValue || f.subName?.stringValue || '';
-      const id = f.id?.stringValue || doc.name.split('/').pop();
-      if (parent === mainCat && name) {
-        subs.push({ name, id });
+      const parent = f.parent?.stringValue || '';
+      const label  = f.label?.stringValue  || '';
+      const value  = f.value?.stringValue  || label;
+      const icon   = f.icon?.stringValue   || '';
+      const order  = parseInt(f.order?.integerValue || 99);
+      if (parent === mainCat && label) {
+        subs.push({ label, value, icon, order });
       }
     }
+    subs.sort((a, b) => a.order - b.order);
     return subs;
   } catch { return []; }
 }
@@ -243,7 +245,10 @@ async function getSubCategories(mainCat) {
 async function buildSubCatKeyboard(mainCat) {
   const subs = await getSubCategories(mainCat);
   if (subs.length === 0) return null;
-  const rows = subs.map(s => [{ text: s.name, callback_data: `subcat_${s.id}` }]);
+  const rows = subs.map(s => [{
+    text: `${s.icon} ${s.label}`.trim(),
+    callback_data: `subcat_${s.value}`
+  }]);
   rows.push([{ text: '📦 بدون قسم فرعي', callback_data: 'subcat_none' }]);
   return { inline_keyboard: rows };
 }
