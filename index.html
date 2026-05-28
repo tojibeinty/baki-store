@@ -987,6 +987,7 @@ async function loadAnalytics() {
     <!-- Admin Tabs -->
     <div style="display:flex;gap:8px;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:16px;flex-wrap:wrap;">
       <button onclick="switchAdminTab('products')" id="tab-products" style="flex:1;padding:10px;background:var(--red);color:white;border:none;border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">📦 المنتجات</button>
+      <button onclick="switchAdminTab('subcats')" id="tab-subcats" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">🗂 الأقسام</button>
       <button onclick="switchAdminTab('print')" id="tab-print" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">🎨 طبعاتك</button>
       <button onclick="switchAdminTab('analytics')" id="tab-analytics" style="flex:1;padding:10px;background:var(--card);color:var(--muted);border:1px solid var(--border);border-radius:8px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;">📊 الإحصائيات</button>
     </div>
@@ -1009,15 +1010,10 @@ async function loadAnalytics() {
       </select>
     </div>
 
-    <div class="form-group" id="p-subcat-group">
+    <div class="form-group" id="p-subcat-group" style="display:none;">
       <label>القسم الفرعي</label>
       <select id="p-subcat">
         <option value="">— بدون تصنيف فرعي —</option>
-        <option value="polyester">بولستر</option>
-        <option value="hoodies">هوديات</option>
-        <option value="cotton">قطني</option>
-        <option value="shorts">شورتات</option>
-        <option value="pants">بناطيل</option>
       </select>
     </div>
 
@@ -1077,6 +1073,68 @@ async function loadAnalytics() {
     <button class="btn-primary" onclick="addProduct()">➕ إضافة المنتج</button>
     <button class="btn-secondary" onclick="closeAdmin()">✖ إغلاق</button>
     </div><!-- end admin-tab-products -->
+
+    <!-- ======= SUBCATS TAB ======= -->
+    <div id="admin-tab-subcats" style="display:none;">
+      <div class="admin-title" style="font-size:1.8rem;margin-bottom:20px;">🗂 إدارة الأقسام الفرعية</div>
+      <p style="color:var(--muted);font-size:0.82rem;margin-bottom:24px;line-height:1.7;">
+        أضف أقساماً فرعية لـ <strong style="color:var(--white)">رجالي</strong> و <strong style="color:var(--white)">نسائي</strong> — تظهر للزبون كبطاقات عند الضغط على القسم.
+      </p>
+
+      <!-- Add subcat form -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
+        <div style="font-weight:700;font-size:0.9rem;color:var(--red);margin-bottom:16px;">➕ إضافة قسم فرعي جديد</div>
+        <div class="form-group">
+          <label>القسم الرئيسي</label>
+          <select id="sc-parent" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;">
+            <option value="men">رجالي 👨</option>
+            <option value="women">نسائي 👩</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>اسم القسم الفرعي (بالعربي)</label>
+          <input type="text" id="sc-label" placeholder="مثال: بولستر" style="width:100%;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:0.9rem;direction:rtl;">
+        </div>
+        <div class="form-group">
+          <label>الإيموجي (اختياري)</label>
+          <input type="text" id="sc-icon" placeholder="مثال: ⚡" style="width:80px;background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--white);font-family:var(--font-body);font-size:1.2rem;text-align:center;">
+        </div>
+        <button onclick="addSubcat()" style="background:var(--red);color:white;border:none;border-radius:8px;padding:12px 24px;font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+          ➕ إضافة القسم
+        </button>
+      </div>
+
+      <!-- Subcats list -->
+      <div style="font-weight:700;font-size:0.9rem;color:var(--muted);margin-bottom:12px;letter-spacing:1px;">الأقسام الحالية</div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:0.75rem;color:var(--red);font-weight:700;letter-spacing:2px;margin-bottom:8px;">👨 رجالي</div>
+        <div id="sc-list-men" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--red);font-weight:700;letter-spacing:2px;margin-bottom:8px;">👩 نسائي</div>
+        <div id="sc-list-women" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <button class="btn-secondary" style="margin-top:24px;" onclick="closeAdmin()">✖ إغلاق</button>
+
+      <!-- Bot commands guide -->
+      <div style="border-top:1px solid var(--border);margin-top:28px;padding-top:24px;">
+        <div style="font-family:var(--font-display);font-size:1.2rem;letter-spacing:2px;color:var(--red);margin-bottom:12px;">✈️ إدارة من بوت تيليغرام</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:0.82rem;line-height:2;">
+          <div style="color:var(--muted);margin-bottom:8px;">أرسل هذه الأوامر مباشرة لبوت المتجر:</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="background:var(--deep);border-radius:6px;padding:8px 12px;font-family:monospace;direction:ltr;color:var(--white);">/أقسام</div>
+            <div style="color:var(--muted);font-size:0.75rem;margin-bottom:4px;">عرض كل الأقسام الحالية + الأحجام</div>
+            <div style="background:var(--deep);border-radius:6px;padding:8px 12px;font-family:monospace;direction:ltr;color:var(--white);">/قسم رجالي بولستر ⚡</div>
+            <div style="background:var(--deep);border-radius:6px;padding:8px 12px;font-family:monospace;direction:ltr;color:var(--white);">/قسم نسائي هوديات 🧥</div>
+            <div style="color:var(--muted);font-size:0.75rem;margin-bottom:4px;">إضافة قسم فرعي جديد</div>
+            <div style="background:var(--deep);border-radius:6px;padding:8px 12px;font-family:monospace;direction:ltr;color:var(--white);">/حذف_قسم رجالي بولستر</div>
+            <div style="color:var(--muted);font-size:0.75rem;">حذف قسم فرعي</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- end admin-tab-subcats -->
 
     <!-- ======= PRINT TAB ======= -->
     <div id="admin-tab-print" style="display:none;">
@@ -2249,22 +2307,106 @@ let selectedSize = null;
 let productImagesData = {};
 
 // ============ SUBCATEGORIES CONFIG ============
-const SUBCATS = {
-  men: [
-    { value: 'polyester', label: 'بولستر', icon: '⚡' },
-    { value: 'hoodies',   label: 'هوديات',  icon: '🧥' },
-    { value: 'cotton',    label: 'قطني',    icon: '🌿' },
-    { value: 'shorts',    label: 'شورتات',  icon: '🩳' },
-    { value: 'pants',     label: 'بناطيل',  icon: '👖' },
-  ],
-  women: [
-    { value: 'polyester', label: 'بولستر', icon: '⚡' },
-    { value: 'hoodies',   label: 'هوديات',  icon: '🧥' },
-    { value: 'cotton',    label: 'قطني',    icon: '🌿' },
-    { value: 'shorts',    label: 'شورتات',  icon: '🩳' },
-    { value: 'leggings',  label: 'لكنجات',  icon: '🩱' },
-  ]
-};
+// SUBCATS — dynamic from Firebase
+let SUBCATS = { men: [], women: [] };
+
+// ============ SUBCATS FIREBASE ============
+async function loadSubcats() {
+  try {
+    const res = await fetch(`${FS_BASE}/subcats?key=${FIREBASE_API_KEY}&pageSize=100`);
+    const data = await res.json();
+    SUBCATS = { men: [], women: [] };
+    if (data.documents) {
+      data.documents.forEach(d => {
+        const f = d.fields || {};
+        const parent = f.parent?.stringValue || 'men';
+        const item = {
+          _docId: d.name.split('/').pop(),
+          value:  f.value?.stringValue  || '',
+          label:  f.label?.stringValue  || '',
+          icon:   f.icon?.stringValue   || '📁',
+          order:  parseInt(f.order?.integerValue || f.order?.doubleValue || 99)
+        };
+        if (!SUBCATS[parent]) SUBCATS[parent] = [];
+        SUBCATS[parent].push(item);
+      });
+      // Sort by order
+      Object.keys(SUBCATS).forEach(k => SUBCATS[k].sort((a,b) => a.order - b.order));
+    }
+  } catch(e) { console.error('خطأ تحميل أقسام فرعية:', e); }
+  // Refresh UI
+  updateSubcatOptions();
+  if (document.getElementById('edit-modal')?.style.display === 'flex') updateEditSubcatOptions();
+  renderSubcatAdminList();
+}
+
+async function addSubcat() {
+  const parent = document.getElementById('sc-parent').value;
+  const label  = document.getElementById('sc-label').value.trim();
+  const icon   = document.getElementById('sc-icon').value.trim() || '📁';
+  if (!label) { showToast('❌ أدخل اسم القسم'); return; }
+
+  // slug: arabic label → simple lowercase key
+  const value = label
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '')
+    .toLowerCase() || 'cat_' + Date.now();
+
+  // Check duplicate
+  if (SUBCATS[parent]?.some(s => s.value === value || s.label === label)) {
+    showToast('❌ هذا القسم موجود مسبقاً'); return;
+  }
+
+  const order = (SUBCATS[parent]?.length || 0) + 1;
+  try {
+    await fetch(`${FS_BASE}/subcats?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        parent: { stringValue: parent },
+        value:  { stringValue: value },
+        label:  { stringValue: label },
+        icon:   { stringValue: icon },
+        order:  { integerValue: order }
+      }})
+    });
+    document.getElementById('sc-label').value = '';
+    document.getElementById('sc-icon').value  = '';
+    showToast('✅ تمت إضافة القسم');
+    await loadSubcats();
+  } catch(e) { showToast('❌ خطأ في الحفظ'); }
+}
+
+async function deleteSubcat(docId) {
+  if (!confirm('حذف هذا القسم الفرعي؟ المنتجات المرتبطة به لن تُحذف.')) return;
+  await fetch(`${FS_BASE}/subcats/${docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+  showToast('🗑 تم الحذف');
+  await loadSubcats();
+}
+
+function renderSubcatAdminList() {
+  ['men', 'women'].forEach(parent => {
+    const list = document.getElementById(`sc-list-${parent}`);
+    if (!list) return;
+    const items = SUBCATS[parent] || [];
+    if (items.length === 0) {
+      list.innerHTML = `<div style="color:var(--muted);font-size:0.82rem;padding:10px 0;">لا توجد أقسام فرعية بعد</div>`;
+      return;
+    }
+    list.innerHTML = items.map(s => `
+      <div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:1.4rem;">${s.icon}</span>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:0.92rem;">${s.label}</div>
+          <div style="color:var(--muted);font-size:0.72rem;margin-top:2px;">
+            ${products.filter(p => p.cat === parent && p.subcat === s.value).length} منتج مرتبط
+          </div>
+        </div>
+        <button onclick="deleteSubcat('${s._docId}')" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='#444';this.style.color='#888'">🗑</button>
+      </div>
+    `).join('');
+  });
+}
 
 
 // ============ CLOUDINARY CONFIG ============
@@ -2299,6 +2441,127 @@ async function uploadToCloudinary(file) {
 // ============ TELEGRAM CONFIG ============
 const BOT_TOKEN = '8582381777:AAE8-mD2RH7RI8mYt08OQWQr_zT_TRCanyo';
 const CHAT_ID = '6263195701';
+
+// ============ TELEGRAM BOT POLLING ============
+// يتحقق من الرسائل الجديدة من البوت كل 8 ثواني
+let _lastUpdateId = 0;
+let _botPollTimer = null;
+
+async function startBotPolling() {
+  if (_botPollTimer) return;
+  await pollBotOnce();
+  _botPollTimer = setInterval(pollBotOnce, 8000);
+}
+
+async function pollBotOnce() {
+  try {
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${_lastUpdateId + 1}&limit=10&timeout=0&allowed_updates=["message"]`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.ok || !data.result?.length) return;
+    for (const update of data.result) {
+      _lastUpdateId = update.update_id;
+      const msg  = update.message;
+      if (!msg || String(msg.chat.id) !== String(CHAT_ID)) continue;
+      await handleBotCommand(msg);
+    }
+  } catch(e) {}
+}
+
+async function handleBotCommand(msg) {
+  const text = (msg.text || '').trim();
+
+  // /قسم رجالي بولستر ⚡
+  // /قسم نسائي هوديات 🧥
+  // /قسم_رجالي بولستر ⚡
+  // /حذف_قسم رجالي بولستر
+  // /أقسام — عرض القائمة
+  const addMatch  = text.match(/^\/قسم[_ ]?(رجالي|نسائي|men|women)\s+(.+)/u);
+  const delMatch  = text.match(/^\/حذف_قسم[_ ]?(رجالي|نسائي|men|women)\s+(.+)/u);
+  const listMatch = text.match(/^\/أقسام/u) || text.match(/^\/subcats/);
+
+  if (addMatch) {
+    const parentRaw = addMatch[1];
+    const parent = (parentRaw === 'رجالي' || parentRaw === 'men') ? 'men' : 'women';
+    const rest   = addMatch[2].trim().split(/\s+/);
+    // Last token = emoji if it looks like one (non-word), rest = label
+    const lastToken = rest[rest.length - 1];
+    const hasEmoji  = /\p{Emoji}/u.test(lastToken) && rest.length > 1;
+    const icon  = hasEmoji ? lastToken : '📁';
+    const label = hasEmoji ? rest.slice(0, -1).join(' ') : rest.join(' ');
+    const value = label.replace(/\s+/g,'_').toLowerCase();
+
+    await fetch(`${FS_BASE}/subcats?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        parent: { stringValue: parent },
+        value:  { stringValue: value },
+        label:  { stringValue: label },
+        icon:   { stringValue: icon },
+        order:  { integerValue: (SUBCATS[parent]?.length || 0) + 1 }
+      }})
+    });
+    await loadSubcats();
+    await sendBotReply(`✅ تمت إضافة القسم: ${icon} ${label}\nتحت: ${parent === 'men' ? 'رجالي 👨' : 'نسائي 👩'}`);
+    return;
+  }
+
+  if (delMatch) {
+    const parentRaw = delMatch[1];
+    const parent = (parentRaw === 'رجالي' || parentRaw === 'men') ? 'men' : 'women';
+    const labelOrValue = delMatch[2].trim();
+    const found = SUBCATS[parent]?.find(s => s.label === labelOrValue || s.value === labelOrValue.toLowerCase());
+    if (!found) { await sendBotReply(`❌ القسم "${labelOrValue}" غير موجود`); return; }
+    await fetch(`${FS_BASE}/subcats/${found._docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+    await loadSubcats();
+    await sendBotReply(`🗑 تم حذف القسم: ${found.icon} ${found.label}`);
+    return;
+  }
+
+  if (listMatch) {
+    const menList    = (SUBCATS.men    || []).map(s => `  ${s.icon} ${s.label}`).join('\n') || '  لا توجد أقسام';
+    const womenList  = (SUBCATS.women  || []).map(s => `  ${s.icon} ${s.label}`).join('\n') || '  لا توجد أقسام';
+    const sizesList  = ['XS','S','M','L','XL','XXL','3XL','4XL','Free Size'].join(' · ');
+    await sendBotReply(
+      `📋 *الأقسام الفرعية الحالية*\n\n` +
+      `👨 *رجالي:*\n${menList}\n\n` +
+      `👩 *نسائي:*\n${womenList}\n\n` +
+      `📏 *الأحجام المتاحة:*\n${sizesList}\n\n` +
+      `─────────────\n` +
+      `*الأوامر:*\n` +
+      `➕ \`/قسم رجالي [الاسم] [إيموجي]\`\n` +
+      `➕ \`/قسم نسائي [الاسم] [إيموجي]\`\n` +
+      `🗑 \`/حذف_قسم رجالي [الاسم]\`\n` +
+      `📋 \`/أقسام\``
+    );
+    return;
+  }
+
+  // Help if unknown command starting with /
+  if (text.startsWith('/')) {
+    await sendBotReply(
+      `🤖 *أوامر الأقسام الفرعية:*\n\n` +
+      `📋 \`/أقسام\` — عرض الأقسام والأحجام\n` +
+      `➕ \`/قسم رجالي بولستر ⚡\`\n` +
+      `➕ \`/قسم نسائي هوديات 🧥\`\n` +
+      `🗑 \`/حذف_قسم رجالي بولستر\``
+    );
+  }
+}
+
+async function sendBotReply(text) {
+  try {
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+    });
+  } catch(e) {}
+}
+
+// Start polling after page loads
+window.addEventListener('load', () => setTimeout(startBotPolling, 3000));
 
 // ============ UTILS ============
 function scrollToSection(id) {
@@ -2522,7 +2785,7 @@ function calcDiscountedTotal(originalText, coupon) {
 }
 
 function switchAdminTab(tab) {
-  const tabs = ['products', 'print', 'analytics'];
+  const tabs = ['products', 'subcats', 'print', 'analytics'];
   tabs.forEach(t => {
     const el = document.getElementById(`admin-tab-${t}`);
     const btn = document.getElementById(`tab-${t}`);
@@ -2535,6 +2798,7 @@ function switchAdminTab(tab) {
   });
   if (tab === 'analytics') renderAnalyticsDashboard();
   if (tab === 'print') renderPtAdminList();
+  if (tab === 'subcats') renderSubcatAdminList();
 }
 
 async function renderAnalyticsDashboard() {
@@ -4158,6 +4422,7 @@ async function loadVideos() {
 window.addEventListener('load', () => {
   loadVideos();
   loadReviews();
+  loadSubcats();
   // Log page visit
   logEvent('visit', {});
   trackEvent('page_view', 'engagement', 'visit');
