@@ -376,6 +376,55 @@ async function saveDesign(d) {
   });
 }
 
+
+// ============ جلب منتجات حسب القسم الرئيسي ============
+async function getMainCatKeyboardForDelete() {
+  // نجيب القسم الرئيسية الموجودة فعلاً بالمنتجات
+  const data = await fsGet('products');
+  if (!data?.documents || data.documents.length === 0) return null;
+  const cats = [...new Set(data.documents.map(d => d.fields?.cat?.stringValue).filter(Boolean))];
+  const catLabels = { men: '👕 رجالي', women: '👗 نسائي', accessories: '🎒 اكسسوارات' };
+  const rows = cats.map(c => [{ text: catLabels[c] || c, callback_data: `del_cat_${c}` }]);
+  return { inline_keyboard: rows };
+}
+
+async function getSubCatKeyboardForDelete(mainCat) {
+  // نجيب الأقسام الفرعية الموجودة فعلاً في منتجات هذا القسم
+  const data = await fsGet('products');
+  if (!data?.documents) return null;
+  const subCats = [...new Set(
+    data.documents
+      .filter(d => d.fields?.cat?.stringValue === mainCat)
+      .map(d => d.fields?.subCat?.stringValue)
+      .filter(Boolean)
+  )];
+  const rows = subCats.map(s => [{ text: `📂 ${s}`, callback_data: `del_subcat_${s}` }]);
+  rows.push([{ text: '📦 بدون قسم فرعي', callback_data: `del_subcat_NONE` }]);
+  return { inline_keyboard: rows };
+}
+
+async function getProductsKeyboardForDelete(mainCat, subCat) {
+  const data = await fsGet('products');
+  if (!data?.documents) return null;
+  const filtered = data.documents.filter(d => {
+    const f = d.fields || {};
+    const catMatch = f.cat?.stringValue === mainCat;
+    const sub = f.subCat?.stringValue || '';
+    const subMatch = subCat === 'NONE' ? !sub : sub === subCat;
+    return catMatch && subMatch;
+  });
+  if (filtered.length === 0) return null;
+  const rows = filtered.map(d => {
+    const f = d.fields || {};
+    const name = f.name?.stringValue || 'بدون اسم';
+    const price = f.price?.integerValue || f.price?.doubleValue || 0;
+    const docId = d.name.split('/').pop();
+    return [{ text: `🗑 ${name} — ${Number(price).toLocaleString()} د.ع`, callback_data: `del_confirm_${docId}` }];
+  });
+  rows.push([{ text: '🔙 رجوع', callback_data: 'delete_product' }]);
+  return { inline_keyboard: rows };
+}
+
 // ============ معالج الرسائل الرئيسي ============
 async function handleMessage(msg) {
   const chatId = String(msg.chat?.id);
@@ -472,15 +521,7 @@ async function handleMessage(msg) {
     return;
   }
 
-  // ============ خطوات حذف منتج ============
-  if (step === 'await_delete_id') {
-    const docId = text.trim();
-    const ok = await deleteProductById(docId);
-    await clearSession(chatId);
-    if (ok) await sendMessage(chatId, '✅ تم حذف المنتج بنجاح!', MAIN_MENU);
-    else await sendMessage(chatId, '❌ ما قدرت أحذف المنتج. تأكد من الـ ID.', MAIN_MENU);
-    return;
-  }
+  // (حذف المنتج يتم الآن عبر الأزرار في handleCallback)
 
   if (step === 'await_delete_tshirt_id') {
     const docId = text.trim();
@@ -676,9 +717,64 @@ async function handleCallback(cb) {
   }
 
   if (data === 'delete_product') {
-    const list = await listProducts();
-    await setSession(chatId, { step: 'await_delete_id' });
-    await sendMessage(chatId, `🗑 *حذف منتج*\n\n${list}\n\nأرسل *ID* المنتج اللي تريد تحذفه:`);
+    const keyboard = await getMainCatKeyboardForDelete();
+    if (!keyboard) {
+      await sendMessage(chatId, '📦 لا توجد منتجات حالياً.', MAIN_MENU);
+      return;
+    }
+    await setSession(chatId, { step: 'await_delete_cat' });
+    await sendMessage(chatId, '🗑 *حذف منتج*\n\nاختر *القسم الرئيسي*:', keyboard);
+    return;
+  }
+
+  // ============ حذف — اختيار القسم الرئيسي ============
+  if (data.startsWith('del_cat_')) {
+    const mainCat = data.replace('del_cat_', '');
+    const keyboard = await getSubCatKeyboardForDelete(mainCat);
+    if (!keyboard) {
+      await sendMessage(chatId, '📦 لا توجد منتجات في هذا القسم.', MAIN_MENU);
+      return;
+    }
+    await setSession(chatId, { step: 'await_delete_subcat', delMainCat: mainCat });
+    await sendMessage(chatId, '📂 اختر *القسم الفرعي*:', keyboard);
+    return;
+  }
+
+  // ============ حذف — اختيار القسم الفرعي ============
+  if (data.startsWith('del_subcat_')) {
+    const subCat = data.replace('del_subcat_', '');
+    const mainCat = session.delMainCat;
+    const keyboard = await getProductsKeyboardForDelete(mainCat, subCat);
+    if (!keyboard) {
+      await sendMessage(chatId, '📦 لا توجد منتجات في هذا القسم الفرعي.', MAIN_MENU);
+      return;
+    }
+    await setSession(chatId, { ...session, step: 'await_delete_confirm', delSubCat: subCat });
+    await sendMessage(chatId, '🗑 اختر *المنتج* اللي تريد تحذفه:', keyboard);
+    return;
+  }
+
+  // ============ حذف — تأكيد الحذف ============
+  if (data.startsWith('del_confirm_')) {
+    const docId = data.replace('del_confirm_', '');
+    // اسأل للتأكيد
+    await setSession(chatId, { ...session, step: 'await_delete_final', delDocId: docId });
+    await sendMessage(chatId, '⚠️ *هل أنت متأكد من حذف هذا المنتج؟*', {
+      inline_keyboard: [
+        [{ text: '✅ نعم، احذفه', callback_data: 'del_yes' }],
+        [{ text: '❌ لا، إلغاء', callback_data: 'delete_product' }]
+      ]
+    });
+    return;
+  }
+
+  // ============ حذف — تنفيذ الحذف ============
+  if (data === 'del_yes') {
+    const docId = session.delDocId;
+    const ok = await deleteProductById(docId);
+    await clearSession(chatId);
+    if (ok) await sendMessage(chatId, '✅ *تم حذف المنتج بنجاح!*', MAIN_MENU);
+    else await sendMessage(chatId, '❌ ما قدرت أحذف المنتج.', MAIN_MENU);
     return;
   }
 
