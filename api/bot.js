@@ -282,7 +282,7 @@ async function saveProduct(product) {
     id: { integerValue: Date.now() },
     name: { stringValue: product.name },
     cat: { stringValue: product.cat },
-    subCat: { stringValue: product.subCat || '' },
+    subcat: { stringValue: product.subCat || '' },
     price: { integerValue: parseInt(product.price) },
     oldPrice: product.oldPrice ? { integerValue: parseInt(product.oldPrice) } : { nullValue: null },
     desc: { stringValue: product.desc || '' },
@@ -395,7 +395,7 @@ async function getSubCatKeyboardForDelete(mainCat) {
   const subCats = [...new Set(
     data.documents
       .filter(d => d.fields?.cat?.stringValue === mainCat)
-      .map(d => d.fields?.subCat?.stringValue)
+      .map(d => d.fields?.subcat?.stringValue)
       .filter(Boolean)
   )];
   const rows = subCats.map(s => [{ text: `📂 ${s}`, callback_data: `del_subcat_${s}` }]);
@@ -409,7 +409,7 @@ async function getProductsKeyboardForDelete(mainCat, subCat) {
   const filtered = data.documents.filter(d => {
     const f = d.fields || {};
     const catMatch = f.cat?.stringValue === mainCat;
-    const sub = f.subCat?.stringValue || '';
+    const sub = f.subcat?.stringValue || '';
     const subMatch = subCat === 'NONE' ? !sub : sub === subCat;
     return catMatch && subMatch;
   });
