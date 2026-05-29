@@ -3421,12 +3421,8 @@ async function sendToTelegram() {
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
     `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `🚚 سعر التوصيل: 3,000 د.ع\n` +
-    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
-    (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n━━━━━━━━━━━━━━━━━\n` +
-    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
-    `🌐 الموقع: https://bakiwear.com/`;
+    `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '');
 
   // Show loading
   const btn = document.querySelector('.telegram-btn');
@@ -3491,17 +3487,13 @@ async function orderNowDirect() {
     `📂 القسم: ${catLabel(selectedProduct.cat)}\n` +
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
-    `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `🚚 سعر التوصيل: 3,000 د.ع\n` +
-    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
-    (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n━━━━━━━━━━━━━━━━━\n` +
-    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
-    `🌐 الموقع: https://bakiwear.com/`;
+    `💰 السعر: ${selectedProduct.price.toLocaleString()} د.ع\n` +
+    `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '');
 
   // لو نظام الدفع مفعّل — افتح مودال الدفع
   if (paymentSettings.enabled) {
-    const total = (selectedProduct.price * parseInt(qty) + 3000).toLocaleString() + ' د.ع';
+    const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
     openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
     return;
   }
@@ -3631,13 +3623,8 @@ async function sendCartToTelegram() {
     `📞 الهاتف: ${phone}\n` +
     (address ? `📍 العنوان: ${address}\n` : '') +
     `\n📦 *المنتجات:*\n${itemsText}\n\n` +
-    `💰 *إجمالي المنتجات: ${total.toLocaleString()} د.ع*\n` +
-    `🚚 سعر التوصيل: 3,000 د.ع\n` +
-    `💳 *الإجمالي مع التوصيل: ${(total + 3000).toLocaleString()} د.ع*` +
-    (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n━━━━━━━━━━━━━━━━━\n` +
-    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
-    `🌐 الموقع: https://bakiwear.com/`;
+    `💰 *الإجمالي: ${total.toLocaleString()} د.ع*` +
+    (note ? `\n📝 ملاحظات: ${note}` : '');
 
   const btn = document.getElementById('cart-send-btn');
   btn.disabled = true;
@@ -5149,20 +5136,9 @@ async function studioSendOrder() {
 ` +
     `📌 الموضع: ${posLabel} — حجم ${studioState.scale}%
 ` +
-    `💰 سعر القطعة: ${p.price.toLocaleString()} د.ع
-` +
-    `🚚 سعر التوصيل: 3,000 د.ع
-` +
-    `💳 الإجمالي مع التوصيل: ${(p.price + 3000).toLocaleString()} د.ع` +
+    `💰 السعر: ${p.price.toLocaleString()} د.ع` +
     (note ? `
-📝 ملاحظات: ${note}` : '') +
-    `
-
-━━━━━━━━━━━━━━━━━
-` +
-    `📸 انستغرام: https://www.instagram.com/bakibeinty
-` +
-    `🌐 الموقع: https://bakiwear.com/`;
+📝 ملاحظات: ${note}` : '');
 
   // ===== بناء صورة التيشيرت + الطبعة مدمجة =====
   function buildMergedBlob() {
