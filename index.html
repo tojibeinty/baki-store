@@ -5149,9 +5149,20 @@ async function studioSendOrder() {
 ` +
     `📌 الموضع: ${posLabel} — حجم ${studioState.scale}%
 ` +
-    `💰 السعر: ${p.price.toLocaleString()} د.ع` +
+    `💰 سعر القطعة: ${p.price.toLocaleString()} د.ع
+` +
+    `🚚 سعر التوصيل: 3,000 د.ع
+` +
+    `💳 الإجمالي مع التوصيل: ${(p.price + 3000).toLocaleString()} د.ع` +
     (note ? `
-📝 ملاحظات: ${note}` : '');
+📝 ملاحظات: ${note}` : '') +
+    `
+
+━━━━━━━━━━━━━━━━━
+` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty
+` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   // ===== بناء صورة التيشيرت + الطبعة مدمجة =====
   function buildMergedBlob() {
