@@ -568,10 +568,6 @@ async function loadAnalytics() {
 
   /* ========= SECTIONS ========= */
   section { padding: 100px 40px; }
-  @media (max-width: 768px) {
-    section { padding: 80px 12px; }
-    #shop { padding: 80px 10px; }
-  }
   .section-header {
     text-align: center;
     margin-bottom: 60px;
@@ -675,188 +671,128 @@ async function loadAnalytics() {
   }
   .products-count { color: var(--muted); font-size: 0.85rem; }
 
-  /* ========= PRODUCTS GRID — MODERN APP STYLE ========= */
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    max-width: 1400px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 4px;
   }
-  @media (max-width: 1100px) {
-    .products-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  }
-  @media (max-width: 768px) {
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 2px; }
-  }
-  @media (max-width: 360px) {
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  }
-
   .product-card {
     background: var(--card);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: all 0.3s;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    animation: fadeUp 0.4s ease forwards;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-    -webkit-tap-highlight-color: transparent;
+    animation: fadeUp 0.5s ease forwards;
   }
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .product-card:hover {
-    border-color: rgba(192,57,43,0.5);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(192,57,43,0.2);
+    border-color: var(--red);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   }
-  .product-card:active { transform: scale(0.98); }
-
-  /* ---- Image wrapper: aspect-ratio square ---- */
   .product-img-wrap {
     position: relative;
     overflow: hidden;
-    width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 220px;
     background: #111;
+    /* iOS fix */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
-    flex-shrink: 0;
   }
   .product-img-wrap img {
     width: 100%; height: 100%;
     object-fit: cover;
     object-position: center center;
-    display: block;
+    /* iOS fix */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
+    display: block;
   }
-  .product-card:hover .product-img-wrap .card-main-img {
-    transform: scale(1.05);
-    transition: transform 0.5s ease;
+  @media (max-width: 600px) {
+    .product-img-wrap { height: 200px; }
   }
+  .product-card:hover .product-img-wrap .card-main-img { transform: scale(1.06); transition: transform 0.5s; }
   .product-img-nav {
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 5px;
   }
   .img-dot {
-    width: 5px; height: 5px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: rgba(255,255,255,0.4);
     cursor: pointer;
     transition: background 0.2s;
   }
   .img-dot.active { background: var(--red); }
-
-  /* ---- Badge ---- */
   .product-badge {
-    position: absolute; top: 10px; right: 10px;
+    position: absolute; top: 14px; right: 14px;
     background: var(--red);
     color: white;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 3px 9px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(192,57,43,0.5);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
   }
-
-  /* ---- Card body ---- */
-  .product-body {
-    padding: 12px 12px 14px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  @media (max-width: 768px) {
-    .product-body { padding: 10px 10px 12px; }
-  }
-
+  .product-body { padding: 20px; }
   .product-category {
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     color: var(--red);
     font-weight: 700;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 4px;
-    opacity: 0.9;
+    margin-bottom: 6px;
   }
   .product-name {
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    margin-bottom: 6px;
-    line-height: 1.35;
-    color: var(--white);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  @media (max-width: 768px) {
-    .product-name { font-size: 0.82rem; }
-  }
-
-  .product-sizes {
-    display: flex; gap: 4px; flex-wrap: wrap;
     margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .product-sizes {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
   }
   .size-tag {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 2px 7px;
-    font-size: 0.68rem;
+    padding: 3px 9px;
+    font-size: 0.75rem;
     color: var(--muted);
   }
-
-  /* ---- Footer: price + order btn pinned to bottom ---- */
   .product-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    gap: 6px;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .product-price {
     font-family: var(--font-num);
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 600;
     color: var(--red);
-    line-height: 1.1;
   }
-  @media (max-width: 400px) {
-    .product-price { font-size: 0.95rem; }
-  }
-  .product-price span { color: var(--muted); font-size: 0.72rem; font-family: var(--font-body); margin-right: 2px; }
-
+  .product-price span { color: var(--muted); font-size: 0.8rem; font-family: var(--font-body); }
   .btn-order {
     background: var(--red);
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 8px 14px;
+    border-radius: 6px;
+    padding: 10px 18px;
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    transition: background 0.2s, transform 0.15s;
-    display: flex; align-items: center; gap: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
   }
-  .btn-order:hover { background: var(--red-hot); transform: scale(1.04); }
-  .btn-order:active { transform: scale(0.97); }
-  @media (max-width: 400px) {
-    .btn-order { padding: 7px 10px; font-size: 0.75rem; }
+  .btn-order:hover {
+    background: var(--red-hot);
+    transform: scale(1.05);
   }
 
   /* ========= ORDER MODAL ========= */
@@ -1014,7 +950,7 @@ async function loadAnalytics() {
     .hero-title { font-size: 3.5rem; }
     .cat-grid { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .products-grid { grid-template-columns: 1fr; }
     footer, #features { padding: 50px 20px 24px; }
   }
 
@@ -3171,15 +3107,15 @@ function renderProducts() {
     <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
       <div class="product-img-wrap" style="position:relative;">
         <div id="pimg-track-${p.id}"
-             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;min-height:100%;direction:ltr;-webkit-transform:translateZ(0);"
+             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:220px;min-height:220px;direction:ltr;-webkit-transform:translateZ(0);"
              onscroll="event.stopPropagation();onProductScroll(event,${p.id},${p.images.length})">
           ${p.images.map((img, i) => `
-            <div style="min-width:100%;width:100%;scroll-snap-align:start;-webkit-scroll-snap-align:start;flex-shrink:0;height:100%;overflow:hidden;background:#111;position:relative;">
+            <div style="min-width:100%;width:100%;scroll-snap-align:start;-webkit-scroll-snap-align:start;flex-shrink:0;height:220px;min-height:220px;overflow:hidden;background:#111;position:relative;">
               <img ${i === 0 ? `src="${optimizeImg(img) || ''}"` : `src="" data-src="${optimizeImg(img) || ''}"`}
                    class="card-main-img lazy-img"
                    loading="${i === 0 ? 'eager' : 'lazy'}"
                    style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;transition:opacity 0.3s;${i===0?'':'opacity:0;'}"
-                   onerror="this.src='https://via.placeholder.com/400x400/181818/555?text=Product'">
+                   onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
             </div>
           `).join('')}
         </div>
@@ -3195,18 +3131,19 @@ function renderProducts() {
         ` : ''}
       </div>
       <div class="product-body">
-        <div class="product-category">${catLabel(p.cat)}${p.subcat && subcatLabels[p.subcat] ? ` · ${subcatIcons[p.subcat]} ${subcatLabels[p.subcat]}` : ''}</div>
+        <div class="product-category">${catLabel(p.cat)}${p.subcat && subcatLabels[p.subcat] ? ` · ${subcatLabels[p.subcat]}` : ''}</div>
         <div class="product-name">${p.name}</div>
+        ${p.desc ? `<div style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">${p.desc}</div>` : ''}
         <div class="product-sizes">
-          ${p.sizes.slice(0,4).map(s => `<span class="size-tag">${s}</span>`).join('')}${p.sizes.length>4?`<span class="size-tag">+${p.sizes.length-4}</span>`:''}
+          ${p.sizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
         </div>
         <div class="product-footer">
           <div>
             <div class="product-price">${p.price.toLocaleString()} <span>د.ع</span></div>
-            ${p.oldPrice ? `<div style="color:#555;font-size:0.72rem;text-decoration:line-through;margin-top:1px">${p.oldPrice.toLocaleString()} د.ع</div>` : ''}
+            ${p.oldPrice ? `<div style="color:#666;font-size:0.82rem;text-decoration:line-through;margin-top:2px">${p.oldPrice.toLocaleString()} د.ع</div>` : ''}
           </div>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <button class="btn-order" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:8px 10px;" onclick="event.stopPropagation();shareProduct(${p.id})" title="مشاركة">📤</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn-order" style="background:transparent;border:1px solid #333;padding:10px 12px;" onclick="event.stopPropagation();shareProduct(${p.id})" title="مشاركة">📤</button>
             <button class="btn-order" onclick="event.stopPropagation();openOrder(${p.id})">اطلب ✈️</button>
           </div>
         </div>
@@ -3484,8 +3421,12 @@ async function sendToTelegram() {
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
     `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
-    (note ? `\n📝 ملاحظات: ${note}` : '');
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '') +
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   // Show loading
   const btn = document.querySelector('.telegram-btn');
@@ -3550,13 +3491,17 @@ async function orderNowDirect() {
     `📂 القسم: ${catLabel(selectedProduct.cat)}\n` +
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
-    `💰 السعر: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `💰 الإجمالي: ${(selectedProduct.price * parseInt(qty)).toLocaleString()} د.ع` +
-    (note ? `\n📝 ملاحظات: ${note}` : '');
+    `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
+    (note ? `\n📝 ملاحظات: ${note}` : '') +
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   // لو نظام الدفع مفعّل — افتح مودال الدفع
   if (paymentSettings.enabled) {
-    const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
+    const total = (selectedProduct.price * parseInt(qty) + 3000).toLocaleString() + ' د.ع';
     openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
     return;
   }
@@ -3686,8 +3631,13 @@ async function sendCartToTelegram() {
     `📞 الهاتف: ${phone}\n` +
     (address ? `📍 العنوان: ${address}\n` : '') +
     `\n📦 *المنتجات:*\n${itemsText}\n\n` +
-    `💰 *الإجمالي: ${total.toLocaleString()} د.ع*` +
-    (note ? `\n📝 ملاحظات: ${note}` : '');
+    `💰 *إجمالي المنتجات: ${total.toLocaleString()} د.ع*\n` +
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 *الإجمالي مع التوصيل: ${(total + 3000).toLocaleString()} د.ع*` +
+    (note ? `\n📝 ملاحظات: ${note}` : '') +
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   const btn = document.getElementById('cart-send-btn');
   btn.disabled = true;
@@ -5199,9 +5149,20 @@ async function studioSendOrder() {
 ` +
     `📌 الموضع: ${posLabel} — حجم ${studioState.scale}%
 ` +
-    `💰 السعر: ${p.price.toLocaleString()} د.ع` +
+    `💰 سعر القطعة: ${p.price.toLocaleString()} د.ع
+` +
+    `🚚 سعر التوصيل: 3,000 د.ع
+` +
+    `💳 الإجمالي مع التوصيل: ${(p.price + 3000).toLocaleString()} د.ع` +
     (note ? `
-📝 ملاحظات: ${note}` : '');
+📝 ملاحظات: ${note}` : '') +
+    `
+
+━━━━━━━━━━━━━━━━━
+` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty
+` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   // ===== بناء صورة التيشيرت + الطبعة مدمجة =====
   function buildMergedBlob() {
