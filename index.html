@@ -866,11 +866,36 @@ async function loadAnalytics() {
     background: rgba(0,0,0,0.92);
     z-index: 9000;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 40px 20px;
     align-items: flex-start;
     justify-content: center;
   }
   #order-modal.active { display: flex; }
+
+  /* ======= PAYMENT MODAL MOBILE FIX ======= */
+  #payment-modal {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 9500;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 40px 20px;
+    align-items: flex-start;
+    justify-content: center;
+    /* iOS Safari fix: force GPU layer */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  #payment-modal.modal-open {
+    display: flex !important;
+  }
+  #payment-modal > div {
+    /* prevent content from going under iOS nav bar */
+    margin-bottom: env(safe-area-inset-bottom, 20px);
+  }
   .order-box {
     background: var(--deep);
     border: 1px solid var(--red);
@@ -1531,10 +1556,10 @@ async function loadAnalytics() {
     </div>
 
     <div style="display:flex;gap:10px;margin-top:10px">
-      <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#c0392b;flex:1">
+      <button type="button" class="telegram-btn" onclick="addToCartFromOrder()" style="background:#c0392b;flex:1">
         🛍 أضف للسلة
       </button>
-      <button class="telegram-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
+      <button type="button" class="telegram-btn" id="order-now-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
         ✈️ اطلب الآن
       </button>
     </div>
@@ -1543,7 +1568,7 @@ async function loadAnalytics() {
 </div>
 
 <!-- ======= PAYMENT MODAL ======= -->
-<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+<div id="payment-modal">
   <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;">
     <button onclick="closePayment()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:20px;text-align:center;">💳 اختر طريقة الدفع</div>
@@ -1582,7 +1607,7 @@ async function loadAnalytics() {
         <div id="receipt-preview" style="margin-top:10px;"></div>
       </div>
 
-      <button id="pay-send-btn" onclick="sendOrderWithPayment()" class="telegram-btn" style="width:100%;margin-top:10px;">
+      <button type="button" id="pay-send-btn" onclick="sendOrderWithPayment()" class="telegram-btn" style="width:100%;margin-top:10px;">
         ✈️ إرسال الطلب مع الحوالة
       </button>
     </div>
@@ -1611,7 +1636,7 @@ async function loadAnalytics() {
         </div>
         <div id="coupon-result-cod" style="margin-top:8px;font-size:0.82rem;"></div>
       </div>
-      <button onclick="sendOrderCOD()" class="telegram-btn" style="width:100%;background:#229ED9;">
+      <button type="button" onclick="sendOrderCOD()" class="telegram-btn" style="width:100%;background:#229ED9;">
         ✈️ إرسال الطلب
       </button>
     </div>
@@ -3636,9 +3661,20 @@ function openOrder(id) {
   sizeSel.innerHTML = p.sizes.map(s => `<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
 
   document.getElementById('order-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 }
 function closeOrder() {
   document.getElementById('order-modal').classList.remove('active');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+  // أغلق مودال الدفع لو كان مفتوح
+  const pm = document.getElementById('payment-modal');
+  if (pm && pm.classList.contains('modal-open')) {
+    pm.classList.remove('modal-open');
+  }
   selectedProduct = null;
   selectedSize = null;
 }
@@ -3749,9 +3785,18 @@ function addToCartFromOrder() {
   closeOrder();
 }
 
+let _orderProcessing = false;
+
 async function orderNowDirect() {
-  if (!selectedProduct) return;
-  if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); return; }
+  // حماية من الضغط المزدوج (double-tap على الموبايل)
+  if (_orderProcessing) return;
+  _orderProcessing = true;
+  const orderBtn = document.getElementById('order-now-btn');
+  if (orderBtn) orderBtn.disabled = true;
+
+  try {
+  if (!selectedProduct) { _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
+  if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
 
   const name = document.getElementById('customer-name').value.trim();
   const phone = document.getElementById('customer-phone').value.trim();
@@ -3759,7 +3804,7 @@ async function orderNowDirect() {
   const note = document.getElementById('order-note').value.trim();
   const qty = document.getElementById('order-qty').value || 1;
 
-  if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
+  if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
 
   const variantIdx = selectedProduct._selectedImgIdx || 0;
   const deliveryCost2 = 3000;
@@ -3783,15 +3828,17 @@ async function orderNowDirect() {
 
   // لو نظام الدفع مفعّل — افتح مودال الدفع
   if (paymentSettings.enabled) {
-    const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
+    const total = grandTotal2.toLocaleString() + ' د.ع';
     openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
+    // أعد الزر بعد فتح المودال (المودال هو اللي يكمل العملية)
+    _orderProcessing = false;
+    if (orderBtn) orderBtn.disabled = false;
     return;
   }
 
   // بدون نظام دفع — أرسل مباشرة
   const photoUrl = selectedProduct.images[variantIdx] || selectedProduct.images[0] || '';
-  const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
+  if (orderBtn) { orderBtn.textContent = '⏳ جاري الإرسال...'; }
 
   try {
     const res = await sendOrderWithPhoto(text, photoUrl);
@@ -3808,7 +3855,12 @@ async function orderNowDirect() {
   } catch(e) {
     showToast('❌ تعذر الاتصال');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '✈️ اطلب الآن'; }
+    if (orderBtn) { orderBtn.disabled = false; orderBtn.textContent = '✈️ اطلب الآن'; }
+  }
+
+  } finally {
+    // تأخير بسيط قبل إعادة تفعيل الحماية (يمنع ghost clicks على الموبايل)
+    setTimeout(() => { _orderProcessing = false; }, 800);
   }
 }
 
@@ -4430,11 +4482,22 @@ function openPaymentModal(orderData) {
 
   document.getElementById('payment-details').style.display = 'none';
   document.getElementById('payment-cod-confirm').style.display = 'none';
-  document.getElementById('payment-modal').style.display = 'flex';
+
+  // فتح المودال بـ class بدل inline style — يحل مشكلة iOS Safari
+  const modal = document.getElementById('payment-modal');
+  modal.classList.add('modal-open');
+  // منع scroll الخلفية على الموبايل
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
 }
 
 function closePayment() {
-  document.getElementById('payment-modal').style.display = 'none';
+  const modal = document.getElementById('payment-modal');
+  modal.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
   pendingOrderData = null;
 }
 
