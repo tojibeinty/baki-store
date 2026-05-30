@@ -568,10 +568,6 @@ async function loadAnalytics() {
 
   /* ========= SECTIONS ========= */
   section { padding: 100px 40px; }
-  @media (max-width: 768px) {
-    section { padding: 80px 12px; }
-    #shop { padding: 80px 10px; }
-  }
   .section-header {
     text-align: center;
     margin-bottom: 60px;
@@ -675,201 +671,142 @@ async function loadAnalytics() {
   }
   .products-count { color: var(--muted); font-size: 0.85rem; }
 
-  /* ========= PRODUCTS GRID — MODERN APP STYLE ========= */
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    max-width: 1400px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 4px;
   }
-  @media (max-width: 1100px) {
-    .products-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  }
-  @media (max-width: 768px) {
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 2px; }
-  }
-  @media (max-width: 360px) {
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  }
-
   .product-card {
     background: var(--card);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: all 0.3s;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    animation: fadeUp 0.4s ease forwards;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-    -webkit-tap-highlight-color: transparent;
+    animation: fadeUp 0.5s ease forwards;
   }
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .product-card:hover {
-    border-color: rgba(192,57,43,0.5);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(192,57,43,0.2);
+    border-color: var(--red);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   }
-  .product-card:active { transform: scale(0.98); }
-
-  /* ---- Image wrapper: aspect-ratio square ---- */
   .product-img-wrap {
     position: relative;
     overflow: hidden;
-    width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 220px;
     background: #111;
+    /* iOS fix */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
-    flex-shrink: 0;
   }
   .product-img-wrap img {
     width: 100%; height: 100%;
     object-fit: cover;
     object-position: center center;
-    display: block;
+    /* iOS fix */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
+    display: block;
   }
-  .product-card:hover .product-img-wrap .card-main-img {
-    transform: scale(1.05);
-    transition: transform 0.5s ease;
+  @media (max-width: 600px) {
+    .product-img-wrap { height: 200px; }
   }
+  .product-card:hover .product-img-wrap .card-main-img { transform: scale(1.06); transition: transform 0.5s; }
   .product-img-nav {
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
     display: flex; gap: 5px;
   }
   .img-dot {
-    width: 5px; height: 5px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: rgba(255,255,255,0.4);
     cursor: pointer;
     transition: background 0.2s;
   }
   .img-dot.active { background: var(--red); }
-
-  /* ---- Badge ---- */
   .product-badge {
-    position: absolute; top: 10px; right: 10px;
+    position: absolute; top: 14px; right: 14px;
     background: var(--red);
     color: white;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 3px 9px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(192,57,43,0.5);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
   }
-
-  /* ---- Card body ---- */
-  .product-body {
-    padding: 12px 12px 14px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  @media (max-width: 768px) {
-    .product-body { padding: 10px 10px 12px; }
-  }
-
+  .product-body { padding: 20px; }
   .product-category {
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     color: var(--red);
     font-weight: 700;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 4px;
-    opacity: 0.9;
+    margin-bottom: 6px;
   }
   .product-name {
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    margin-bottom: 6px;
-    line-height: 1.35;
-    color: var(--white);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  @media (max-width: 768px) {
-    .product-name { font-size: 0.82rem; }
-  }
-
-  .product-sizes {
-    display: flex; gap: 4px; flex-wrap: wrap;
     margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .product-sizes {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 16px;
   }
   .size-tag {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 2px 7px;
-    font-size: 0.68rem;
+    padding: 3px 9px;
+    font-size: 0.75rem;
     color: var(--muted);
   }
-
-  /* ---- Footer: price + order btn pinned to bottom ---- */
   .product-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    gap: 6px;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .product-price {
     font-family: var(--font-num);
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 600;
     color: var(--red);
-    line-height: 1.1;
   }
-  @media (max-width: 400px) {
-    .product-price { font-size: 0.95rem; }
-  }
-  .product-price span { color: var(--muted); font-size: 0.72rem; font-family: var(--font-body); margin-right: 2px; }
-
+  .product-price span { color: var(--muted); font-size: 0.8rem; font-family: var(--font-body); }
   .btn-order {
     background: var(--red);
     color: white;
     border: none;
-    border-radius: 8px;
-    padding: 8px 14px;
+    border-radius: 6px;
+    padding: 10px 18px;
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    transition: background 0.2s, transform 0.15s;
-    display: flex; align-items: center; gap: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
   }
-  .btn-order:hover { background: var(--red-hot); transform: scale(1.04); }
-  .btn-order:active { transform: scale(0.97); }
-  @media (max-width: 400px) {
-    .btn-order { padding: 7px 10px; font-size: 0.75rem; }
+  .btn-order:hover {
+    background: var(--red-hot);
+    transform: scale(1.05);
   }
 
   /* ========= ORDER MODAL ========= */
   #order-modal {
     display: none;
-    position: fixed; top:0; right:0; bottom:0; left:0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.92);
     z-index: 9000;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     padding: 40px 20px;
+    align-items: flex-start;
+    justify-content: center;
   }
-  #order-modal.active { display: block; }
+  #order-modal.active { display: flex; }
   .order-box {
     background: var(--deep);
     border: 1px solid var(--red);
@@ -877,7 +814,6 @@ async function loadAnalytics() {
     padding: 40px;
     width: 100%;
     max-width: 500px;
-    margin: 0 auto;
     animation: modalIn 0.3s ease;
   }
   @keyframes modalIn {
@@ -1014,7 +950,7 @@ async function loadAnalytics() {
     .hero-title { font-size: 3.5rem; }
     .cat-grid { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .products-grid { grid-template-columns: 1fr; }
     footer, #features { padding: 50px 20px 24px; }
   }
 
@@ -1205,7 +1141,23 @@ async function loadAnalytics() {
         </select>
       </div>
 
-
+      <div class="form-group">
+        <label>ألوان الطبعة المتاحة</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أسود" id="pt-print-black" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#111;border-radius:50%;border:1px solid #555;"></span> أسود
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أحمر" id="pt-print-red" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#c0392b;border-radius:50%;"></span> أحمر
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
+            <input type="checkbox" value="أزرق داكن" id="pt-print-navy" style="accent-color:var(--red);width:auto;">
+            <span style="display:inline-block;width:14px;height:14px;background:#1a3a5c;border-radius:50%;"></span> أزرق داكن
+          </label>
+        </div>
+      </div>
 
       <div class="form-group">
         <label>السعر (دينار عراقي)</label>
@@ -1543,13 +1495,8 @@ async function loadAnalytics() {
 </div>
 
 <!-- ======= PAYMENT MODAL ======= -->
-<style>
-#payment-modal.open {
-  display: block !important;
-}
-</style>
-<div id="payment-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:9500;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
-  <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;margin:0 auto;">
+<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+  <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;">
     <button onclick="closePayment()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:20px;text-align:center;">💳 اختر طريقة الدفع</div>
 
@@ -1564,7 +1511,7 @@ async function loadAnalytics() {
       </div>
       <div id="payment-account-info" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;">
         <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px;">ادفع على هذا الحساب</div>
-        <div id="payment-account-number" style="font-size:1.2rem;font-weight:700;color:var(--red);direction:ltr;letter-spacing:2px;word-break:break-all;overflow-wrap:break-word;"></div>
+        <div id="payment-account-number" style="font-size:1.2rem;font-weight:700;color:var(--red);direction:ltr;letter-spacing:2px;"></div>
       </div>
 
       <!-- كوبون الخصم -->
@@ -1624,7 +1571,7 @@ async function loadAnalytics() {
 </div>
 
 <!-- ======= EDIT PRODUCT MODAL ======= -->
-<div id="edit-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
   <div style="background:#111;border:1px solid #c0392b;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
     <button onclick="closeEdit()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#c0392b;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
@@ -1684,18 +1631,6 @@ async function loadAnalytics() {
         <label><input type="checkbox" value="Free Size"> Free</label>
       </div>
     </div>
-    <div class="form-group" style="margin-top:6px;">
-      <label>الصور (يمكنك حذف أو إضافة أو تغيير الصور)</label>
-      <div id="edit-images-list"></div>
-      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-        <button type="button" onclick="addEditImageRow()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ إضافة رابط صورة</button>
-        <label style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;display:inline-flex;align-items:center;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-          📤 رفع صورة جديدة
-          <input type="file" accept="image/*" onchange="uploadEditImage(this)" style="display:none;">
-        </label>
-      </div>
-    </div>
-
     <button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
     <button class="btn-secondary" onclick="closeEdit()">إلغاء</button>
   </div>
@@ -1703,10 +1638,10 @@ async function loadAnalytics() {
 
 <!-- ======= PASSWORD MODAL ======= -->
 <div id="password-modal" style="
-  display:none; position:fixed; top:0; right:0; bottom:0; left:0;
+  display:none; position:fixed; inset:0;
   background:rgba(0,0,0,0.97);
   z-index:99999;
-  -webkit-overflow-scrolling:touch;
+  align-items:center; justify-content:center;
 ">
   <div style="
     background:#111;
@@ -1715,7 +1650,6 @@ async function loadAnalytics() {
     padding:40px;
     width:100%; max-width:380px;
     text-align:center;
-    margin:40px auto;
   ">
     <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:4px;color:#c0392b;margin-bottom:6px">لوحة التحكم</div>
@@ -1953,158 +1887,498 @@ async function loadAnalytics() {
     <!-- Studio: shows after tshirt selected -->
     <div id="studio-main" style="display:none;">
       <div style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:3px;color:var(--red);margin-bottom:16px;">02 — صمّم طبعتك</div>
-      <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;" id="studio-grid">
 
-        <!-- Viewer + Library below -->
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <div style="background:var(--deep);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;position:relative;">
-            <div id="studio-stage" style="position:relative;width:300px;height:370px;user-select:none;">
-              <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous"
-                style="width:100%;height:100%;object-fit:contain;display:block;transition:filter 0.3s;">
-              <canvas id="studio-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
-              <div id="studio-drag" style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:grab;z-index:10;"></div>
+      <!-- ===== STUDIO LAYOUT — Mobile-first single column then desktop side-by-side ===== -->
+      <div class="studio-layout" id="studio-grid">
+
+        <!-- ─── PREVIEW AREA ─── -->
+        <div class="studio-preview-col">
+
+          <!-- Stage wrapper: overflow visible so design can extend + clipping done via printable zone -->
+          <div class="studio-stage-wrapper">
+            <!-- Shirt image — base layer -->
+            <img id="studio-shirt-img" src="" alt="" crossorigin="anonymous" class="studio-shirt-base">
+
+            <!-- Design overlay — absolute, z-index above shirt, NO canvas, pure DOM transform -->
+            <div id="studio-design-overlay" class="studio-design-overlay">
+              <img id="studio-design-img" src="" alt="" class="studio-design-img" style="display:none;">
+              <div id="studio-design-emoji" class="studio-design-emoji" style="display:none;"></div>
             </div>
-            <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);letter-spacing:1px;">اسحب التصميم لتحريكه</div>
-            <div style="display:flex;gap:8px;margin-top:12px;">
-              <button onclick="studioResetPos()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">⤢ إعادة الموضع</button>
-              <button onclick="studioClear()" style="background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:var(--font-body);font-size:0.78rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">✕ مسح</button>
+
+            <!-- Printable zone guide (dashed border) -->
+            <div id="studio-print-zone" class="studio-print-zone"></div>
+
+            <!-- Touch / drag capture layer -->
+            <div id="studio-drag" class="studio-drag-layer"
+              title="اسحب لتحريك التصميم — قرص أصبعين للتكبير">
             </div>
+
+            <!-- Hidden canvas used ONLY for export/order preview -->
+            <canvas id="studio-canvas" style="display:none;"></canvas>
           </div>
 
-          <!-- المكتبة تحت الصورة مباشرة -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">— اختر من المكتبة —</div>
-            <div id="studio-lib" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:8px;max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--red) var(--border);padding:2px;"></div>
-          </div>
-        </div>
-
-        <!-- Controls -->
-        <div style="display:flex;flex-direction:column;gap:12px;">
-
-          <!-- Print color -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">لون الطبعة</div>
-            <div id="studio-colors" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+          <!-- Hint -->
+          <div class="studio-hint">
+            👆 اسحب لتحريك · قرص أصبعين للتكبير · دوّر بأصبعين
           </div>
 
-          <!-- Upload -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">التصميم</div>
-            <div onclick="document.getElementById('studio-file').click()"
-              style="border:1.5px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s;"
-              onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
-              <div style="font-size:1.5rem;opacity:0.4;margin-bottom:4px;">↑</div>
-              <div style="font-size:0.8rem;color:var(--muted);"><strong style="color:var(--white);">ارفع تصميمك</strong><br>PNG أو JPG</div>
-            </div>
-            <input type="file" id="studio-file" accept="image/*" style="display:none" onchange="studioOnFile(this)">
+          <!-- Quick action buttons directly below preview -->
+          <div class="studio-quick-btns">
+            <button onclick="studioResetPos()" class="studio-qbtn">⤢ إعادة</button>
+            <button onclick="studioRotate(-15)" class="studio-qbtn">↺ −15°</button>
+            <button onclick="studioRotate(15)"  class="studio-qbtn">↻ +15°</button>
+            <button onclick="studioClear()"     class="studio-qbtn studio-qbtn-danger">✕ مسح</button>
           </div>
 
-          <!-- Position & Scale -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">الموضع</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
-              <button class="studio-pos-btn active-pos" onclick="studioSetPos('chest',this)">صدر</button>
-              <button class="studio-pos-btn" onclick="studioSetPos('center',this)">وسط</button>
-              <button class="studio-pos-btn" onclick="studioSetPos('full',this)">كامل</button>
+          <!-- CONTROLS — appear directly under preview on mobile -->
+          <div class="studio-controls-panel">
+
+            <!-- لون الطبعة -->
+            <div class="studio-ctrl-card">
+              <div class="studio-ctrl-label">🎨 لون الطبعة</div>
+              <div id="studio-colors" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
             </div>
 
-            <!-- الحجم الكلي -->
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">الحجم الكلي</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <input type="range" min="5" max="95" value="40" step="1" id="studio-scale"
-                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;accent-color:var(--red);"
-                oninput="studioOnScale(this)">
-              <span id="studio-scale-val" style="font-family:var(--font-num);font-size:0.95rem;color:var(--red);min-width:34px;text-align:center;">40%</span>
+            <!-- رفع تصميم -->
+            <div class="studio-ctrl-card">
+              <div class="studio-ctrl-label">📤 ارفع تصميمك</div>
+              <div onclick="document.getElementById('studio-file').click()" class="studio-upload-drop" id="studio-upload-drop">
+                <div style="font-size:2rem;opacity:0.4;">⬆</div>
+                <div style="font-size:0.85rem;color:var(--muted);">اضغط لرفع <strong style="color:var(--white)">PNG / JPG</strong></div>
+                <div id="studio-upload-name" style="font-size:0.75rem;color:var(--red);margin-top:4px;display:none;"></div>
+              </div>
+              <input type="file" id="studio-file" accept="image/*" style="display:none" onchange="studioOnFile(this)">
             </div>
 
-            <!-- العرض -->
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">↔ العرض</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <input type="range" min="5" max="95" value="40" step="1" id="studio-scale-w"
-                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;accent-color:var(--red);"
-                oninput="studioOnScaleW(this)">
-              <span id="studio-scale-w-val" style="font-family:var(--font-num);font-size:0.95rem;color:var(--red);min-width:34px;text-align:center;">40%</span>
+            <!-- الموضع -->
+            <div class="studio-ctrl-card">
+              <div class="studio-ctrl-label">📍 الموضع</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
+                <button class="studio-pos-btn active-pos" onclick="studioSetPos('chest',this)">صدر</button>
+                <button class="studio-pos-btn" onclick="studioSetPos('center',this)">وسط</button>
+                <button class="studio-pos-btn" onclick="studioSetPos('full',this)">كامل</button>
+              </div>
+
+              <!-- Sliders — touch-friendly height -->
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">الحجم الكلي</span>
+                <input type="range" min="5" max="95" value="40" step="1" id="studio-scale" class="studio-range" oninput="studioOnScale(this)">
+                <span id="studio-scale-val" class="studio-slider-val">40%</span>
+              </div>
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">↔ عرض</span>
+                <input type="range" min="5" max="95" value="40" step="1" id="studio-scale-w" class="studio-range" oninput="studioOnScaleW(this)">
+                <span id="studio-scale-w-val" class="studio-slider-val">40%</span>
+              </div>
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">↕ طول</span>
+                <input type="range" min="5" max="95" value="40" step="1" id="studio-scale-h" class="studio-range" oninput="studioOnScaleH(this)">
+                <span id="studio-scale-h-val" class="studio-slider-val">40%</span>
+              </div>
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">⟷ يمين/يسار</span>
+                <input type="range" min="-40" max="40" value="0" step="1" id="studio-offset-x" class="studio-range" oninput="studioOnOffsetX(this)">
+                <span id="studio-offset-x-val" class="studio-slider-val">0%</span>
+              </div>
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">⟸ فوق/تحت</span>
+                <input type="range" min="-40" max="40" value="0" step="1" id="studio-offset-y" class="studio-range" oninput="studioOnOffsetY(this)">
+                <span id="studio-offset-y-val" class="studio-slider-val">0%</span>
+              </div>
+              <div class="studio-slider-row">
+                <span class="studio-slider-lbl">↻ تدوير</span>
+                <input type="range" min="-180" max="180" value="0" step="1" id="studio-rotate-slider" class="studio-range" oninput="studioOnRotateSlider(this)">
+                <span id="studio-rotate-val" class="studio-slider-val">0°</span>
+              </div>
+              <button onclick="studioResetControls()" class="studio-reset-btn">⤢ إعادة تعيين كل شيء</button>
             </div>
 
-            <!-- الطول -->
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">↕ الطول</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <input type="range" min="5" max="95" value="40" step="1" id="studio-scale-h"
-                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;accent-color:var(--red);"
-                oninput="studioOnScaleH(this)">
-              <span id="studio-scale-h-val" style="font-family:var(--font-num);font-size:0.95rem;color:var(--red);min-width:34px;text-align:center;">40%</span>
+            <!-- المقاس -->
+            <div class="studio-ctrl-card">
+              <div class="studio-ctrl-label">📐 المقاس</div>
+              <div id="studio-sizes" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
             </div>
 
-            <!-- يمين / يسار -->
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">⟷ يمين / يسار</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <input type="range" min="-40" max="40" value="0" step="1" id="studio-offset-x"
-                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;accent-color:var(--red);"
-                oninput="studioOnOffsetX(this)">
-              <span id="studio-offset-x-val" style="font-family:var(--font-num);font-size:0.95rem;color:var(--red);min-width:38px;text-align:center;">0%</span>
+            <!-- المكتبة -->
+            <div class="studio-ctrl-card">
+              <div class="studio-ctrl-label">🖼 اختر من المكتبة</div>
+              <div id="studio-lib" class="studio-lib-grid"></div>
             </div>
 
-            <!-- فوق / تحت -->
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">⟸ فوق / تحت</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-              <input type="range" min="-40" max="40" value="0" step="1" id="studio-offset-y"
-                style="-webkit-appearance:none;flex:1;height:3px;background:var(--border);border-radius:2px;outline:none;accent-color:var(--red);"
-                oninput="studioOnOffsetY(this)">
-              <span id="studio-offset-y-val" style="font-family:var(--font-num);font-size:0.95rem;color:var(--red);min-width:38px;text-align:center;">0%</span>
+            <!-- السعر + الطلب -->
+            <div class="studio-ctrl-card studio-order-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <span style="font-size:0.85rem;color:var(--muted);">السعر الكلي</span>
+                <span id="studio-price-display" style="font-family:var(--font-num);font-size:1.6rem;color:var(--red);">— د.ع</span>
+              </div>
+              <button onclick="studioOrder()" class="studio-order-btn">اطلب الآن ✦</button>
             </div>
 
-            <!-- زر إعادة تعيين -->
-            <button onclick="studioResetControls()"
-              style="width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font-body);font-size:0.8rem;cursor:pointer;transition:all 0.2s;margin-top:4px;"
-              onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'"
-              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-              ⤢ إعادة الموضع
-            </button>
-          </div>
-
-          <!-- Size -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;">المقاس</div>
-            <div id="studio-sizes" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-          </div>
-
-          <!-- Price + CTA -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-              <span style="font-size:0.8rem;color:var(--muted);">السعر الكلي</span>
-              <span id="studio-price-display" style="font-family:var(--font-num);font-size:1.5rem;color:var(--red);">— د.ع</span>
-            </div>
-            <button onclick="studioOrder()"
-              style="width:100%;padding:15px;background:var(--red);color:white;border:none;border-radius:10px;font-family:var(--font-display);font-size:1.3rem;letter-spacing:3px;cursor:pointer;transition:all 0.25s;"
-              onmouseover="this.style.background='#e74c3c';this.style.transform='translateY(-2px)'"
-              onmouseout="this.style.background='var(--red)';this.style.transform='translateY(0)'">
-              اطلب الآن ✦
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-
-
+          </div><!-- end studio-controls-panel -->
+        </div><!-- end studio-preview-col -->
+      </div><!-- end studio-layout -->
     </div>
   </div>
 </section>
 
 <style>
-.studio-pos-btn{padding:8px 0;background:var(--deep);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font-body);font-size:0.78rem;cursor:pointer;transition:all 0.2s;text-align:center;}
-.studio-pos-btn:hover{border-color:var(--red);color:var(--white);}
-.active-pos{border-color:var(--red)!important;background:rgba(192,57,43,0.1)!important;color:var(--white)!important;}
-#studio-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--red);border-radius:50%;cursor:pointer;}
-@media(max-width:900px){
-  #studio-grid{grid-template-columns:1fr!important;}
-  #studio-stage{width:240px;height:296px;}
+/* ============================================================
+   PRINT STUDIO — Mobile-first Responsive Redesign
+   ============================================================ */
+
+/* Prevent page zoom during pinch-to-zoom on studio */
+#print-studio { touch-action: pan-y; }
+
+/* ── Layout ── */
+.studio-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Preview Column ── */
+.studio-preview-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Stage Wrapper ──
+   Uses padding-bottom trick for a responsive square-ish ratio.
+   overflow: visible so design can hang outside shirt while still visible.
+   The print zone clip is logical/visual only via the guide overlay.        */
+.studio-stage-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  /* aspect-ratio kept via padding trick for older iOS Safari support */
+  padding-bottom: min(460px, 120%);
+  height: 0;
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: visible;   /* ← key fix: no clipping */
+  user-select: none;
+  -webkit-user-select: none;
+  margin: 0 auto;
+  isolation: isolate;
+}
+
+.studio-shirt-base {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 16px;
+  z-index: 1;
+  pointer-events: none;
+  transition: filter 0.3s;
+  will-change: transform; /* GPU layer */
+}
+
+/* Design overlay — sits above shirt */
+.studio-design-overlay {
+  position: absolute;
+  /* centered by default; JS will apply transform */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+.studio-design-img {
+  display: block;
+  width: 120px;   /* default; JS resizes via inline style */
+  height: auto;
+  pointer-events: none;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
+
+.studio-design-emoji {
+  font-size: 80px;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Printable zone dashed guide */
+.studio-print-zone {
+  position: absolute;
+  /* chest area by default: ~25% top, 20% sides, 60% height */
+  top: 20%;
+  left: 18%;
+  right: 18%;
+  height: 55%;
+  border: 1.5px dashed rgba(192, 57, 43, 0.4);
+  border-radius: 8px;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+/* Drag capture layer — fills stage, above everything, captures touch */
+.studio-drag-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: grab;
+  touch-action: none;   /* ← key: prevents browser pan/zoom on this element */
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 16px;
+}
+.studio-drag-layer:active { cursor: grabbing; }
+
+/* Hint text */
+.studio-hint {
+  font-size: 0.74rem;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-top: 10px;
+  padding: 0 12px;
+  line-height: 1.5;
+}
+
+/* Quick action buttons */
+.studio-quick-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 380px;
+}
+.studio-qbtn {
+  flex: 1;
+  min-width: 70px;
+  padding: 9px 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.studio-qbtn:active { border-color: var(--red); color: var(--white); transform: scale(0.96); }
+.studio-qbtn-danger:active { border-color: #e74c3c; color: #e74c3c; }
+
+/* ── Controls Panel ── directly below preview, no scroll needed */
+.studio-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 18px;
+}
+
+/* Cards */
+.studio-ctrl-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.studio-ctrl-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* Upload drop zone */
+.studio-upload-drop {
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.studio-upload-drop:active {
+  border-color: var(--red);
+  background: rgba(192,57,43,0.06);
+}
+
+/* Sliders — large touch targets */
+.studio-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.studio-slider-lbl {
+  font-size: 0.7rem;
+  color: var(--muted);
+  min-width: 72px;
+  text-align: right;
+  direction: rtl;
+}
+.studio-range {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  accent-color: var(--red);
+  /* Taller click/touch area */
+  padding: 8px 0;
+  cursor: pointer;
+}
+.studio-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--red);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--deep);
+  box-shadow: 0 0 6px rgba(192,57,43,0.5);
+}
+.studio-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--red);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--deep);
+}
+.studio-slider-val {
+  font-family: var(--font-num);
+  font-size: 0.88rem;
+  color: var(--red);
+  min-width: 38px;
+  text-align: center;
+}
+
+/* Library grid */
+.studio-lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) var(--border);
+  padding: 2px;
+}
+
+/* Reset btn */
+.studio-reset-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.studio-reset-btn:active { border-color: var(--red); color: var(--white); }
+
+/* Order card */
+.studio-order-card {
+  position: sticky;
+  bottom: 12px;
+  z-index: 20;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+}
+.studio-order-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.studio-order-btn:active { background: #e74c3c; transform: scale(0.98); }
+
+/* Position buttons */
+.studio-pos-btn {
+  padding: 10px 0;
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.studio-pos-btn:active { border-color: var(--red); color: var(--white); }
+.active-pos {
+  border-color: var(--red) !important;
+  background: rgba(192,57,43,0.1) !important;
+  color: var(--white) !important;
+}
+
+/* Hidden export canvas */
+#studio-canvas { display: none; }
+
+/* ── Desktop two-column layout ── */
+@media (min-width: 860px) {
+  .studio-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 28px;
+  }
+  .studio-preview-col {
+    flex: 1;
+    position: sticky;
+    top: 90px;
+  }
+  .studio-controls-panel {
+    width: 340px;
+    flex-shrink: 0;
+    margin-top: 0;
+    max-width: none;
+  }
+  .studio-order-card {
+    position: static;
+    box-shadow: none;
+  }
+  .studio-stage-wrapper {
+    max-width: 100%;
+    padding-bottom: min(460px, 110%);
+  }
+  .studio-upload-drop:hover {
+    border-color: var(--red);
+    background: rgba(192,57,43,0.04);
+  }
+  .studio-qbtn:hover { border-color: var(--red); color: var(--white); }
+  .studio-reset-btn:hover { border-color: var(--red); color: var(--white); }
+  .studio-order-btn:hover { background: #e74c3c; transform: translateY(-2px); }
 }
 </style>
 
 <!-- ======= PRINT ORDER MODAL ======= -->
-<div id="print-order-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.92);z-index:9500;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
+<div id="print-order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
   <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:480px;animation:modalIn 0.3s ease;position:relative;">
     <button onclick="document.getElementById('print-order-modal').style.display='none'"
       style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.85rem;transition:all 0.2s;"
@@ -2248,105 +2522,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </footer>
 
-<!-- ======= EDIT PRINT PRODUCT MODAL ======= -->
-<div id="edit-print-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
-  <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:620px;position:relative;">
-    <button onclick="closeEditPrintModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
-    <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل تيشيرت الطبعة</h2>
-
-    <div class="form-group">
-      <label>اسم التيشيرت *</label>
-      <input type="text" id="ept-name" placeholder="مثال: تيشيرت أوفرسايز">
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div class="form-group">
-        <label>السعر (دينار) *</label>
-        <input type="number" id="ept-price" placeholder="25000">
-      </div>
-      <div class="form-group">
-        <label>السعر القديم (اختياري)</label>
-        <input type="number" id="ept-oldprice" placeholder="30000">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>نوع القماش</label>
-      <select id="ept-fabric">
-        <option value="">— اختر —</option>
-        <option value="100% قطن">100% قطن</option>
-        <option value="بولستر">بولستر</option>
-        <option value="قطن بولستر">قطن بولستر</option>
-        <option value="أوفرسايز">أوفرسايز</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>وصف (اختياري)</label>
-      <textarea id="ept-desc" placeholder="وصف مختصر..."></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>المقاسات المتاحة</label>
-      <div class="size-checkboxes">
-        <label><input type="checkbox" id="ept-size-XS" value="XS"> XS</label>
-        <label><input type="checkbox" id="ept-size-S" value="S"> S</label>
-        <label><input type="checkbox" id="ept-size-M" value="M"> M</label>
-        <label><input type="checkbox" id="ept-size-L" value="L"> L</label>
-        <label><input type="checkbox" id="ept-size-XL" value="XL"> XL</label>
-        <label><input type="checkbox" id="ept-size-XXL" value="XXL"> XXL</label>
-        <label><input type="checkbox" id="ept-size-3XL" value="3XL"> 3XL</label>
-      </div>
-    </div>
-
-
-
-    <div class="form-group">
-      <label>الصور الحالية (يمكنك تعديل الروابط أو حذف صورة)</label>
-      <div id="ept-images-list"></div>
-      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
-        <button type="button" onclick="addEptImageRow()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ إضافة رابط صورة</button>
-        <label style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-          📤 رفع صورة جديدة
-          <input type="file" accept="image/*" onchange="uploadEptImage(this)" style="display:none;">
-        </label>
-      </div>
-    </div>
-
-    <button id="ept-save-btn" onclick="saveEditPrintProduct()" class="btn-primary" style="margin-top:10px;">💾 حفظ التعديلات</button>
-    <button onclick="closeEditPrintModal()" class="btn-secondary">إلغاء</button>
-  </div>
-</div>
-
-<!-- ======= EDIT SUBCAT MODAL ======= -->
-<div id="edit-subcat-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
-  <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:420px;position:relative;">
-    <button onclick="closeEditSubcatModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
-    <h2 style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل القسم الفرعي</h2>
-    <input type="hidden" id="esc-docid">
-    <div class="form-group">
-      <label>اسم القسم *</label>
-      <input type="text" id="esc-label" placeholder="مثال: هوديات">
-    </div>
-    <div class="form-group">
-      <label>الأيقونة (إيموجي)</label>
-      <input type="text" id="esc-icon" placeholder="📁" style="font-size:1.4rem;text-align:center;">
-    </div>
-    <button id="esc-save-btn" onclick="saveEditSubcat()" class="btn-primary" style="margin-top:10px;">💾 حفظ</button>
-    <button onclick="closeEditSubcatModal()" class="btn-secondary">إلغاء</button>
-  </div>
-</div>
-
 <!-- ======= CART MODAL ======= -->
 <div id="cart-modal" style="
-  display:none; position:fixed; top:0; right:0; bottom:0; left:0;
+  display:none; position:fixed; inset:0;
   background:rgba(0,0,0,0.92);
   z-index:9000; overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
   padding:40px 20px;
+  align-items:flex-start; justify-content:center;
 ">
   <div style="
     background:#111; border:1px solid #c0392b;
     border-radius:12px; padding:36px;
     width:100%; max-width:550px;
-    position:relative; animation:modalIn 0.3s ease; margin:0 auto;
+    position:relative; animation:modalIn 0.3s ease;
   ">
     <button onclick="closeCart()" style="
       position:absolute; top:16px; left:16px;
@@ -2385,20 +2573,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div style="margin-bottom:20px">
         <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">ملاحظات (اختياري)</label>
         <textarea id="cart-note" placeholder="أي ملاحظات..." style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl;height:80px;resize:vertical"></textarea>
-      </div>
-
-      <!-- كوبون الخصم للسلة -->
-      <div style="margin-bottom:20px;">
-        <div style="color:var(--muted);font-size:0.82rem;margin-bottom:8px;font-weight:600;">🎟️ كوبون خصم (اختياري)</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="coupon-input-cart" placeholder="أدخل كود الخصم"
-            style="flex:1;background:#181818;border:1px solid #333;border-radius:8px;padding:10px 14px;color:white;font-family:var(--font-body);font-size:0.9rem;direction:rtl;"
-            onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='#333'">
-          <button onclick="applyCouponCart()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:0 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;font-weight:700;transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
-            تطبيق
-          </button>
-        </div>
-        <div id="coupon-result-cart" style="margin-top:8px;font-size:0.82rem;"></div>
       </div>
 
       <button onclick="sendCartToTelegram()" style="
@@ -2533,51 +2707,6 @@ async function deleteSubcat(docId) {
   await loadSubcats();
 }
 
-async function updateSubcatInFirebase(docId, label, icon) {
-  await fetch(`${FS_BASE}/subcats/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=label&updateMask.fieldPaths=icon`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fields: {
-      label: { stringValue: label },
-      icon:  { stringValue: icon }
-    }})
-  });
-  await loadSubcats();
-}
-
-function openEditSubcatModal(docId) {
-  // Find the subcat across all parents
-  let sc = null;
-  for (const parent of ['men','women']) {
-    sc = (SUBCATS[parent] || []).find(s => s._docId === docId);
-    if (sc) break;
-  }
-  if (!sc) return;
-  document.getElementById('esc-docid').value = docId;
-  document.getElementById('esc-label').value = sc.label || '';
-  document.getElementById('esc-icon').value  = sc.icon  || '📁';
-  document.getElementById('edit-subcat-modal').style.display = 'block';
-}
-
-async function saveEditSubcat() {
-  const docId = document.getElementById('esc-docid').value;
-  const label = document.getElementById('esc-label').value.trim();
-  const icon  = document.getElementById('esc-icon').value.trim() || '📁';
-  if (!label) { showToast('❌ أدخل اسم القسم'); return; }
-  const btn = document.getElementById('esc-save-btn');
-  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
-  try {
-    await updateSubcatInFirebase(docId, label, icon);
-    document.getElementById('edit-subcat-modal').style.display = 'none';
-    showToast('✅ تم تعديل القسم');
-  } catch(e) { showToast('❌ خطأ في الحفظ'); }
-  finally { btn.disabled = false; btn.textContent = '💾 حفظ'; }
-}
-
-function closeEditSubcatModal() {
-  document.getElementById('edit-subcat-modal').style.display = 'none';
-}
-
 function renderSubcatAdminList() {
   ['men', 'women'].forEach(parent => {
     const list = document.getElementById(`sc-list-${parent}`);
@@ -2596,7 +2725,6 @@ function renderSubcatAdminList() {
             ${products.filter(p => p.cat === parent && p.subcat === s.value).length} منتج مرتبط
           </div>
         </div>
-        <button onclick="openEditSubcatModal('${s._docId}')" style="background:transparent;border:1px solid #c0392b;color:#c0392b;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">✏️</button>
         <button onclick="deleteSubcat('${s._docId}')" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='#444';this.style.color='#888'">🗑</button>
       </div>
     `).join('');
@@ -2659,7 +2787,7 @@ async function hashPassword(str) {
 
 function openAdmin() {
   const pm = document.getElementById('password-modal');
-  pm.style.display = 'block';
+  pm.style.display = 'flex';
   document.getElementById('admin-password-input').value = '';
   document.getElementById('pass-error').style.display = 'none';
   setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
@@ -2689,37 +2817,6 @@ function closeAdmin() {
 // ============ COUPONS ============
 let appliedCoupon = null;
 let appliedCouponCOD = null;
-let appliedCouponCart = null;
-
-async function applyCouponCart() {
-  const code = document.getElementById('coupon-input-cart').value.trim().toUpperCase();
-  const resultEl = document.getElementById('coupon-result-cart');
-  if (!code) { resultEl.innerHTML = '<span style="color:#e74c3c;">❌ أدخل كود الخصم</span>'; return; }
-
-  const coupons = await loadCoupons();
-  const coupon = coupons.find(c => c.code === code);
-
-  if (!coupon) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">❌ الكود غير صحيح</span>';
-    appliedCouponCart = null;
-    return;
-  }
-  if (coupon.usesLeft <= 0) {
-    resultEl.innerHTML = '<span style="color:#e74c3c;">❌ هذا الكوبون منتهي</span>';
-    appliedCouponCart = null;
-    return;
-  }
-
-  appliedCouponCart = coupon;
-  const total = cart.reduce((s, x) => s + x.price * x.qty, 0) + 3000;
-  const discounted = Math.round(total * (1 - coupon.discount / 100));
-  resultEl.innerHTML = `
-    <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:10px 14px;margin-top:4px;">
-      <div style="color:#2ecc71;font-weight:700;margin-bottom:4px;">✅ تم تطبيق كوبون ${coupon.code}</div>
-      <div style="color:var(--muted);font-size:0.8rem;">خصم ${coupon.discount}% على الإجمالي</div>
-      <div style="color:#2ecc71;font-size:1.1rem;font-weight:700;margin-top:6px;">السعر بعد الخصم: <span style="font-size:1.3rem;">${discounted.toLocaleString()} د.ع</span></div>
-    </div>`;
-}
 
 async function loadCoupons() {
   try {
@@ -2852,15 +2949,15 @@ async function applyCouponCOD() {
 }
 
 async function useCoupon(coupon) {
+  // اقرأ القيمة الحالية من Firebase مباشرة (مو من الكاش)
   try {
     const res = await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`);
-    if (!res.ok) return;
     const data = await res.json();
     const currentUses = parseInt(data.fields?.usesLeft?.integerValue || data.fields?.usesLeft?.doubleValue || 0);
     const newUses = currentUses - 1;
 
     if (newUses <= 0) {
-      // انتهت الاستخدامات — احذف الكوبون تماماً
+      // انتهت الاستخدامات — احذف الكوبون
       await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
     } else {
       // نقص واحد وحفظ
@@ -2875,20 +2972,18 @@ async function useCoupon(coupon) {
 
 function calcDiscountedTotal(originalText, coupon) {
   if (!coupon) return originalText;
-  // استخرج أكبر رقم من النص — هو الإجمالي مع التوصيل
-  const allNums = [...originalText.matchAll(/([\d,]+)\s*د\.ع/g)]
-    .map(m => parseInt(m[1].replace(/,/g, '')))
-    .filter(n => n > 0);
-  if (allNums.length === 0) return originalText;
-  const original = Math.max(...allNums); // أكبر رقم = الإجمالي
+  // استخرج المبلغ الإجمالي من النص
+  const match = originalText.match(/الإجمالي[^0-9]*([\d,]+)/);
+  if (!match) return originalText;
+  const original = parseInt(match[1].replace(/,/g, ''));
   const saved = Math.round(original * coupon.discount / 100);
   const discounted = original - saved;
   return originalText +
     `\n\n🎟️ كوبون الخصم: ${coupon.code}` +
     `\n💸 نسبة الخصم: ${coupon.discount}%` +
-    `\n💵 الإجمالي قبل الخصم: ${original.toLocaleString()} د.ع` +
-    `\n✂️ المبلغ الموفّر: -${saved.toLocaleString()} د.ع` +
-    `\n✅ السعر النهائي بعد الخصم: ${discounted.toLocaleString()} د.ع`;
+    `\n💵 المبلغ الأصلي: ${original.toLocaleString()} د.ع` +
+    `\n✂️ الخصم: -${saved.toLocaleString()} د.ع` +
+    `\n✅ السعر بعد الخصم: ${discounted.toLocaleString()} د.ع`;
 }
 
 function switchAdminTab(tab) {
@@ -3352,15 +3447,15 @@ function renderProducts() {
     <div class="product-card" id="card-${p.id}" onclick="openOrder(${p.id})">
       <div class="product-img-wrap" style="position:relative;">
         <div id="pimg-track-${p.id}"
-             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:100%;min-height:100%;direction:ltr;-webkit-transform:translateZ(0);"
+             style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;height:220px;min-height:220px;direction:ltr;-webkit-transform:translateZ(0);"
              onscroll="event.stopPropagation();onProductScroll(event,${p.id},${p.images.length})">
           ${p.images.map((img, i) => `
-            <div style="min-width:100%;width:100%;scroll-snap-align:start;-webkit-scroll-snap-align:start;flex-shrink:0;height:100%;overflow:hidden;background:#111;position:relative;">
+            <div style="min-width:100%;width:100%;scroll-snap-align:start;-webkit-scroll-snap-align:start;flex-shrink:0;height:220px;min-height:220px;overflow:hidden;background:#111;position:relative;">
               <img ${i === 0 ? `src="${optimizeImg(img) || ''}"` : `src="" data-src="${optimizeImg(img) || ''}"`}
                    class="card-main-img lazy-img"
                    loading="${i === 0 ? 'eager' : 'lazy'}"
                    style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;transition:opacity 0.3s;${i===0?'':'opacity:0;'}"
-                   onerror="this.src='https://via.placeholder.com/400x400/181818/555?text=Product'">
+                   onerror="this.src='https://via.placeholder.com/400x300/181818/555?text=Product'">
             </div>
           `).join('')}
         </div>
@@ -3376,18 +3471,19 @@ function renderProducts() {
         ` : ''}
       </div>
       <div class="product-body">
-        <div class="product-category">${catLabel(p.cat)}${p.subcat && subcatLabels[p.subcat] ? ` · ${subcatIcons[p.subcat]} ${subcatLabels[p.subcat]}` : ''}</div>
+        <div class="product-category">${catLabel(p.cat)}${p.subcat && subcatLabels[p.subcat] ? ` · ${subcatLabels[p.subcat]}` : ''}</div>
         <div class="product-name">${p.name}</div>
+        ${p.desc ? `<div style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">${p.desc}</div>` : ''}
         <div class="product-sizes">
-          ${p.sizes.slice(0,4).map(s => `<span class="size-tag">${s}</span>`).join('')}${p.sizes.length>4?`<span class="size-tag">+${p.sizes.length-4}</span>`:''}
+          ${p.sizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
         </div>
         <div class="product-footer">
           <div>
             <div class="product-price">${p.price.toLocaleString()} <span>د.ع</span></div>
-            ${p.oldPrice ? `<div style="color:#555;font-size:0.72rem;text-decoration:line-through;margin-top:1px">${p.oldPrice.toLocaleString()} د.ع</div>` : ''}
+            ${p.oldPrice ? `<div style="color:#666;font-size:0.82rem;text-decoration:line-through;margin-top:2px">${p.oldPrice.toLocaleString()} د.ع</div>` : ''}
           </div>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <button class="btn-order" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:8px 10px;" onclick="event.stopPropagation();shareProduct(${p.id})" title="مشاركة">📤</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn-order" style="background:transparent;border:1px solid #333;padding:10px 12px;" onclick="event.stopPropagation();shareProduct(${p.id})" title="مشاركة">📤</button>
             <button class="btn-order" onclick="event.stopPropagation();openOrder(${p.id})">اطلب ✈️</button>
           </div>
         </div>
@@ -3410,49 +3506,9 @@ function shareProduct(id) {
 }
 
 // ============ EDIT PRODUCT ============
-let editProductImages = [];
-
-function renderEditImages(imgs) {
-  const wrap = document.getElementById('edit-images-list');
-  if (!wrap) return;
-  wrap.innerHTML = imgs.map((url, i) => `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <img src="${url||''}" onerror="this.src=''" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);background:#111;flex-shrink:0;">
-      <input type="text" value="${url||''}" placeholder="رابط الصورة"
-        oninput="editProductImages[${i}]=this.value;this.previousElementSibling.src=this.value"
-        style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-family:var(--font-body);font-size:0.82rem;direction:ltr;"
-        onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
-      <button onclick="removeEditImage(${i})" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:0.85rem;flex-shrink:0;" onmouseover="this.style.color='var(--red)';this.style.borderColor='var(--red)'" onmouseout="this.style.color='#888';this.style.borderColor='#444'">✖</button>
-    </div>
-  `).join('');
-}
-
-function removeEditImage(idx) {
-  editProductImages.splice(idx, 1);
-  renderEditImages(editProductImages);
-}
-
-function addEditImageRow() {
-  editProductImages.push('');
-  renderEditImages(editProductImages);
-}
-
-async function uploadEditImage(inp) {
-  const file = inp.files[0]; if (!file) return;
-  showToast('⏳ جاري رفع الصورة...');
-  try {
-    const url = await uploadToCloudinary(file);
-    editProductImages.push(url);
-    renderEditImages(editProductImages);
-    showToast('✅ تم رفع الصورة');
-  } catch(e) { showToast('❌ فشل رفع الصورة'); }
-  inp.value = '';
-}
-
 function openEdit(docId) {
   const p = products.find(x => x._docId === docId);
   if (!p) return;
-  editProductImages = [...(p.images || [])];
   document.getElementById('edit-docid').value = docId;
   document.getElementById('edit-name').value = p.name;
   document.getElementById('edit-cat').value = p.cat;
@@ -3463,14 +3519,13 @@ function openEdit(docId) {
   document.querySelectorAll('#edit-sizes input[type=checkbox]').forEach(cb => {
     cb.checked = p.sizes.includes(cb.value);
   });
-  renderEditImages(editProductImages);
   // Subcat
   updateEditSubcatOptions();
   setTimeout(() => {
     const sel = document.getElementById('edit-subcat');
     if (sel) sel.value = p.subcat || '';
   }, 50);
-  document.getElementById('edit-modal').style.display = 'block';
+  document.getElementById('edit-modal').style.display = 'flex';
 }
 
 function updateEditSubcatOptions() {
@@ -3502,13 +3557,12 @@ async function saveEdit() {
   const badge = document.getElementById('edit-badge').value;
   const subcat = document.getElementById('edit-subcat')?.value || '';
   const sizes = Array.from(document.querySelectorAll('#edit-sizes input[type=checkbox]')).filter(c => c.checked).map(c => c.value);
-  const images = editProductImages.filter(u => u && u.trim());
 
   if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً'); return; }
 
   const p = products.find(x => x._docId === docId);
-  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, subcat, sizes, images: images.length ? images : (p.images || []) };
+  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, subcat, sizes };
   delete updatedProduct._docId;
 
   showToast('⏳ جاري الحفظ...');
@@ -3697,9 +3751,6 @@ async function sendToTelegram() {
 
   if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
 
-  const deliveryCost = 3000;
-  const subtotal = selectedProduct.price * parseInt(qty);
-  const grandTotal = subtotal + deliveryCost;
   const text =
     `🛒 *طلب جديد - باكي ستور*\n\n` +
     `👤 الاسم: ${name}\n` +
@@ -3710,10 +3761,12 @@ async function sendToTelegram() {
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
     `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `🚚 سعر التوصيل: ${deliveryCost.toLocaleString()} د.ع\n` +
-    `💵 الإجمالي مع التوصيل: ${grandTotal.toLocaleString()} د.ع` +
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n🌐 الموقع: https://bakiwear.com\n📸 انستغرام: https://www.instagram.com/bakibeinty`;
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   // Show loading
   const btn = document.querySelector('.telegram-btn');
@@ -3768,9 +3821,6 @@ async function orderNowDirect() {
   if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
 
   const variantIdx = selectedProduct._selectedImgIdx || 0;
-  const deliveryCost2 = 3000;
-  const subtotal2 = selectedProduct.price * parseInt(qty);
-  const grandTotal2 = subtotal2 + deliveryCost2;
   const text =
     `🛒 *طلب جديد - باكي ستور*\n\n` +
     `👤 الاسم: ${name}\n` +
@@ -3782,14 +3832,42 @@ async function orderNowDirect() {
     `📏 الحجم: ${selectedSize}\n` +
     `🔢 الكمية: ${qty}\n` +
     `💰 سعر القطعة: ${selectedProduct.price.toLocaleString()} د.ع\n` +
-    `🚚 سعر التوصيل: ${deliveryCost2.toLocaleString()} د.ع\n` +
-    `💵 الإجمالي مع التوصيل: ${grandTotal2.toLocaleString()} د.ع` +
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 الإجمالي مع التوصيل: ${(selectedProduct.price * parseInt(qty) + 3000).toLocaleString()} د.ع` +
     (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n🌐 الموقع: https://bakiwear.com\n📸 انستغرام: https://www.instagram.com/bakibeinty`;
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
-  // افتح مودال الدفع دائماً
-  const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
-  openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
+  // لو نظام الدفع مفعّل — افتح مودال الدفع
+  if (paymentSettings.enabled) {
+    const total = (selectedProduct.price * parseInt(qty) + 3000).toLocaleString() + ' د.ع';
+    openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
+    return;
+  }
+
+  // بدون نظام دفع — أرسل مباشرة
+  const photoUrl = selectedProduct.images[variantIdx] || selectedProduct.images[0] || '';
+  const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
+
+  try {
+    const res = await sendOrderWithPhoto(text, photoUrl);
+    const data = await (res.json ? res.json() : res);
+    if (data.ok) {
+      showToast('✅ تم إرسال طلبك بنجاح!');
+      const oTotal = (selectedProduct.price * parseInt(qty));
+      logEvent('order', { productId: String(selectedProduct.id), productName: selectedProduct.name, cat: selectedProduct.cat, total: String(oTotal) });
+      trackEvent('purchase', 'order', selectedProduct.name, oTotal);
+      closeOrder();
+    } else {
+      showToast('❌ خطأ في الإرسال');
+    }
+  } catch(e) {
+    showToast('❌ تعذر الاتصال');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✈️ اطلب الآن'; }
+  }
 }
 
 // ============ CART ============
@@ -3819,7 +3897,7 @@ function updateCartCount() {
 }
 
 function openCart() {
-  document.getElementById('cart-modal').style.display = 'block';
+  document.getElementById('cart-modal').style.display = 'flex';
   renderCart();
 }
 
@@ -3885,8 +3963,6 @@ async function sendCartToTelegram() {
   if (cart.length === 0) { showToast('❗ السلة فارغة'); return; }
 
   const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
-  const deliveryCostCart = 3000;
-  const grandTotalCart = total + deliveryCostCart;
   const itemsText = cart.map(x => `  • ${x.name} | حجم: ${x.size} | كمية: ${x.qty} | ${(x.price * x.qty).toLocaleString()} د.ع`).join('\n');
 
   const text =
@@ -3895,36 +3971,30 @@ async function sendCartToTelegram() {
     `📞 الهاتف: ${phone}\n` +
     (address ? `📍 العنوان: ${address}\n` : '') +
     `\n📦 *المنتجات:*\n${itemsText}\n\n` +
-    `💰 مجموع المنتجات: ${total.toLocaleString()} د.ع\n` +
-    `🚚 سعر التوصيل: ${deliveryCostCart.toLocaleString()} د.ع\n` +
-    `💵 *الإجمالي مع التوصيل: ${grandTotalCart.toLocaleString()} د.ع*` +
+    `💰 *إجمالي المنتجات: ${total.toLocaleString()} د.ع*\n` +
+    `🚚 سعر التوصيل: 3,000 د.ع\n` +
+    `💳 *الإجمالي مع التوصيل: ${(total + 3000).toLocaleString()} د.ع*` +
     (note ? `\n📝 ملاحظات: ${note}` : '') +
-    `\n\n🌐 الموقع: https://bakiwear.com\n📸 انستغرام: https://www.instagram.com/bakibeinty`;
+    `\n\n━━━━━━━━━━━━━━━━━\n` +
+    `📸 انستغرام: https://www.instagram.com/bakibeinty\n` +
+    `🌐 الموقع: https://bakiwear.com/`;
 
   const btn = document.getElementById('cart-send-btn');
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
-  let finalText = calcDiscountedTotal(text, appliedCouponCart);
-
   try {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text: finalText, parse_mode: 'Markdown' })
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
     });
     const data = await res.json();
     if (data.ok) {
-      if (appliedCouponCart) { await useCoupon(appliedCouponCart); appliedCouponCart = null; }
       showToast('✅ تم إرسال طلبك بنجاح!');
       const cartTotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
       logEvent('cart_order', { total: String(cartTotal), itemCount: String(cart.length) });
       trackEvent('purchase', 'cart', 'cart_order', cartTotal);
-      // reset coupon UI
-      const ci = document.getElementById('coupon-input-cart');
-      const cr = document.getElementById('coupon-result-cart');
-      if (ci) ci.value = '';
-      if (cr) cr.innerHTML = '';
       clearCart();
       closeCart();
     } else {
@@ -4336,50 +4406,20 @@ let selectedPaymentMethod = null;
 let receiptBase64 = null;
 let pendingOrderData = null;
 
-let paymentSettingsLoaded = false;
-
-async function savePaymentSettings() {
+function savePaymentSettings() {
   paymentSettings.enabled = document.getElementById('pay-master')?.checked || false;
   ['cash','supercell','usdt','cod'].forEach(m => {
     paymentSettings[m].enabled = document.getElementById(`pay-${m}`)?.checked || false;
     if (m !== 'cod') paymentSettings[m].account = document.getElementById(`pay-${m}-account`)?.value || '';
   });
-  // حفظ في localStorage كنسخة احتياطية
   localStorage.setItem('baki_payment', JSON.stringify(paymentSettings));
-  // حفظ في Firebase حتى تعمل على كل الأجهزة
-  try {
-    await fetch(`${FS_BASE}/settings/payment?key=${FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: {
-        data: { stringValue: JSON.stringify(paymentSettings) }
-      }})
-    });
-  } catch(e) { console.warn('تعذر حفظ إعدادات الدفع في Firebase:', e); }
   updateToggleUI();
 }
 
-async function loadPaymentSettings() {
-  // أولاً: حاول تحميل من Firebase (يعمل على كل الأجهزة)
-  try {
-    const res = await fetch(`${FS_BASE}/settings/payment?key=${FIREBASE_API_KEY}`);
-    if (res.ok) {
-      const data = await res.json();
-      const raw = data.fields?.data?.stringValue;
-      if (raw) {
-        paymentSettings = JSON.parse(raw);
-        // حدّث localStorage أيضاً
-        localStorage.setItem('baki_payment', JSON.stringify(paymentSettings));
-      }
-    }
-  } catch(e) {
-    // إذا فشل Firebase، استخدم localStorage
-    const saved = localStorage.getItem('baki_payment');
-    if (saved) {
-      try { paymentSettings = JSON.parse(saved); } catch(e2) {}
-    }
-  }
-  // ضبط واجهة الأدمن
+function loadPaymentSettings() {
+  const saved = localStorage.getItem('baki_payment');
+  if (saved) paymentSettings = JSON.parse(saved);
+  // Set UI
   const master = document.getElementById('pay-master');
   if (master) master.checked = paymentSettings.enabled;
   ['cash','supercell','usdt','cod'].forEach(m => {
@@ -4391,7 +4431,6 @@ async function loadPaymentSettings() {
     }
   });
   updateToggleUI();
-  paymentSettingsLoaded = true;
 }
 
 function updateToggleUI() {
@@ -4441,7 +4480,7 @@ function openPaymentModal(orderData) {
 
   document.getElementById('payment-details').style.display = 'none';
   document.getElementById('payment-cod-confirm').style.display = 'none';
-  document.getElementById('payment-modal').style.display = 'block';
+  document.getElementById('payment-modal').style.display = 'flex';
 }
 
 function closePayment() {
@@ -4573,7 +4612,7 @@ async function sendOrderCOD() {
 updateCartCount();
 renderVideos();
 renderAdminVideoList();
-loadPaymentSettings(); // async — تحمّل الإعدادات من Firebase
+loadPaymentSettings();
 async function loadVideos() {
   try {
     const res = await fetch(`${FS_BASE}/videos?key=${FIREBASE_API_KEY}`);
@@ -4707,126 +4746,6 @@ async function deletePrintProductFromFirebase(docId) {
   await loadPrintProducts();
 }
 
-async function updatePrintProductInFirebase(docId, p) {
-  const body = {
-    fields: {
-      id: { integerValue: p.id },
-      name: { stringValue: p.name },
-      fabric: { stringValue: p.fabric || '' },
-      printColors: { arrayValue: { values: (p.printColors||[]).map(c=>({stringValue:c})) } },
-      price: { integerValue: p.price },
-      oldPrice: p.oldPrice ? { integerValue: p.oldPrice } : { nullValue: null },
-      desc: { stringValue: p.desc || '' },
-      sizes: { arrayValue: { values: p.sizes.map(s=>({stringValue:s})) } },
-      images: { arrayValue: { values: p.images.map(i=>({stringValue:i})) } }
-    }
-  };
-  const updateMask = ['name','fabric','price','oldPrice','desc','sizes','images','printColors']
-    .map(f => `updateMask.fieldPaths=${f}`).join('&');
-  await fetch(`${FS_BASE}/printProducts/${docId}?key=${FIREBASE_API_KEY}&${updateMask}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  await loadPrintProducts();
-}
-
-// ---- Edit Print Product Modal ----
-let editPtDocId = null;
-let editPtProduct = null;
-
-function openEditPrintModal(docId) {
-  const p = printProducts.find(x => x._docId === docId);
-  if (!p) return;
-  editPtDocId = docId;
-  editPtProduct = { ...p, images: [...p.images] };
-
-  document.getElementById('ept-name').value    = p.name || '';
-  document.getElementById('ept-price').value   = p.price || '';
-  document.getElementById('ept-oldprice').value = p.oldPrice || '';
-  document.getElementById('ept-fabric').value  = p.fabric || '';
-  document.getElementById('ept-desc').value    = p.desc || '';
-
-  // Images list
-  renderEptImages(editPtProduct.images);
-
-  // Sizes checkboxes
-  ['XS','S','M','L','XL','XXL','3XL'].forEach(sz => {
-    const cb = document.getElementById(`ept-size-${sz}`);
-    if (cb) cb.checked = (p.sizes || []).includes(sz);
-  });
-
-  // Print colors - not used
-  document.getElementById('edit-print-modal').style.display = 'block';
-}
-
-function renderEptImages(imgs) {
-  const wrap = document.getElementById('ept-images-list');
-  if (!wrap) return;
-  wrap.innerHTML = imgs.map((url, i) => `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <img src="${url||''}" onerror="this.src=''" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);background:#111;">
-      <input type="text" value="${url||''}" placeholder="رابط الصورة" oninput="editPtProduct.images[${i}]=this.value;this.previousElementSibling.src=this.value"
-        style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-family:var(--font-body);font-size:0.82rem;direction:ltr;"
-        onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
-      <button onclick="removeEptImage(${i})" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:0.8rem;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#888'">✖</button>
-    </div>
-  `).join('');
-}
-
-function removeEptImage(idx) {
-  editPtProduct.images.splice(idx, 1);
-  renderEptImages(editPtProduct.images);
-}
-
-function addEptImageRow() {
-  editPtProduct.images.push('');
-  renderEptImages(editPtProduct.images);
-}
-
-async function uploadEptImage(inp) {
-  const file = inp.files[0]; if (!file) return;
-  showToast('⏳ جاري رفع الصورة...');
-  try {
-    const url = await uploadToCloudinary(file);
-    editPtProduct.images.push(url);
-    renderEptImages(editPtProduct.images);
-    showToast('✅ تم رفع الصورة');
-  } catch(e) { showToast('❌ فشل رفع الصورة'); }
-  inp.value = '';
-}
-
-async function saveEditPrintProduct() {
-  if (!editPtDocId || !editPtProduct) return;
-  const name  = document.getElementById('ept-name').value.trim();
-  const price = parseInt(document.getElementById('ept-price').value) || 0;
-  const oldP  = document.getElementById('ept-oldprice').value;
-  if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
-
-  editPtProduct.name    = name;
-  editPtProduct.price   = price;
-  editPtProduct.oldPrice = oldP ? parseInt(oldP) : null;
-  editPtProduct.fabric  = document.getElementById('ept-fabric').value;
-  editPtProduct.desc    = document.getElementById('ept-desc').value.trim();
-  editPtProduct.sizes   = ['XS','S','M','L','XL','XXL','3XL'].filter(sz => document.getElementById(`ept-size-${sz}`)?.checked);
-  editPtProduct.printColors = [];
-  editPtProduct.images  = editPtProduct.images.filter(u => u);
-
-  const btn = document.getElementById('ept-save-btn');
-  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
-  try {
-    await updatePrintProductInFirebase(editPtDocId, editPtProduct);
-    document.getElementById('edit-print-modal').style.display = 'none';
-    showToast('✅ تم التعديل بنجاح');
-  } catch(e) { showToast('❌ خطأ في الحفظ'); }
-  finally { btn.disabled = false; btn.textContent = '💾 حفظ التعديلات'; }
-}
-
-function closeEditPrintModal() {
-  document.getElementById('edit-print-modal').style.display = 'none';
-  editPtDocId = null; editPtProduct = null;
-}
-
 // ---- Admin UI helpers ----
 let ptUrlInputCount = 0;
 function addPtUrlInput() {
@@ -4873,12 +4792,17 @@ async function addPrintProduct() {
   const oldPriceVal = document.getElementById('pt-old-price').value;
   const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
 
-  const printColors = [];
+  const printColors = ['pt-print-black','pt-print-red','pt-print-navy']
+    .map(id => document.getElementById(id))
+    .filter(el => el && el.checked)
+    .map(el => el.value);
+
   const sizes = Array.from(document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]'))
     .filter(c => c.checked).map(c => c.value);
 
   if (!name || !price) { showToast('❌ يرجى إدخال الاسم والسعر'); return; }
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً على الأقل'); return; }
+  if (printColors.length === 0) { showToast('❌ اختر لون طبعة واحد على الأقل'); return; }
 
   showToast('⏳ جاري رفع الصور...');
   const imageFiles = document.getElementById('pt-images').files;
@@ -4911,7 +4835,7 @@ async function addPrintProduct() {
     document.getElementById('pt-images').value = '';
     document.getElementById('pt-img-preview').innerHTML = '';
     document.getElementById('pt-url-inputs-wrap').innerHTML = '';
-    // reset print colors (removed)
+    ['pt-print-black','pt-print-red','pt-print-navy'].forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
     document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]').forEach(c => c.checked = ['M','L'].includes(c.value));
     ptTempImages = [];
   } catch(e) {
@@ -4940,15 +4864,12 @@ function renderPtAdminList() {
   list.innerHTML = '<h3 style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:2px;margin-bottom:14px;color:var(--muted)">التيشيرتات الحالية</h3>' +
     printProducts.map(p => `
       <div class="admin-product-item">
-        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=T'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=T'" style="cursor:pointer;" onclick="openEditPrintModal('${p._docId}')">
-        <div class="admin-product-info" style="cursor:pointer;" onclick="openEditPrintModal('${p._docId}')">
+        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=T'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=T'">
+        <div class="admin-product-info">
           <strong>${p.name}</strong>
           <span>${p.fabric || '—'} · ${p.price.toLocaleString()} د.ع · ألوان: ${(p.printColors||[]).join(', ')}</span>
         </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn-delete" style="border-color:#c0392b;color:#c0392b;" onclick="openEditPrintModal('${p._docId}')">✏️</button>
-          <button class="btn-delete" onclick="deletePrintProduct('${p._docId}')">🗑</button>
-        </div>
+        <button class="btn-delete" onclick="deletePrintProduct('${p._docId}')">🗑</button>
       </div>
     `).join('');
 }
@@ -5121,7 +5042,8 @@ let studioState = {
   offsetY: 0,
   size: null,
   dragX: 0, dragY: 0,
-  dragging: false, sx: 0, sy: 0, sdx: 0, sdy: 0
+  rotation: 0,
+  _designSrc: null
 };
 
 function renderStudioTshirts() {
@@ -5171,8 +5093,8 @@ function studioSelectTshirt(id) {
   // Set shirt image
   const imgEl = document.getElementById('studio-shirt-img');
   imgEl.src = p.images[0] || '';
-  imgEl.onload = () => { setTimeout(studioInitCanvas, 60); };
-  if (imgEl.complete && imgEl.src) setTimeout(studioInitCanvas, 60);
+  imgEl.onload = () => { setTimeout(() => { studioState.dragX=0; studioState.dragY=studioState.pos==="chest"?-(_stageEl()?.offsetHeight||370)*0.2:0; studioUpdateZone(); studioApplyOverlay(); }, 60); };
+  if (imgEl.complete && imgEl.src) setTimeout(() => { studioState.dragX=0; studioState.dragY=studioState.pos==="chest"?-(_stageEl()?.offsetHeight||370)*0.2:0; studioUpdateZone(); studioApplyOverlay(); }, 60);
 
   // Render print colors from product
   const colorsWrap = document.getElementById('studio-colors');
@@ -5243,256 +5165,410 @@ function renderStudioLib() {
   `).join('');
 }
 
-let _studioCanvas = null;
-let _studioCtx = null;
-let _studioStage = null;
+// ============================================================
+//  STUDIO ENGINE v2 — DOM-based, Mobile-first
+//  • Drag (mouse + single-touch)
+//  • Pinch-to-zoom (two-finger)
+//  • Two-finger rotate
+//  • Slider controls sync
+//  • Canvas used only for export (hidden)
+// ============================================================
 
+// ── helpers ──────────────────────────────────────────────────
+function _stageEl()   { return document.getElementById('studio-stage-wrapper') || document.querySelector('.studio-stage-wrapper'); }
+function _overlayEl() { return document.getElementById('studio-design-overlay'); }
+function _imgEl()     { return document.getElementById('studio-design-img'); }
+function _emojiEl()   { return document.getElementById('studio-design-emoji'); }
+function _shirtEl()   { return document.getElementById('studio-shirt-img'); }
+function _zoneEl()    { return document.getElementById('studio-print-zone'); }
+
+// Legacy compat — getStudioCanvas() still needed by studioOrder/studioSendOrder
 function getStudioCanvas() {
-  if (!_studioCanvas) _studioCanvas = document.getElementById('studio-canvas');
-  return _studioCanvas;
-}
-function getStudioCtx() {
-  if (!_studioCtx && getStudioCanvas()) _studioCtx = getStudioCanvas().getContext('2d');
-  return _studioCtx;
-}
-function getStudioStage() {
-  if (!_studioStage) _studioStage = document.getElementById('studio-stage');
-  return _studioStage;
-}
-
-// Keep these as aliases for backward compat
-Object.defineProperty(window, 'studioCanvas', { get: getStudioCanvas });
-Object.defineProperty(window, 'studioCtx',   { get: getStudioCtx });
-Object.defineProperty(window, 'studioStage', { get: getStudioStage });
-
-function studioInitCanvas() {
-  const stage = getStudioStage();
-  const canvas = getStudioCanvas();
-  if (!stage || !canvas) return;
-  canvas.width  = stage.offsetWidth;
-  canvas.height = stage.offsetHeight;
-  studioResetPos();
-  studioDraw();
-}
-
-function studioGetCenter() {
-  const canvas = getStudioCanvas();
-  const w = canvas ? canvas.width : 300, h = canvas ? canvas.height : 370;
-  if (studioState.pos === 'chest')  return { x: w*0.5, y: h*0.3 };
-  return { x: w*0.5, y: h*0.5 };
-}
-
-function studioResetPos() {
-  const c = studioGetCenter();
-  studioState.dragX = c.x;
-  studioState.dragY = c.y;
-}
-
-function studioDraw() {
-  const ctx = getStudioCtx();
-  const canvas = getStudioCanvas();
-  if (!ctx || !canvas) return;
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
-  const baseSize = studioState.pos === 'full' ? w * 0.65 : w * (studioState.scale / 100);
-  const dw = studioState.pos === 'full' ? baseSize : w * (studioState.scaleW / 100);
-  const dh = studioState.pos === 'full' ? baseSize : h * (studioState.scaleH / 100);
-  const cx = studioState.dragX + (studioState.offsetX / 100) * w;
-  const cy = studioState.dragY + (studioState.offsetY / 100) * h;
-  const x = cx - dw/2;
-  const y = cy - dh/2;
-  ctx.save();
-  ctx.globalAlpha = 0.92;
-  if (studioState.designImg) {
-    ctx.drawImage(studioState.designImg, x, y, dw, dh);
-  } else if (studioState.designEmoji) {
-    const size = Math.round(Math.min(dw, dh) * 0.72);
-    ctx.font = `${size}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = studioState.printColor;
-    ctx.fillText(studioState.designEmoji, cx, cy);
+  let c = document.getElementById('studio-canvas');
+  if (!c) return null;
+  // Size it to the stage for correct coordinate mapping
+  const stage = _stageEl();
+  if (stage && (c.width !== stage.offsetWidth || c.height !== stage.offsetHeight)) {
+    c.width  = stage.offsetWidth  || 300;
+    c.height = stage.offsetHeight || 370;
   }
-  ctx.restore();
+  return c;
+}
+function getStudioCtx()   { const c = getStudioCanvas(); return c ? c.getContext('2d') : null; }
+function getStudioStage() { return _stageEl(); }
+Object.defineProperty(window,'studioCanvas',{get:getStudioCanvas});
+Object.defineProperty(window,'studioCtx',  {get:getStudioCtx});
+Object.defineProperty(window,'studioStage',{get:getStudioStage});
+
+// ── studioInitCanvas ─ kept for resize compat ─────────────────
+function studioInitCanvas() {
+  studioApplyOverlay();
 }
 
+// ── core: apply current state to DOM overlay ──────────────────
+function studioApplyOverlay() {
+  const overlay = _overlayEl();
+  if (!overlay) return;
+
+  const stage = _stageEl();
+  if (!stage) return;
+  const W = stage.offsetWidth  || 300;
+  const H = stage.offsetHeight || 370;
+
+  // Compute pixel sizes from % state
+  const scaleW = studioState.pos === 'full' ? 65 : studioState.scaleW;
+  const scaleH = studioState.pos === 'full' ? 65 : studioState.scaleH;
+  const pw = W * scaleW / 100;
+  const ph = H * scaleH / 100;
+
+  // Position: dragX/dragY are offsets from center (0,0 = center of stage)
+  const cx = studioState.dragX + W * studioState.offsetX / 100;
+  const cy = studioState.dragY + H * studioState.offsetY / 100;
+
+  // CSS transform: translate from center-center, then scale, then rotate
+  overlay.style.width  = pw + 'px';
+  overlay.style.height = ph + 'px';
+  // top/left fixed at 50%/50% (set in CSS), translateX/Y move from there
+  overlay.style.transform =
+    `translate(calc(-50% + ${cx}px), calc(-50% + ${cy}px)) rotate(${studioState.rotation}deg)`;
+
+  // Show/hide img vs emoji
+  const imgEl   = _imgEl();
+  const emojiEl = _emojiEl();
+
+  if (studioState.designImg && imgEl) {
+    imgEl.src   = studioState.designImg.src || studioState._designSrc || '';
+    imgEl.style.display  = 'block';
+    imgEl.style.width    = '100%';
+    imgEl.style.height   = '100%';
+    imgEl.style.objectFit = 'contain';
+    if (emojiEl) emojiEl.style.display = 'none';
+  } else if (studioState.designEmoji && emojiEl) {
+    emojiEl.textContent  = studioState.designEmoji;
+    emojiEl.style.display = 'block';
+    emojiEl.style.color   = studioState.printColor;
+    emojiEl.style.fontSize = Math.min(pw, ph) * 0.85 + 'px';
+    if (imgEl) imgEl.style.display = 'none';
+  } else {
+    if (imgEl)   imgEl.style.display   = 'none';
+    if (emojiEl) emojiEl.style.display = 'none';
+  }
+}
+
+// alias so old code (studioDraw) still works
+function studioDraw() { studioApplyOverlay(); }
+
+// ── print zone guide ──────────────────────────────────────────
+function studioUpdateZone() {
+  const z = _zoneEl();
+  if (!z) return;
+  if (studioState.pos === 'chest') {
+    z.style.top='20%'; z.style.left='18%'; z.style.right='18%'; z.style.height='40%';
+  } else if (studioState.pos === 'center') {
+    z.style.top='25%'; z.style.left='15%'; z.style.right='15%'; z.style.height='50%';
+  } else { // full
+    z.style.top='10%'; z.style.left='10%'; z.style.right='10%'; z.style.height='75%';
+  }
+}
+
+// ── studioResetPos ────────────────────────────────────────────
+function studioResetPos() {
+  studioState.dragX = 0;
+  studioState.dragY = studioState.pos === 'chest' ? -(_stageEl()?.offsetHeight||370)*0.2 : 0;
+  studioState.rotation = 0;
+  _syncRotateSlider();
+  studioApplyOverlay();
+}
+
+// ── rotation helper ───────────────────────────────────────────
+function studioRotate(deg) {
+  studioState.rotation = ((studioState.rotation + deg) % 360 + 360) % 360;
+  if (studioState.rotation > 180) studioState.rotation -= 360;
+  _syncRotateSlider();
+  studioApplyOverlay();
+}
+function studioOnRotateSlider(el) {
+  studioState.rotation = parseInt(el.value);
+  document.getElementById('studio-rotate-val').textContent = studioState.rotation + '°';
+  studioApplyOverlay();
+}
+function _syncRotateSlider() {
+  const sl = document.getElementById('studio-rotate-slider');
+  const vl = document.getElementById('studio-rotate-val');
+  if (sl) sl.value = studioState.rotation;
+  if (vl) vl.textContent = studioState.rotation + '°';
+}
+
+// ── color / pos / scale controls ─────────────────────────────
 function studioSetColor(hex, btn) {
   studioState.printColor = hex;
   document.querySelectorAll('.studio-color-opt').forEach(b => b.style.borderColor = 'var(--border)');
   if (btn) btn.style.borderColor = 'var(--red)';
-  studioDraw();
+  studioApplyOverlay();
 }
 
 function studioSetPos(p, btn) {
   studioState.pos = p;
   document.querySelectorAll('.studio-pos-btn').forEach(b => b.classList.remove('active-pos'));
   if (btn) btn.classList.add('active-pos');
+  studioUpdateZone();
   studioResetPos();
   studioResetControls();
-  studioDraw();
 }
 
 function studioOnScale(el) {
   studioState.scale = parseInt(el.value);
   studioState.scaleW = studioState.scale;
   studioState.scaleH = studioState.scale;
-  document.getElementById('studio-scale-val').textContent = studioState.scale + '%';
-  document.getElementById('studio-scale-w').value = studioState.scaleW;
-  document.getElementById('studio-scale-w-val').textContent = studioState.scaleW + '%';
-  document.getElementById('studio-scale-h').value = studioState.scaleH;
-  document.getElementById('studio-scale-h-val').textContent = studioState.scaleH + '%';
-  studioDraw();
+  document.getElementById('studio-scale-val').textContent  = studioState.scale + '%';
+  const sw = document.getElementById('studio-scale-w');
+  const sh = document.getElementById('studio-scale-h');
+  if (sw) { sw.value = studioState.scaleW; document.getElementById('studio-scale-w-val').textContent = studioState.scaleW + '%'; }
+  if (sh) { sh.value = studioState.scaleH; document.getElementById('studio-scale-h-val').textContent = studioState.scaleH + '%'; }
+  studioApplyOverlay();
 }
-
 function studioOnScaleW(el) {
   studioState.scaleW = parseInt(el.value);
   document.getElementById('studio-scale-w-val').textContent = studioState.scaleW + '%';
-  studioDraw();
+  studioApplyOverlay();
 }
-
 function studioOnScaleH(el) {
   studioState.scaleH = parseInt(el.value);
   document.getElementById('studio-scale-h-val').textContent = studioState.scaleH + '%';
-  studioDraw();
+  studioApplyOverlay();
 }
-
 function studioOnOffsetX(el) {
   studioState.offsetX = parseInt(el.value);
-  document.getElementById('studio-offset-x-val').textContent = (studioState.offsetX > 0 ? '+' : '') + studioState.offsetX + '%';
-  studioDraw();
+  document.getElementById('studio-offset-x-val').textContent = (studioState.offsetX>0?'+':'') + studioState.offsetX + '%';
+  studioApplyOverlay();
 }
-
 function studioOnOffsetY(el) {
   studioState.offsetY = parseInt(el.value);
-  document.getElementById('studio-offset-y-val').textContent = (studioState.offsetY > 0 ? '+' : '') + studioState.offsetY + '%';
-  studioDraw();
+  document.getElementById('studio-offset-y-val').textContent = (studioState.offsetY>0?'+':'') + studioState.offsetY + '%';
+  studioApplyOverlay();
 }
-
 function studioResetControls() {
-  studioState.scaleW = studioState.scale;
-  studioState.scaleH = studioState.scale;
+  studioState.scaleW  = studioState.scale;
+  studioState.scaleH  = studioState.scale;
   studioState.offsetX = 0;
   studioState.offsetY = 0;
-  const sw = document.getElementById('studio-scale-w');
-  const sh = document.getElementById('studio-scale-h');
-  const ox = document.getElementById('studio-offset-x');
-  const oy = document.getElementById('studio-offset-y');
-  if (sw) { sw.value = studioState.scaleW; document.getElementById('studio-scale-w-val').textContent = studioState.scaleW + '%'; }
-  if (sh) { sh.value = studioState.scaleH; document.getElementById('studio-scale-h-val').textContent = studioState.scaleH + '%'; }
-  if (ox) { ox.value = 0; document.getElementById('studio-offset-x-val').textContent = '0%'; }
-  if (oy) { oy.value = 0; document.getElementById('studio-offset-y-val').textContent = '0%'; }
-  studioDraw();
+  studioState.rotation = 0;
+  const ids = {
+    'studio-scale-w':'studio-scale-w-val','studio-scale-h':'studio-scale-h-val',
+    'studio-offset-x':'studio-offset-x-val','studio-offset-y':'studio-offset-y-val'
+  };
+  const vals = [studioState.scaleW+'%', studioState.scaleH+'%', '0%', '0%'];
+  Object.entries(ids).forEach(([sid, vid], i) => {
+    const el = document.getElementById(sid);
+    const vl = document.getElementById(vid);
+    if (el) el.value = parseFloat(vals[i]);
+    if (vl) vl.textContent = vals[i];
+  });
+  _syncRotateSlider();
+  studioApplyOverlay();
 }
 
+// ── size ──────────────────────────────────────────────────────
 function studioSetSize(s, btn) {
   studioState.size = s;
   document.querySelectorAll('.studio-size-btn').forEach(b => {
-    b.style.background = 'var(--card)';
-    b.style.borderColor = 'var(--border)';
-    b.style.color = 'var(--muted)';
+    b.style.background = 'var(--card)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--muted)';
   });
   if (btn) { btn.style.background='var(--red)'; btn.style.borderColor='var(--red)'; btn.style.color='white'; }
 }
 
+// ── emoji ─────────────────────────────────────────────────────
 function studioSetEmoji(em, btn) {
   studioState.designEmoji = em;
-  studioState.designImg = null;
+  studioState.designImg   = null;
   studioState.selectedDesignUrl = null;
   document.querySelectorAll('.studio-lib-item,.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
   if (btn) btn.style.borderColor='var(--red)';
-  studioDraw();
+  studioApplyOverlay();
 }
 
-// اختيار طبعة من المكتبة
+// ── library design ────────────────────────────────────────────
 function studioSetDesign(url, id, btn) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    studioState.designImg = img;
+  const tryLoad = (crossOrigin) => new Promise((resolve, reject) => {
+    const img = new Image();
+    if (crossOrigin) img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
+  tryLoad(true).catch(() => tryLoad(false)).then(img => {
+    studioState.designImg  = img;
+    studioState._designSrc = url;
     studioState.designEmoji = null;
     studioState.selectedDesignUrl = url;
     document.querySelectorAll('.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
     if (btn) btn.style.borderColor='var(--red)';
-    studioDraw();
-  };
-  img.onerror = () => {
-    // fallback بدون CORS
-    const img2 = new Image();
-    img2.onload = () => {
-      studioState.designImg = img2;
-      studioState.designEmoji = null;
-      studioState.selectedDesignUrl = url;
-      document.querySelectorAll('.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
-      if (btn) btn.style.borderColor='var(--red)';
-      studioDraw();
-    };
-    img2.src = url;
-  };
-  img.src = url;
+    studioApplyOverlay();
+    // Show name in upload area
+    const nm = document.getElementById('studio-upload-name');
+    if (nm) { nm.textContent = '✅ تم اختيار الطبعة'; nm.style.display='block'; }
+  }).catch(() => showToast('❌ لم يمكن تحميل الطبعة'));
 }
 
+// ── clear ─────────────────────────────────────────────────────
 function studioClear() {
-  studioState.designImg = null;
+  studioState.designImg   = null;
   studioState.designEmoji = null;
   studioState.selectedDesignUrl = null;
+  studioState._designSrc  = null;
   document.querySelectorAll('.studio-lib-item,.studio-design-item').forEach(b => b.style.borderColor='var(--border)');
   const fi = document.getElementById('studio-file');
   if (fi) fi.value = '';
-  studioDraw();
+  const nm = document.getElementById('studio-upload-name');
+  if (nm) { nm.style.display='none'; nm.textContent=''; }
+  studioApplyOverlay();
 }
 
+// ── file upload ───────────────────────────────────────────────
 function studioOnFile(inp) {
   const f = inp.files[0]; if (!f) return;
   const r = new FileReader();
   r.onload = e => {
     const img = new Image();
     img.onload = () => {
-      studioState.designImg = img;
+      studioState.designImg  = img;
+      studioState._designSrc = e.target.result;
       studioState.designEmoji = null;
-      studioState.selectedDesignUrl = null; // رفع مباشر مو من المكتبة
+      studioState.selectedDesignUrl = null;
       document.querySelectorAll('.studio-design-item,.studio-lib-item').forEach(b => b.style.borderColor='var(--border)');
-      studioDraw();
+      // Show filename
+      const nm = document.getElementById('studio-upload-name');
+      if (nm) { nm.textContent = '✅ ' + f.name; nm.style.display='block'; }
+      studioApplyOverlay();
     };
     img.src = e.target.result;
   };
   r.readAsDataURL(f);
 }
 
-// Drag — يتحمّل بعد DOM
+// ============================================================
+//  TOUCH & MOUSE INTERACTION ENGINE
+// ============================================================
 function studioInitDrag() {
-  const studioDragEl = document.getElementById('studio-drag');
-  if (!studioDragEl) return;
-  function sGetXY(e) {
-    const r = studioDragEl.getBoundingClientRect();
-    const src = e.touches ? e.touches[0] : e;
-    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  const dragEl = document.getElementById('studio-drag');
+  if (!dragEl) return;
+
+  // ── state ─────────────────────────────────────────────────
+  let drag = {
+    active:  false,
+    startX:  0, startY: 0,
+    origDX:  0, origDY: 0,
+    // pinch
+    pinching: false,
+    pinchDist0: 0, pinchAngle0: 0,
+    origScaleW: 0, origScaleH: 0, origRot: 0
+  };
+
+  // ── utils ──────────────────────────────────────────────────
+  function touchDist(t0, t1) {
+    const dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+    return Math.sqrt(dx*dx + dy*dy);
   }
-  studioDragEl.addEventListener('mousedown', e => {
-    const {x,y} = sGetXY(e);
-    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
-    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
+  function touchAngle(t0, t1) {
+    return Math.atan2(t1.clientY - t0.clientY, t1.clientX - t0.clientX) * 180 / Math.PI;
+  }
+  function clampScale(v) { return Math.max(5, Math.min(95, v)); }
+
+  // ── MOUSE ─────────────────────────────────────────────────
+  dragEl.addEventListener('mousedown', e => {
+    e.preventDefault();
+    drag.active = true;
+    drag.startX = e.clientX; drag.startY = e.clientY;
+    drag.origDX = studioState.dragX; drag.origDY = studioState.dragY;
+    dragEl.style.cursor = 'grabbing';
   });
   window.addEventListener('mousemove', e => {
-    if (!studioState.dragging) return;
-    const r = studioDragEl.getBoundingClientRect();
-    studioState.dragX = studioState.sdx+(e.clientX-r.left-studioState.sx);
-    studioState.dragY = studioState.sdy+(e.clientY-r.top-studioState.sy);
-    studioDraw();
+    if (!drag.active) return;
+    studioState.dragX = drag.origDX + (e.clientX - drag.startX);
+    studioState.dragY = drag.origDY + (e.clientY - drag.startY);
+    studioApplyOverlay();
   });
-  window.addEventListener('mouseup', ()=>studioState.dragging=false);
-  studioDragEl.addEventListener('touchstart', e=>{
-    const {x,y}=sGetXY(e);
-    studioState.dragging=true; studioState.sx=x; studioState.sy=y;
-    studioState.sdx=studioState.dragX; studioState.sdy=studioState.dragY;
-  },{passive:true});
-  studioDragEl.addEventListener('touchmove', e=>{
-    if(!studioState.dragging) return;
-    const {x,y}=sGetXY(e);
-    studioState.dragX=studioState.sdx+(x-studioState.sx);
-    studioState.dragY=studioState.sdy+(y-studioState.sy);
-    studioDraw(); e.preventDefault();
-  },{passive:false});
-  studioDragEl.addEventListener('touchend',()=>studioState.dragging=false);
+  window.addEventListener('mouseup', () => {
+    drag.active = false;
+    dragEl.style.cursor = 'grab';
+  });
+
+  // ── TOUCH ─────────────────────────────────────────────────
+  dragEl.addEventListener('touchstart', e => {
+    e.preventDefault(); // prevent page scroll & zoom on stage
+    if (e.touches.length === 1) {
+      // single finger: drag
+      drag.pinching = false;
+      drag.active   = true;
+      drag.startX   = e.touches[0].clientX;
+      drag.startY   = e.touches[0].clientY;
+      drag.origDX   = studioState.dragX;
+      drag.origDY   = studioState.dragY;
+    } else if (e.touches.length === 2) {
+      // two fingers: pinch + rotate
+      drag.active   = false;
+      drag.pinching = true;
+      drag.pinchDist0  = touchDist(e.touches[0], e.touches[1]);
+      drag.pinchAngle0 = touchAngle(e.touches[0], e.touches[1]);
+      drag.origScaleW  = studioState.scaleW;
+      drag.origScaleH  = studioState.scaleH;
+      drag.origRot     = studioState.rotation;
+    }
+  }, { passive: false });
+
+  dragEl.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (drag.active && e.touches.length === 1) {
+      // drag
+      studioState.dragX = drag.origDX + (e.touches[0].clientX - drag.startX);
+      studioState.dragY = drag.origDY + (e.touches[0].clientY - drag.startY);
+      studioApplyOverlay();
+    } else if (drag.pinching && e.touches.length === 2) {
+      // pinch scale
+      const dist  = touchDist(e.touches[0], e.touches[1]);
+      const ratio = dist / drag.pinchDist0;
+      const newW  = clampScale(Math.round(drag.origScaleW * ratio));
+      const newH  = clampScale(Math.round(drag.origScaleH * ratio));
+      studioState.scaleW = newW;
+      studioState.scaleH = newH;
+      studioState.scale  = Math.round((newW + newH) / 2);
+      // rotate
+      const angle = touchAngle(e.touches[0], e.touches[1]);
+      studioState.rotation = drag.origRot + (angle - drag.pinchAngle0);
+      // sync sliders silently
+      _syncSlidersFromState();
+      studioApplyOverlay();
+    }
+  }, { passive: false });
+
+  dragEl.addEventListener('touchend', e => {
+    if (e.touches.length === 0) { drag.active = false; drag.pinching = false; }
+    else if (e.touches.length === 1 && drag.pinching) {
+      // transition from pinch back to single-finger drag
+      drag.pinching = false;
+      drag.active   = true;
+      drag.startX   = e.touches[0].clientX;
+      drag.startY   = e.touches[0].clientY;
+      drag.origDX   = studioState.dragX;
+      drag.origDY   = studioState.dragY;
+    }
+  });
+}
+
+// sync all slider DOM elements from studioState (called after pinch)
+function _syncSlidersFromState() {
+  const map = {
+    'studio-scale':    ['studio-scale-val',   studioState.scale  + '%'],
+    'studio-scale-w':  ['studio-scale-w-val',  studioState.scaleW + '%'],
+    'studio-scale-h':  ['studio-scale-h-val',  studioState.scaleH + '%'],
+  };
+  Object.entries(map).forEach(([sid, [vid, val]]) => {
+    const sl = document.getElementById(sid);
+    const vl = document.getElementById(vid);
+    if (sl) sl.value = parseFloat(val);
+    if (vl) vl.textContent = val;
+  });
+  _syncRotateSlider();
 }
 
 function studioOrder() {
@@ -5506,30 +5582,39 @@ function studioOrder() {
   document.getElementById('pom-details').textContent = `لون الطبعة: ${colorLabel} — مقاس ${studioState.size||'—'}`;
   document.getElementById('pom-price').textContent = p.price.toLocaleString() + ' د.ع';
 
-  // Preview canvas
+  // Preview canvas — center-origin coordinate system
   const pvc = document.getElementById('print-preview-canvas');
   const pvctx = pvc.getContext('2d');
   pvctx.clearRect(0,0,pvc.width,pvc.height);
   const shirtImg = document.getElementById('studio-shirt-img');
-  const mainCanvas = getStudioCanvas();
   if (shirtImg && shirtImg.complete) {
     pvctx.drawImage(shirtImg, 0, 0, pvc.width, pvc.height);
-    const s = pvc.width * (studioState.scale/100) * 0.85;
-    const px = mainCanvas ? pvc.width  * (studioState.dragX / mainCanvas.width)  - s/2 : pvc.width/2 - s/2;
-    const py = mainCanvas ? pvc.height * (studioState.dragY / mainCanvas.height) - s/2 : pvc.height*0.3 - s/2;
+    const stage = _stageEl();
+    const stW = stage ? stage.offsetWidth  : 300;
+    const stH = stage ? stage.offsetHeight : 370;
+    const ratioX = pvc.width  / stW;
+    const ratioY = pvc.height / stH;
+    const dw = pvc.width  * (studioState.scaleW / 100);
+    const dh = pvc.height * (studioState.scaleH / 100);
+    const cx = pvc.width/2  + studioState.dragX * ratioX + (studioState.offsetX/100)*pvc.width;
+    const cy = pvc.height/2 + studioState.dragY * ratioY + (studioState.offsetY/100)*pvc.height;
+    pvctx.save();
+    pvctx.translate(cx, cy);
+    pvctx.rotate(studioState.rotation * Math.PI / 180);
     pvctx.globalAlpha = 0.9;
     if (studioState.designImg) {
-      pvctx.drawImage(studioState.designImg, px, py, s, s);
+      pvctx.drawImage(studioState.designImg, -dw/2, -dh/2, dw, dh);
     } else if (studioState.designEmoji) {
-      pvctx.font = `${Math.round(s*0.72)}px serif`;
+      pvctx.font = `${Math.round(Math.min(dw,dh)*0.72)}px serif`;
       pvctx.textAlign='center'; pvctx.textBaseline='middle';
       pvctx.fillStyle = studioState.printColor;
-      pvctx.fillText(studioState.designEmoji, mainCanvas ? pvc.width*(studioState.dragX/mainCanvas.width) : pvc.width/2, mainCanvas ? pvc.height*(studioState.dragY/mainCanvas.height) : pvc.height*0.3);
+      pvctx.fillText(studioState.designEmoji, 0, 0);
     }
+    pvctx.restore();
   }
 
   const modal = document.getElementById('print-order-modal');
-  modal.style.display = 'block';
+  modal.style.display = 'flex';
 }
 
 async function studioSendOrder() {
@@ -5568,17 +5653,9 @@ async function studioSendOrder() {
 ` +
     `📌 الموضع: ${posLabel} — حجم ${studioState.scale}%
 ` +
-    `💰 سعر القطعة: ${p.price.toLocaleString()} د.ع
-` +
-    `🚚 سعر التوصيل: 3,000 د.ع
-` +
-    `💵 الإجمالي مع التوصيل: ${(p.price + 3000).toLocaleString()} د.ع` +
+    `💰 السعر: ${p.price.toLocaleString()} د.ع` +
     (note ? `
-📝 ملاحظات: ${note}` : '') +
-    `
-
-🌐 الموقع: https://bakiwear.com
-📸 انستغرام: https://www.instagram.com/bakibeinty`;
+📝 ملاحظات: ${note}` : '');
 
   // ===== بناء صورة التيشيرت + الطبعة مدمجة =====
   function buildMergedBlob() {
@@ -5598,26 +5675,29 @@ async function studioSendOrder() {
           ctx.drawImage(shirtImg, 0, 0, out.width, out.height);
         }
 
-        const cw = mainCanvas ? mainCanvas.width  : 300;
-        const ch = mainCanvas ? mainCanvas.height : 370;
-        const baseW = studioState.pos === 'full' ? out.width * 0.65 : out.width * (studioState.scaleW / 100);
+        // Center-origin: dragX/Y are px offsets from stage center
+        const stage = _stageEl();
+        const stW = stage ? stage.offsetWidth  : 300;
+        const stH = stage ? stage.offsetHeight : 370;
+        const ratioX = out.width  / stW;
+        const ratioY = out.height / stH;
+        const baseW = studioState.pos === 'full' ? out.width * 0.65 : out.width  * (studioState.scaleW / 100);
         const baseH = studioState.pos === 'full' ? out.width * 0.65 : out.height * (studioState.scaleH / 100);
-        const cx2 = out.width  * (studioState.dragX / cw) + (studioState.offsetX / 100) * out.width;
-        const cy2 = out.height * (studioState.dragY / ch) + (studioState.offsetY / 100) * out.height;
-        const dx = cx2 - baseW/2;
-        const dy = cy2 - baseH/2;
+        const cx2 = out.width/2  + studioState.dragX * ratioX + (studioState.offsetX/100)*out.width;
+        const cy2 = out.height/2 + studioState.dragY * ratioY + (studioState.offsetY/100)*out.height;
 
         ctx.save();
+        ctx.translate(cx2, cy2);
+        ctx.rotate(studioState.rotation * Math.PI / 180);
         ctx.globalAlpha = 0.92;
         if (studioState.designImg) {
-          ctx.drawImage(studioState.designImg, dx, dy, baseW, baseH);
+          ctx.drawImage(studioState.designImg, -baseW/2, -baseH/2, baseW, baseH);
         } else if (studioState.designEmoji) {
-          ctx.font = `${Math.round(sz*0.72)}px serif`;
+          const sz2 = Math.round(Math.min(baseW,baseH)*0.72);
+          ctx.font = `${sz2}px serif`;
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillStyle = studioState.printColor;
-          ctx.fillText(studioState.designEmoji,
-            out.width*(studioState.dragX/cw),
-            out.height*(studioState.dragY/ch));
+          ctx.fillText(studioState.designEmoji, 0, 0);
         }
         ctx.restore();
         out.toBlob(blob => resolve(blob), 'image/png');
@@ -5760,7 +5840,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('resize', () => {
-  if (studioState.product) setTimeout(studioInitCanvas, 150);
+  if (studioState.product) {
+    setTimeout(() => { studioUpdateZone(); studioApplyOverlay(); }, 150);
+  }
 });
 // End Print Studio
 </script>
