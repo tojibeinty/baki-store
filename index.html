@@ -1695,6 +1695,18 @@ async function loadAnalytics() {
         <label><input type="checkbox" value="Free Size"> Free</label>
       </div>
     </div>
+    <div class="form-group" style="margin-top:6px;">
+      <label>الصور (يمكنك حذف أو إضافة أو تغيير الصور)</label>
+      <div id="edit-images-list"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button type="button" onclick="addEditImageRow()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ إضافة رابط صورة</button>
+        <label style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;display:inline-flex;align-items:center;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          📤 رفع صورة جديدة
+          <input type="file" accept="image/*" onchange="uploadEditImage(this)" style="display:none;">
+        </label>
+      </div>
+    </div>
+
     <button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
     <button class="btn-secondary" onclick="closeEdit()">إلغاء</button>
   </div>
@@ -2284,7 +2296,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="form-group">
       <label>المقاسات المتاحة</label>
       <div class="size-checkboxes">
-        ${['XS','S','M','L','XL','XXL','3XL'].map(sz=>`<label><input type="checkbox" id="ept-size-${sz}" value="${sz}"> ${sz}</label>`).join('')}
+        <label><input type="checkbox" id="ept-size-XS" value="XS"> XS</label>
+        <label><input type="checkbox" id="ept-size-S" value="S"> S</label>
+        <label><input type="checkbox" id="ept-size-M" value="M"> M</label>
+        <label><input type="checkbox" id="ept-size-L" value="L"> L</label>
+        <label><input type="checkbox" id="ept-size-XL" value="XL"> XL</label>
+        <label><input type="checkbox" id="ept-size-XXL" value="XXL"> XXL</label>
+        <label><input type="checkbox" id="ept-size-3XL" value="3XL"> 3XL</label>
       </div>
     </div>
 
@@ -3362,9 +3380,49 @@ function shareProduct(id) {
 }
 
 // ============ EDIT PRODUCT ============
+let editProductImages = [];
+
+function renderEditImages(imgs) {
+  const wrap = document.getElementById('edit-images-list');
+  if (!wrap) return;
+  wrap.innerHTML = imgs.map((url, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <img src="${url||''}" onerror="this.src=''" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);background:#111;flex-shrink:0;">
+      <input type="text" value="${url||''}" placeholder="رابط الصورة"
+        oninput="editProductImages[${i}]=this.value;this.previousElementSibling.src=this.value"
+        style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-family:var(--font-body);font-size:0.82rem;direction:ltr;"
+        onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      <button onclick="removeEditImage(${i})" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:0.85rem;flex-shrink:0;" onmouseover="this.style.color='var(--red)';this.style.borderColor='var(--red)'" onmouseout="this.style.color='#888';this.style.borderColor='#444'">✖</button>
+    </div>
+  `).join('');
+}
+
+function removeEditImage(idx) {
+  editProductImages.splice(idx, 1);
+  renderEditImages(editProductImages);
+}
+
+function addEditImageRow() {
+  editProductImages.push('');
+  renderEditImages(editProductImages);
+}
+
+async function uploadEditImage(inp) {
+  const file = inp.files[0]; if (!file) return;
+  showToast('⏳ جاري رفع الصورة...');
+  try {
+    const url = await uploadToCloudinary(file);
+    editProductImages.push(url);
+    renderEditImages(editProductImages);
+    showToast('✅ تم رفع الصورة');
+  } catch(e) { showToast('❌ فشل رفع الصورة'); }
+  inp.value = '';
+}
+
 function openEdit(docId) {
   const p = products.find(x => x._docId === docId);
   if (!p) return;
+  editProductImages = [...(p.images || [])];
   document.getElementById('edit-docid').value = docId;
   document.getElementById('edit-name').value = p.name;
   document.getElementById('edit-cat').value = p.cat;
@@ -3375,6 +3433,7 @@ function openEdit(docId) {
   document.querySelectorAll('#edit-sizes input[type=checkbox]').forEach(cb => {
     cb.checked = p.sizes.includes(cb.value);
   });
+  renderEditImages(editProductImages);
   // Subcat
   updateEditSubcatOptions();
   setTimeout(() => {
@@ -3413,12 +3472,13 @@ async function saveEdit() {
   const badge = document.getElementById('edit-badge').value;
   const subcat = document.getElementById('edit-subcat')?.value || '';
   const sizes = Array.from(document.querySelectorAll('#edit-sizes input[type=checkbox]')).filter(c => c.checked).map(c => c.value);
+  const images = editProductImages.filter(u => u && u.trim());
 
   if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً'); return; }
 
   const p = products.find(x => x._docId === docId);
-  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, subcat, sizes };
+  const updatedProduct = { ...p, name, cat, price, oldPrice, desc, badge, subcat, sizes, images: images.length ? images : (p.images || []) };
   delete updatedProduct._docId;
 
   showToast('⏳ جاري الحفظ...');
