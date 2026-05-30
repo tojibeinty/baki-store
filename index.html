@@ -862,40 +862,14 @@ async function loadAnalytics() {
   /* ========= ORDER MODAL ========= */
   #order-modal {
     display: none;
-    position: fixed; inset: 0;
+    position: fixed; top:0; right:0; bottom:0; left:0;
     background: rgba(0,0,0,0.92);
     z-index: 9000;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 40px 20px;
-    align-items: flex-start;
-    justify-content: center;
   }
-  #order-modal.active { display: flex; }
-
-  /* ======= PAYMENT MODAL MOBILE FIX ======= */
-  #payment-modal {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.95);
-    z-index: 9500;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding: 40px 20px;
-    align-items: flex-start;
-    justify-content: center;
-    /* iOS Safari fix: force GPU layer */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-  #payment-modal.modal-open {
-    display: flex !important;
-  }
-  #payment-modal > div {
-    /* prevent content from going under iOS nav bar */
-    margin-bottom: env(safe-area-inset-bottom, 20px);
-  }
+  #order-modal.active { display: block; }
   .order-box {
     background: var(--deep);
     border: 1px solid var(--red);
@@ -903,6 +877,7 @@ async function loadAnalytics() {
     padding: 40px;
     width: 100%;
     max-width: 500px;
+    margin: 0 auto;
     animation: modalIn 0.3s ease;
   }
   @keyframes modalIn {
@@ -1556,10 +1531,10 @@ async function loadAnalytics() {
     </div>
 
     <div style="display:flex;gap:10px;margin-top:10px">
-      <button type="button" class="telegram-btn" onclick="addToCartFromOrder()" style="background:#c0392b;flex:1">
+      <button class="telegram-btn" onclick="addToCartFromOrder()" style="background:#c0392b;flex:1">
         🛍 أضف للسلة
       </button>
-      <button type="button" class="telegram-btn" id="order-now-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
+      <button class="telegram-btn" onclick="orderNowDirect()" style="background:#229ED9;flex:1">
         ✈️ اطلب الآن
       </button>
     </div>
@@ -1568,8 +1543,13 @@ async function loadAnalytics() {
 </div>
 
 <!-- ======= PAYMENT MODAL ======= -->
-<div id="payment-modal">
-  <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;">
+<style>
+#payment-modal.open {
+  display: block !important;
+}
+</style>
+<div id="payment-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:9500;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
+  <div style="background:#111;border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:500px;position:relative;animation:modalIn 0.3s ease;margin:0 auto;">
     <button onclick="closePayment()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:20px;text-align:center;">💳 اختر طريقة الدفع</div>
 
@@ -1607,7 +1587,7 @@ async function loadAnalytics() {
         <div id="receipt-preview" style="margin-top:10px;"></div>
       </div>
 
-      <button type="button" id="pay-send-btn" onclick="sendOrderWithPayment()" class="telegram-btn" style="width:100%;margin-top:10px;">
+      <button id="pay-send-btn" onclick="sendOrderWithPayment()" class="telegram-btn" style="width:100%;margin-top:10px;">
         ✈️ إرسال الطلب مع الحوالة
       </button>
     </div>
@@ -1636,7 +1616,7 @@ async function loadAnalytics() {
         </div>
         <div id="coupon-result-cod" style="margin-top:8px;font-size:0.82rem;"></div>
       </div>
-      <button type="button" onclick="sendOrderCOD()" class="telegram-btn" style="width:100%;background:#229ED9;">
+      <button onclick="sendOrderCOD()" class="telegram-btn" style="width:100%;background:#229ED9;">
         ✈️ إرسال الطلب
       </button>
     </div>
@@ -1644,7 +1624,7 @@ async function loadAnalytics() {
 </div>
 
 <!-- ======= EDIT PRODUCT MODAL ======= -->
-<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+<div id="edit-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:99998;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
   <div style="background:#111;border:1px solid #c0392b;border-radius:12px;padding:36px;width:100%;max-width:600px;position:relative;">
     <button onclick="closeEdit()" style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid #333;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:1rem;">✖</button>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:#c0392b;margin-bottom:24px;text-align:center;">✏️ تعديل المنتج</div>
@@ -1723,10 +1703,10 @@ async function loadAnalytics() {
 
 <!-- ======= PASSWORD MODAL ======= -->
 <div id="password-modal" style="
-  display:none; position:fixed; inset:0;
+  display:none; position:fixed; top:0; right:0; bottom:0; left:0;
   background:rgba(0,0,0,0.97);
   z-index:99999;
-  align-items:center; justify-content:center;
+  -webkit-overflow-scrolling:touch;
 ">
   <div style="
     background:#111;
@@ -1735,6 +1715,7 @@ async function loadAnalytics() {
     padding:40px;
     width:100%; max-width:380px;
     text-align:center;
+    margin:40px auto;
   ">
     <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
     <div style="font-family:var(--font-display);font-size:2rem;letter-spacing:4px;color:#c0392b;margin-bottom:6px">لوحة التحكم</div>
@@ -2123,7 +2104,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </style>
 
 <!-- ======= PRINT ORDER MODAL ======= -->
-<div id="print-order-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9500;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+<div id="print-order-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.92);z-index:9500;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
   <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:480px;animation:modalIn 0.3s ease;position:relative;">
     <button onclick="document.getElementById('print-order-modal').style.display='none'"
       style="position:absolute;top:16px;left:16px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.85rem;transition:all 0.2s;"
@@ -2268,7 +2249,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </footer>
 
 <!-- ======= EDIT PRINT PRODUCT MODAL ======= -->
-<div id="edit-print-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+<div id="edit-print-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
   <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:620px;position:relative;">
     <button onclick="closeEditPrintModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
     <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل تيشيرت الطبعة</h2>
@@ -2335,7 +2316,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </div>
 
 <!-- ======= EDIT SUBCAT MODAL ======= -->
-<div id="edit-subcat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;padding:40px 20px;align-items:center;justify-content:center;">
+<div id="edit-subcat-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:40px 20px;">
   <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:420px;position:relative;">
     <button onclick="closeEditSubcatModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
     <h2 style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل القسم الفرعي</h2>
@@ -2355,17 +2336,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <!-- ======= CART MODAL ======= -->
 <div id="cart-modal" style="
-  display:none; position:fixed; inset:0;
+  display:none; position:fixed; top:0; right:0; bottom:0; left:0;
   background:rgba(0,0,0,0.92);
   z-index:9000; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   padding:40px 20px;
-  align-items:flex-start; justify-content:center;
 ">
   <div style="
     background:#111; border:1px solid #c0392b;
     border-radius:12px; padding:36px;
     width:100%; max-width:550px;
-    position:relative; animation:modalIn 0.3s ease;
+    position:relative; animation:modalIn 0.3s ease; margin:0 auto;
   ">
     <button onclick="closeCart()" style="
       position:absolute; top:16px; left:16px;
@@ -2575,7 +2556,7 @@ function openEditSubcatModal(docId) {
   document.getElementById('esc-docid').value = docId;
   document.getElementById('esc-label').value = sc.label || '';
   document.getElementById('esc-icon').value  = sc.icon  || '📁';
-  document.getElementById('edit-subcat-modal').style.display = 'flex';
+  document.getElementById('edit-subcat-modal').style.display = 'block';
 }
 
 async function saveEditSubcat() {
@@ -2678,7 +2659,7 @@ async function hashPassword(str) {
 
 function openAdmin() {
   const pm = document.getElementById('password-modal');
-  pm.style.display = 'flex';
+  pm.style.display = 'block';
   document.getElementById('admin-password-input').value = '';
   document.getElementById('pass-error').style.display = 'none';
   setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
@@ -3489,7 +3470,7 @@ function openEdit(docId) {
     const sel = document.getElementById('edit-subcat');
     if (sel) sel.value = p.subcat || '';
   }, 50);
-  document.getElementById('edit-modal').style.display = 'flex';
+  document.getElementById('edit-modal').style.display = 'block';
 }
 
 function updateEditSubcatOptions() {
@@ -3661,20 +3642,9 @@ function openOrder(id) {
   sizeSel.innerHTML = p.sizes.map(s => `<button class="size-btn" onclick="selectSize('${s}',this)">${s}</button>`).join('');
 
   document.getElementById('order-modal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
 }
 function closeOrder() {
   document.getElementById('order-modal').classList.remove('active');
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
-  // أغلق مودال الدفع لو كان مفتوح
-  const pm = document.getElementById('payment-modal');
-  if (pm && pm.classList.contains('modal-open')) {
-    pm.classList.remove('modal-open');
-  }
   selectedProduct = null;
   selectedSize = null;
 }
@@ -3785,18 +3755,9 @@ function addToCartFromOrder() {
   closeOrder();
 }
 
-let _orderProcessing = false;
-
 async function orderNowDirect() {
-  // حماية من الضغط المزدوج (double-tap على الموبايل)
-  if (_orderProcessing) return;
-  _orderProcessing = true;
-  const orderBtn = document.getElementById('order-now-btn');
-  if (orderBtn) orderBtn.disabled = true;
-
-  try {
-  if (!selectedProduct) { _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
-  if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
+  if (!selectedProduct) return;
+  if (!selectedSize) { showToast('❗ الرجاء اختيار الحجم أولاً'); return; }
 
   const name = document.getElementById('customer-name').value.trim();
   const phone = document.getElementById('customer-phone').value.trim();
@@ -3804,7 +3765,7 @@ async function orderNowDirect() {
   const note = document.getElementById('order-note').value.trim();
   const qty = document.getElementById('order-qty').value || 1;
 
-  if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); _orderProcessing = false; if(orderBtn) orderBtn.disabled=false; return; }
+  if (!name || !phone) { showToast('❗ الرجاء إدخال الاسم ورقم الهاتف'); return; }
 
   const variantIdx = selectedProduct._selectedImgIdx || 0;
   const deliveryCost2 = 3000;
@@ -3827,18 +3788,20 @@ async function orderNowDirect() {
     `\n\n🌐 الموقع: https://bakiwear.com\n📸 انستغرام: https://www.instagram.com/bakibeinty`;
 
   // لو نظام الدفع مفعّل — افتح مودال الدفع
+  // أعد قراءة الإعدادات من Firebase في حال لم تُحمَّل بعد
+  if (!paymentSettingsLoaded) {
+    await loadPaymentSettings();
+  }
   if (paymentSettings.enabled) {
-    const total = grandTotal2.toLocaleString() + ' د.ع';
+    const total = (selectedProduct.price * parseInt(qty)).toLocaleString() + ' د.ع';
     openPaymentModal({ text, photoUrl: selectedProduct.images[variantIdx] || selectedProduct.images[0] || '', total });
-    // أعد الزر بعد فتح المودال (المودال هو اللي يكمل العملية)
-    _orderProcessing = false;
-    if (orderBtn) orderBtn.disabled = false;
     return;
   }
 
   // بدون نظام دفع — أرسل مباشرة
   const photoUrl = selectedProduct.images[variantIdx] || selectedProduct.images[0] || '';
-  if (orderBtn) { orderBtn.textContent = '⏳ جاري الإرسال...'; }
+  const btn = document.querySelectorAll('#order-modal .telegram-btn')[1];
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
 
   try {
     const res = await sendOrderWithPhoto(text, photoUrl);
@@ -3855,12 +3818,7 @@ async function orderNowDirect() {
   } catch(e) {
     showToast('❌ تعذر الاتصال');
   } finally {
-    if (orderBtn) { orderBtn.disabled = false; orderBtn.textContent = '✈️ اطلب الآن'; }
-  }
-
-  } finally {
-    // تأخير بسيط قبل إعادة تفعيل الحماية (يمنع ghost clicks على الموبايل)
-    setTimeout(() => { _orderProcessing = false; }, 800);
+    if (btn) { btn.disabled = false; btn.textContent = '✈️ اطلب الآن'; }
   }
 }
 
@@ -3891,7 +3849,7 @@ function updateCartCount() {
 }
 
 function openCart() {
-  document.getElementById('cart-modal').style.display = 'flex';
+  document.getElementById('cart-modal').style.display = 'block';
   renderCart();
 }
 
@@ -4408,20 +4366,50 @@ let selectedPaymentMethod = null;
 let receiptBase64 = null;
 let pendingOrderData = null;
 
-function savePaymentSettings() {
+let paymentSettingsLoaded = false;
+
+async function savePaymentSettings() {
   paymentSettings.enabled = document.getElementById('pay-master')?.checked || false;
   ['cash','supercell','usdt','cod'].forEach(m => {
     paymentSettings[m].enabled = document.getElementById(`pay-${m}`)?.checked || false;
     if (m !== 'cod') paymentSettings[m].account = document.getElementById(`pay-${m}-account`)?.value || '';
   });
+  // حفظ في localStorage كنسخة احتياطية
   localStorage.setItem('baki_payment', JSON.stringify(paymentSettings));
+  // حفظ في Firebase حتى تعمل على كل الأجهزة
+  try {
+    await fetch(`${FS_BASE}/settings/payment?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        data: { stringValue: JSON.stringify(paymentSettings) }
+      }})
+    });
+  } catch(e) { console.warn('تعذر حفظ إعدادات الدفع في Firebase:', e); }
   updateToggleUI();
 }
 
-function loadPaymentSettings() {
-  const saved = localStorage.getItem('baki_payment');
-  if (saved) paymentSettings = JSON.parse(saved);
-  // Set UI
+async function loadPaymentSettings() {
+  // أولاً: حاول تحميل من Firebase (يعمل على كل الأجهزة)
+  try {
+    const res = await fetch(`${FS_BASE}/settings/payment?key=${FIREBASE_API_KEY}`);
+    if (res.ok) {
+      const data = await res.json();
+      const raw = data.fields?.data?.stringValue;
+      if (raw) {
+        paymentSettings = JSON.parse(raw);
+        // حدّث localStorage أيضاً
+        localStorage.setItem('baki_payment', JSON.stringify(paymentSettings));
+      }
+    }
+  } catch(e) {
+    // إذا فشل Firebase، استخدم localStorage
+    const saved = localStorage.getItem('baki_payment');
+    if (saved) {
+      try { paymentSettings = JSON.parse(saved); } catch(e2) {}
+    }
+  }
+  // ضبط واجهة الأدمن
   const master = document.getElementById('pay-master');
   if (master) master.checked = paymentSettings.enabled;
   ['cash','supercell','usdt','cod'].forEach(m => {
@@ -4433,6 +4421,7 @@ function loadPaymentSettings() {
     }
   });
   updateToggleUI();
+  paymentSettingsLoaded = true;
 }
 
 function updateToggleUI() {
@@ -4482,22 +4471,11 @@ function openPaymentModal(orderData) {
 
   document.getElementById('payment-details').style.display = 'none';
   document.getElementById('payment-cod-confirm').style.display = 'none';
-
-  // فتح المودال بـ class بدل inline style — يحل مشكلة iOS Safari
-  const modal = document.getElementById('payment-modal');
-  modal.classList.add('modal-open');
-  // منع scroll الخلفية على الموبايل
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
+  document.getElementById('payment-modal').style.display = 'block';
 }
 
 function closePayment() {
-  const modal = document.getElementById('payment-modal');
-  modal.classList.remove('modal-open');
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
+  document.getElementById('payment-modal').style.display = 'none';
   pendingOrderData = null;
 }
 
@@ -4625,7 +4603,7 @@ async function sendOrderCOD() {
 updateCartCount();
 renderVideos();
 renderAdminVideoList();
-loadPaymentSettings();
+loadPaymentSettings(); // async — تحمّل الإعدادات من Firebase
 async function loadVideos() {
   try {
     const res = await fetch(`${FS_BASE}/videos?key=${FIREBASE_API_KEY}`);
@@ -4809,7 +4787,7 @@ function openEditPrintModal(docId) {
   });
 
   // Print colors - not used
-  document.getElementById('edit-print-modal').style.display = 'flex';
+  document.getElementById('edit-print-modal').style.display = 'block';
 }
 
 function renderEptImages(imgs) {
@@ -5581,7 +5559,7 @@ function studioOrder() {
   }
 
   const modal = document.getElementById('print-order-modal');
-  modal.style.display = 'flex';
+  modal.style.display = 'block';
 }
 
 async function studioSendOrder() {
