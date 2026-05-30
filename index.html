@@ -2246,6 +2246,93 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </footer>
 
+<!-- ======= EDIT PRINT PRODUCT MODAL ======= -->
+<div id="edit-print-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;padding:40px 20px;align-items:flex-start;justify-content:center;">
+  <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:620px;position:relative;">
+    <button onclick="closeEditPrintModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+    <h2 style="font-family:var(--font-display);font-size:2rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل تيشيرت الطبعة</h2>
+
+    <div class="form-group">
+      <label>اسم التيشيرت *</label>
+      <input type="text" id="ept-name" placeholder="مثال: تيشيرت أوفرسايز">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label>السعر (دينار) *</label>
+        <input type="number" id="ept-price" placeholder="25000">
+      </div>
+      <div class="form-group">
+        <label>السعر القديم (اختياري)</label>
+        <input type="number" id="ept-oldprice" placeholder="30000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>نوع القماش</label>
+      <select id="ept-fabric">
+        <option value="">— اختر —</option>
+        <option value="100% قطن">100% قطن</option>
+        <option value="بولستر">بولستر</option>
+        <option value="قطن بولستر">قطن بولستر</option>
+        <option value="أوفرسايز">أوفرسايز</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>وصف (اختياري)</label>
+      <textarea id="ept-desc" placeholder="وصف مختصر..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>المقاسات المتاحة</label>
+      <div class="size-checkboxes">
+        ${['XS','S','M','L','XL','XXL','3XL'].map(sz=>`<label><input type="checkbox" id="ept-size-${sz}" value="${sz}"> ${sz}</label>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>ألوان الطبعة المتاحة</label>
+      <div class="size-checkboxes">
+        <label><input type="checkbox" id="ept-color-أسود" value="أسود"> ⚫ أسود</label>
+        <label><input type="checkbox" id="ept-color-أحمر" value="أحمر"> 🔴 أحمر</label>
+        <label><input type="checkbox" id="ept-color-أزرق داكن" value="أزرق داكن"> 🔵 أزرق داكن</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>الصور الحالية (يمكنك تعديل الروابط أو حذف صورة)</label>
+      <div id="ept-images-list"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button type="button" onclick="addEptImageRow()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">+ إضافة رابط صورة</button>
+        <label style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          📤 رفع صورة جديدة
+          <input type="file" accept="image/*" onchange="uploadEptImage(this)" style="display:none;">
+        </label>
+      </div>
+    </div>
+
+    <button id="ept-save-btn" onclick="saveEditPrintProduct()" class="btn-primary" style="margin-top:10px;">💾 حفظ التعديلات</button>
+    <button onclick="closeEditPrintModal()" class="btn-secondary">إلغاء</button>
+  </div>
+</div>
+
+<!-- ======= EDIT SUBCAT MODAL ======= -->
+<div id="edit-subcat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;overflow-y:auto;padding:40px 20px;align-items:center;justify-content:center;">
+  <div style="background:var(--deep);border:1px solid var(--red);border-radius:12px;padding:36px;width:100%;max-width:420px;position:relative;">
+    <button onclick="closeEditSubcatModal()" style="position:absolute;top:16px;left:16px;background:transparent;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+    <h2 style="font-family:var(--font-display);font-size:1.8rem;letter-spacing:3px;color:var(--red);margin-bottom:28px;text-align:center;">✏️ تعديل القسم الفرعي</h2>
+    <input type="hidden" id="esc-docid">
+    <div class="form-group">
+      <label>اسم القسم *</label>
+      <input type="text" id="esc-label" placeholder="مثال: هوديات">
+    </div>
+    <div class="form-group">
+      <label>الأيقونة (إيموجي)</label>
+      <input type="text" id="esc-icon" placeholder="📁" style="font-size:1.4rem;text-align:center;">
+    </div>
+    <button id="esc-save-btn" onclick="saveEditSubcat()" class="btn-primary" style="margin-top:10px;">💾 حفظ</button>
+    <button onclick="closeEditSubcatModal()" class="btn-secondary">إلغاء</button>
+  </div>
+</div>
+
 <!-- ======= CART MODAL ======= -->
 <div id="cart-modal" style="
   display:none; position:fixed; inset:0;
@@ -2431,6 +2518,51 @@ async function deleteSubcat(docId) {
   await loadSubcats();
 }
 
+async function updateSubcatInFirebase(docId, label, icon) {
+  await fetch(`${FS_BASE}/subcats/${docId}?key=${FIREBASE_API_KEY}&updateMask.fieldPaths=label&updateMask.fieldPaths=icon`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: {
+      label: { stringValue: label },
+      icon:  { stringValue: icon }
+    }})
+  });
+  await loadSubcats();
+}
+
+function openEditSubcatModal(docId) {
+  // Find the subcat across all parents
+  let sc = null;
+  for (const parent of ['men','women']) {
+    sc = (SUBCATS[parent] || []).find(s => s._docId === docId);
+    if (sc) break;
+  }
+  if (!sc) return;
+  document.getElementById('esc-docid').value = docId;
+  document.getElementById('esc-label').value = sc.label || '';
+  document.getElementById('esc-icon').value  = sc.icon  || '📁';
+  document.getElementById('edit-subcat-modal').style.display = 'flex';
+}
+
+async function saveEditSubcat() {
+  const docId = document.getElementById('esc-docid').value;
+  const label = document.getElementById('esc-label').value.trim();
+  const icon  = document.getElementById('esc-icon').value.trim() || '📁';
+  if (!label) { showToast('❌ أدخل اسم القسم'); return; }
+  const btn = document.getElementById('esc-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  try {
+    await updateSubcatInFirebase(docId, label, icon);
+    document.getElementById('edit-subcat-modal').style.display = 'none';
+    showToast('✅ تم تعديل القسم');
+  } catch(e) { showToast('❌ خطأ في الحفظ'); }
+  finally { btn.disabled = false; btn.textContent = '💾 حفظ'; }
+}
+
+function closeEditSubcatModal() {
+  document.getElementById('edit-subcat-modal').style.display = 'none';
+}
+
 function renderSubcatAdminList() {
   ['men', 'women'].forEach(parent => {
     const list = document.getElementById(`sc-list-${parent}`);
@@ -2449,6 +2581,7 @@ function renderSubcatAdminList() {
             ${products.filter(p => p.cat === parent && p.subcat === s.value).length} منتج مرتبط
           </div>
         </div>
+        <button onclick="openEditSubcatModal('${s._docId}')" style="background:transparent;border:1px solid #c0392b;color:#c0392b;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">✏️</button>
         <button onclick="deleteSubcat('${s._docId}')" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.8rem;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='#444';this.style.color='#888'">🗑</button>
       </div>
     `).join('');
@@ -4471,6 +4604,131 @@ async function deletePrintProductFromFirebase(docId) {
   await loadPrintProducts();
 }
 
+async function updatePrintProductInFirebase(docId, p) {
+  const body = {
+    fields: {
+      id: { integerValue: p.id },
+      name: { stringValue: p.name },
+      fabric: { stringValue: p.fabric || '' },
+      printColors: { arrayValue: { values: (p.printColors||[]).map(c=>({stringValue:c})) } },
+      price: { integerValue: p.price },
+      oldPrice: p.oldPrice ? { integerValue: p.oldPrice } : { nullValue: null },
+      desc: { stringValue: p.desc || '' },
+      sizes: { arrayValue: { values: p.sizes.map(s=>({stringValue:s})) } },
+      images: { arrayValue: { values: p.images.map(i=>({stringValue:i})) } }
+    }
+  };
+  const updateMask = ['name','fabric','price','oldPrice','desc','sizes','images','printColors']
+    .map(f => `updateMask.fieldPaths=${f}`).join('&');
+  await fetch(`${FS_BASE}/printProducts/${docId}?key=${FIREBASE_API_KEY}&${updateMask}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  await loadPrintProducts();
+}
+
+// ---- Edit Print Product Modal ----
+let editPtDocId = null;
+let editPtProduct = null;
+
+function openEditPrintModal(docId) {
+  const p = printProducts.find(x => x._docId === docId);
+  if (!p) return;
+  editPtDocId = docId;
+  editPtProduct = { ...p, images: [...p.images] };
+
+  document.getElementById('ept-name').value    = p.name || '';
+  document.getElementById('ept-price').value   = p.price || '';
+  document.getElementById('ept-oldprice').value = p.oldPrice || '';
+  document.getElementById('ept-fabric').value  = p.fabric || '';
+  document.getElementById('ept-desc').value    = p.desc || '';
+
+  // Images list
+  renderEptImages(editPtProduct.images);
+
+  // Sizes checkboxes
+  ['XS','S','M','L','XL','XXL','3XL'].forEach(sz => {
+    const cb = document.getElementById(`ept-size-${sz}`);
+    if (cb) cb.checked = (p.sizes || []).includes(sz);
+  });
+
+  // Print colors
+  ['أسود','أحمر','أزرق داكن'].forEach(col => {
+    const cb = document.getElementById(`ept-color-${col}`);
+    if (cb) cb.checked = (p.printColors || []).includes(col);
+  });
+
+  document.getElementById('edit-print-modal').style.display = 'flex';
+}
+
+function renderEptImages(imgs) {
+  const wrap = document.getElementById('ept-images-list');
+  if (!wrap) return;
+  wrap.innerHTML = imgs.map((url, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <img src="${url||''}" onerror="this.src=''" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);background:#111;">
+      <input type="text" value="${url||''}" placeholder="رابط الصورة" oninput="editPtProduct.images[${i}]=this.value;this.previousElementSibling.src=this.value"
+        style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-family:var(--font-body);font-size:0.82rem;direction:ltr;"
+        onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      <button onclick="removeEptImage(${i})" style="background:transparent;border:1px solid #444;color:#888;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:0.8rem;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#888'">✖</button>
+    </div>
+  `).join('');
+}
+
+function removeEptImage(idx) {
+  editPtProduct.images.splice(idx, 1);
+  renderEptImages(editPtProduct.images);
+}
+
+function addEptImageRow() {
+  editPtProduct.images.push('');
+  renderEptImages(editPtProduct.images);
+}
+
+async function uploadEptImage(inp) {
+  const file = inp.files[0]; if (!file) return;
+  showToast('⏳ جاري رفع الصورة...');
+  try {
+    const url = await uploadToCloudinary(file);
+    editPtProduct.images.push(url);
+    renderEptImages(editPtProduct.images);
+    showToast('✅ تم رفع الصورة');
+  } catch(e) { showToast('❌ فشل رفع الصورة'); }
+  inp.value = '';
+}
+
+async function saveEditPrintProduct() {
+  if (!editPtDocId || !editPtProduct) return;
+  const name  = document.getElementById('ept-name').value.trim();
+  const price = parseInt(document.getElementById('ept-price').value) || 0;
+  const oldP  = document.getElementById('ept-oldprice').value;
+  if (!name || !price) { showToast('❌ الاسم والسعر مطلوبان'); return; }
+
+  editPtProduct.name    = name;
+  editPtProduct.price   = price;
+  editPtProduct.oldPrice = oldP ? parseInt(oldP) : null;
+  editPtProduct.fabric  = document.getElementById('ept-fabric').value;
+  editPtProduct.desc    = document.getElementById('ept-desc').value.trim();
+  editPtProduct.sizes   = ['XS','S','M','L','XL','XXL','3XL'].filter(sz => document.getElementById(`ept-size-${sz}`)?.checked);
+  editPtProduct.printColors = ['أسود','أحمر','أزرق داكن'].filter(col => document.getElementById(`ept-color-${col}`)?.checked);
+  editPtProduct.images  = editPtProduct.images.filter(u => u);
+
+  const btn = document.getElementById('ept-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...';
+  try {
+    await updatePrintProductInFirebase(editPtDocId, editPtProduct);
+    document.getElementById('edit-print-modal').style.display = 'none';
+    showToast('✅ تم التعديل بنجاح');
+  } catch(e) { showToast('❌ خطأ في الحفظ'); }
+  finally { btn.disabled = false; btn.textContent = '💾 حفظ التعديلات'; }
+}
+
+function closeEditPrintModal() {
+  document.getElementById('edit-print-modal').style.display = 'none';
+  editPtDocId = null; editPtProduct = null;
+}
+
 // ---- Admin UI helpers ----
 let ptUrlInputCount = 0;
 function addPtUrlInput() {
@@ -4589,12 +4847,15 @@ function renderPtAdminList() {
   list.innerHTML = '<h3 style="font-family:var(--font-display);font-size:1.4rem;letter-spacing:2px;margin-bottom:14px;color:var(--muted)">التيشيرتات الحالية</h3>' +
     printProducts.map(p => `
       <div class="admin-product-item">
-        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=T'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=T'">
-        <div class="admin-product-info">
+        <img src="${p.images[0] || 'https://via.placeholder.com/60x60/181818/555?text=T'}" onerror="this.src='https://via.placeholder.com/60x60/181818/555?text=T'" style="cursor:pointer;" onclick="openEditPrintModal('${p._docId}')">
+        <div class="admin-product-info" style="cursor:pointer;" onclick="openEditPrintModal('${p._docId}')">
           <strong>${p.name}</strong>
           <span>${p.fabric || '—'} · ${p.price.toLocaleString()} د.ع · ألوان: ${(p.printColors||[]).join(', ')}</span>
         </div>
-        <button class="btn-delete" onclick="deletePrintProduct('${p._docId}')">🗑</button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-delete" style="border-color:#c0392b;color:#c0392b;" onclick="openEditPrintModal('${p._docId}')">✏️</button>
+          <button class="btn-delete" onclick="deletePrintProduct('${p._docId}')">🗑</button>
+        </div>
       </div>
     `).join('');
 }
