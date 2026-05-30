@@ -1205,23 +1205,7 @@ async function loadAnalytics() {
         </select>
       </div>
 
-      <div class="form-group">
-        <label>ألوان الطبعة المتاحة</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
-          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-            <input type="checkbox" value="أسود" id="pt-print-black" style="accent-color:var(--red);width:auto;">
-            <span style="display:inline-block;width:14px;height:14px;background:#111;border-radius:50%;border:1px solid #555;"></span> أسود
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-            <input type="checkbox" value="أحمر" id="pt-print-red" style="accent-color:var(--red);width:auto;">
-            <span style="display:inline-block;width:14px;height:14px;background:#c0392b;border-radius:50%;"></span> أحمر
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;color:var(--white);font-size:0.85rem;margin-bottom:0;">
-            <input type="checkbox" value="أزرق داكن" id="pt-print-navy" style="accent-color:var(--red);width:auto;">
-            <span style="display:inline-block;width:14px;height:14px;background:#1a3a5c;border-radius:50%;"></span> أزرق داكن
-          </label>
-        </div>
-      </div>
+
 
       <div class="form-group">
         <label>السعر (دينار عراقي)</label>
@@ -2306,14 +2290,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
 
-    <div class="form-group">
-      <label>ألوان الطبعة المتاحة</label>
-      <div class="size-checkboxes">
-        <label><input type="checkbox" id="ept-color-أسود" value="أسود"> ⚫ أسود</label>
-        <label><input type="checkbox" id="ept-color-أحمر" value="أحمر"> 🔴 أحمر</label>
-        <label><input type="checkbox" id="ept-color-أزرق داكن" value="أزرق داكن"> 🔵 أزرق داكن</label>
-      </div>
-    </div>
+
 
     <div class="form-group">
       <label>الصور الحالية (يمكنك تعديل الروابط أو حذف صورة)</label>
@@ -2402,6 +2379,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div style="margin-bottom:20px">
         <label style="display:block;color:#888;font-size:0.82rem;margin-bottom:6px;font-weight:600">ملاحظات (اختياري)</label>
         <textarea id="cart-note" placeholder="أي ملاحظات..." style="width:100%;background:#181818;border:1px solid #333;border-radius:8px;padding:12px;color:white;font-family:var(--font-body);font-size:0.95rem;direction:rtl;height:80px;resize:vertical"></textarea>
+      </div>
+
+      <!-- كوبون الخصم للسلة -->
+      <div style="margin-bottom:20px;">
+        <div style="color:var(--muted);font-size:0.82rem;margin-bottom:8px;font-weight:600;">🎟️ كوبون خصم (اختياري)</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="coupon-input-cart" placeholder="أدخل كود الخصم"
+            style="flex:1;background:#181818;border:1px solid #333;border-radius:8px;padding:10px 14px;color:white;font-family:var(--font-body);font-size:0.9rem;direction:rtl;"
+            onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='#333'">
+          <button onclick="applyCouponCart()" style="background:var(--card);border:1px solid var(--border);color:var(--white);border-radius:8px;padding:0 16px;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;font-weight:700;transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+            تطبيق
+          </button>
+        </div>
+        <div id="coupon-result-cart" style="margin-top:8px;font-size:0.82rem;"></div>
       </div>
 
       <button onclick="sendCartToTelegram()" style="
@@ -2692,6 +2683,37 @@ function closeAdmin() {
 // ============ COUPONS ============
 let appliedCoupon = null;
 let appliedCouponCOD = null;
+let appliedCouponCart = null;
+
+async function applyCouponCart() {
+  const code = document.getElementById('coupon-input-cart').value.trim().toUpperCase();
+  const resultEl = document.getElementById('coupon-result-cart');
+  if (!code) { resultEl.innerHTML = '<span style="color:#e74c3c;">❌ أدخل كود الخصم</span>'; return; }
+
+  const coupons = await loadCoupons();
+  const coupon = coupons.find(c => c.code === code);
+
+  if (!coupon) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">❌ الكود غير صحيح</span>';
+    appliedCouponCart = null;
+    return;
+  }
+  if (coupon.usesLeft <= 0) {
+    resultEl.innerHTML = '<span style="color:#e74c3c;">❌ هذا الكوبون منتهي</span>';
+    appliedCouponCart = null;
+    return;
+  }
+
+  appliedCouponCart = coupon;
+  const total = cart.reduce((s, x) => s + x.price * x.qty, 0) + 3000;
+  const discounted = Math.round(total * (1 - coupon.discount / 100));
+  resultEl.innerHTML = `
+    <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:10px 14px;margin-top:4px;">
+      <div style="color:#2ecc71;font-weight:700;margin-bottom:4px;">✅ تم تطبيق كوبون ${coupon.code}</div>
+      <div style="color:var(--muted);font-size:0.8rem;">خصم ${coupon.discount}% على الإجمالي</div>
+      <div style="color:#2ecc71;font-size:1.1rem;font-weight:700;margin-top:6px;">السعر بعد الخصم: <span style="font-size:1.3rem;">${discounted.toLocaleString()} د.ع</span></div>
+    </div>`;
+}
 
 async function loadCoupons() {
   try {
@@ -2824,15 +2846,15 @@ async function applyCouponCOD() {
 }
 
 async function useCoupon(coupon) {
-  // اقرأ القيمة الحالية من Firebase مباشرة (مو من الكاش)
   try {
     const res = await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`);
+    if (!res.ok) return;
     const data = await res.json();
     const currentUses = parseInt(data.fields?.usesLeft?.integerValue || data.fields?.usesLeft?.doubleValue || 0);
     const newUses = currentUses - 1;
 
     if (newUses <= 0) {
-      // انتهت الاستخدامات — احذف الكوبون
+      // انتهت الاستخدامات — احذف الكوبون تماماً
       await fetch(`${FS_BASE}/coupons/${coupon._docId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
     } else {
       // نقص واحد وحفظ
@@ -2847,18 +2869,20 @@ async function useCoupon(coupon) {
 
 function calcDiscountedTotal(originalText, coupon) {
   if (!coupon) return originalText;
-  // استخرج المبلغ الإجمالي من النص
-  const match = originalText.match(/الإجمالي[^0-9]*([\d,]+)/);
-  if (!match) return originalText;
-  const original = parseInt(match[1].replace(/,/g, ''));
+  // استخرج أكبر رقم من النص — هو الإجمالي مع التوصيل
+  const allNums = [...originalText.matchAll(/([\d,]+)\s*د\.ع/g)]
+    .map(m => parseInt(m[1].replace(/,/g, '')))
+    .filter(n => n > 0);
+  if (allNums.length === 0) return originalText;
+  const original = Math.max(...allNums); // أكبر رقم = الإجمالي
   const saved = Math.round(original * coupon.discount / 100);
   const discounted = original - saved;
   return originalText +
     `\n\n🎟️ كوبون الخصم: ${coupon.code}` +
     `\n💸 نسبة الخصم: ${coupon.discount}%` +
-    `\n💵 المبلغ الأصلي: ${original.toLocaleString()} د.ع` +
-    `\n✂️ الخصم: -${saved.toLocaleString()} د.ع` +
-    `\n✅ السعر بعد الخصم: ${discounted.toLocaleString()} د.ع`;
+    `\n💵 الإجمالي قبل الخصم: ${original.toLocaleString()} د.ع` +
+    `\n✂️ المبلغ الموفّر: -${saved.toLocaleString()} د.ع` +
+    `\n✅ السعر النهائي بعد الخصم: ${discounted.toLocaleString()} د.ع`;
 }
 
 function switchAdminTab(tab) {
@@ -3901,18 +3925,26 @@ async function sendCartToTelegram() {
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
+  let finalText = calcDiscountedTotal(text, appliedCouponCart);
+
   try {
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'Markdown' })
+      body: JSON.stringify({ chat_id: CHAT_ID, text: finalText, parse_mode: 'Markdown' })
     });
     const data = await res.json();
     if (data.ok) {
+      if (appliedCouponCart) { await useCoupon(appliedCouponCart); appliedCouponCart = null; }
       showToast('✅ تم إرسال طلبك بنجاح!');
       const cartTotal = cart.reduce((s, x) => s + x.price * x.qty, 0);
       logEvent('cart_order', { total: String(cartTotal), itemCount: String(cart.length) });
       trackEvent('purchase', 'cart', 'cart_order', cartTotal);
+      // reset coupon UI
+      const ci = document.getElementById('coupon-input-cart');
+      const cr = document.getElementById('coupon-result-cart');
+      if (ci) ci.value = '';
+      if (cr) cr.innerHTML = '';
       clearCart();
       closeCart();
     } else {
@@ -4713,12 +4745,7 @@ function openEditPrintModal(docId) {
     if (cb) cb.checked = (p.sizes || []).includes(sz);
   });
 
-  // Print colors
-  ['أسود','أحمر','أزرق داكن'].forEach(col => {
-    const cb = document.getElementById(`ept-color-${col}`);
-    if (cb) cb.checked = (p.printColors || []).includes(col);
-  });
-
+  // Print colors - not used
   document.getElementById('edit-print-modal').style.display = 'flex';
 }
 
@@ -4771,7 +4798,7 @@ async function saveEditPrintProduct() {
   editPtProduct.fabric  = document.getElementById('ept-fabric').value;
   editPtProduct.desc    = document.getElementById('ept-desc').value.trim();
   editPtProduct.sizes   = ['XS','S','M','L','XL','XXL','3XL'].filter(sz => document.getElementById(`ept-size-${sz}`)?.checked);
-  editPtProduct.printColors = ['أسود','أحمر','أزرق داكن'].filter(col => document.getElementById(`ept-color-${col}`)?.checked);
+  editPtProduct.printColors = [];
   editPtProduct.images  = editPtProduct.images.filter(u => u);
 
   const btn = document.getElementById('ept-save-btn');
@@ -4835,17 +4862,12 @@ async function addPrintProduct() {
   const oldPriceVal = document.getElementById('pt-old-price').value;
   const oldPrice = oldPriceVal ? parseInt(oldPriceVal) : null;
 
-  const printColors = ['pt-print-black','pt-print-red','pt-print-navy']
-    .map(id => document.getElementById(id))
-    .filter(el => el && el.checked)
-    .map(el => el.value);
-
+  const printColors = [];
   const sizes = Array.from(document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]'))
     .filter(c => c.checked).map(c => c.value);
 
   if (!name || !price) { showToast('❌ يرجى إدخال الاسم والسعر'); return; }
   if (sizes.length === 0) { showToast('❌ اختر حجماً واحداً على الأقل'); return; }
-  if (printColors.length === 0) { showToast('❌ اختر لون طبعة واحد على الأقل'); return; }
 
   showToast('⏳ جاري رفع الصور...');
   const imageFiles = document.getElementById('pt-images').files;
@@ -4878,7 +4900,7 @@ async function addPrintProduct() {
     document.getElementById('pt-images').value = '';
     document.getElementById('pt-img-preview').innerHTML = '';
     document.getElementById('pt-url-inputs-wrap').innerHTML = '';
-    ['pt-print-black','pt-print-red','pt-print-navy'].forEach(id => { const el=document.getElementById(id); if(el) el.checked=false; });
+    // reset print colors (removed)
     document.querySelectorAll('#pt-sizes-wrap input[type=checkbox]').forEach(c => c.checked = ['M','L'].includes(c.value));
     ptTempImages = [];
   } catch(e) {
