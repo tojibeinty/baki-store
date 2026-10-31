@@ -4,7 +4,7 @@
 // ============================================
 
 // ضع هنا البيانات:
-const ADMIN_BOT_TOKEN = '7951459262:AAGo1UOG5K5_t6onmt65yctR6KIyIA2se58';  // token البوت الإداري الجديد
+const ADMIN_BOT_TOKEN = '6360843107:AAHYNmyGwGtX3UUZz8KemMMpx5snsfby_5E';  // token البوت الإداري الجديد
 const VERCEL_URL = 'https://baki-store.vercel.app'; // رابط Vercel مشروعك
 
 async function setupWebhook() {
