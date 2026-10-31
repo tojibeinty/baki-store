@@ -7,7 +7,7 @@ const FIREBASE_PROJECT = 'baki-store-9bc21';
 const FIREBASE_API_KEY = 'AIzaSyDNyLcBRcVOQ5jxWlML1Jk0GNaOfybPqLM';
 const FS_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT}/databases/(default)/documents`;
 
-const BOT_TOKEN = '7951459262:AAGo1UOG5K5_t6onmt65yctR6KIyIA2se58';       // 👈 token البوت من BotFather
+const BOT_TOKEN = '6360843107:AAHYNmyGwGtX3UUZz8KemMMpx5snsfby_5E';       // 👈 token البوت من BotFather
 const ADMIN_CHAT_ID = '6263195701'; // 👈 chat_id حسابك من @userinfobot
 
 // ============ Cloudinary ============
